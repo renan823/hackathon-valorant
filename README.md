@@ -11,12 +11,11 @@ data/
 ├── Rush Series Esquenta/          # Torneio 1
 ├── Rush Series Esquenta 2/        # Torneio 2
 ├── Rush Series Inclusivo/         # Torneio 3
-└── Univavá/
-    ├── Classificatória 1/
-    ├── Classificatória 2/
-    ├── Classificatória 3/
-    ├── Classificatória 4/
-    └── Fase de Grupos/
+├── Classificatória 1/
+├── Classificatória 2/
+├── Classificatória 3/
+├── Classificatória 4/
+└── Fase de Grupos/
 ```
 
 ## Nomenclatura dos Arquivos
