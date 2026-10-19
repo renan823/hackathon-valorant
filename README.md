@@ -4,6 +4,22 @@ Este repositório contém dados de partidas do torneio universitário de Valoran
 
 ---
 
+## Executar
+```sh
+uv sync
+```
+
+Carregar dados
+```sh
+uv run loader.py
+```
+
+Criar/editar notebook marimo (abre no navegador)
+```sh
+uv run marimo edit <arquivo.py>
+```
+
+
 ## Estrutura de Pastas
 
 ```
