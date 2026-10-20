@@ -112,6 +112,8 @@ Objeto único com informações gerais sobre a partida.
 | `/Game/Maps/Duality/Duality` | Bind |
 | `/Game/Maps/Port/Port` | Icebox |
 | `/Game/Maps/Juliett/Juliett` | Sunset |
+| `/Game/Maps/Infinity/Infinity` | Abyss |
+| `/Game/Maps/Plummet/Plummet` | Summit |
 
 ---
 
@@ -193,6 +195,9 @@ Array com um objeto por jogador. Partidas normais têm 10 jogadores (5 por time)
 | `eb93336a-449b-9c1b-0a54-a891f7921d69` | Phoenix |
 | `df1cb487-4902-002e-5c17-d28e83e78588` | Chamber |
 | `7f94d92c-4234-0a36-9646-3a87eb8b5ecd` | Yoru |
+| `7f94d92c-4234-0a36-9646-3a87eb8b5c89` | Yoru (variante de patch) |
+| `b444168c-4e35-8076-db47-ef9bf368f384` | Tejo |
+| `92eeef5d-43b5-1d4a-8d03-b3927a09034b` | Agente não identificado (1 ocorrência) |
 
 > Alguns agentes aparecem com dois UUIDs distintos — variações de versão do jogo. Trate-os como o mesmo agente ao analisar.
 
@@ -338,8 +343,9 @@ Array de kills realizadas por este jogador neste round.
 
 | Valor | Significado |
 |-------|-------------|
-| `"Weapon"` | Arma de fogo (pistola, rifle, etc.) |
+| `"Weapon"` | Arma de fogo (pistola, rifle, etc.) — ver nota abaixo sobre anomalia com habilidades |
 | `"Ability"` | Habilidade de agente |
+| `"Melee"` | Faca (corpo a corpo) — `damageItem` será `2F59173C-4BED-B6C3-2191-DEA9B58BE9C7` |
 | `"Bomb"` | Explosão da spike |
 | `"Crush"` | Esmagamento (habilidades de área) |
 | `"Fall"` | Dano de queda |
@@ -368,7 +374,18 @@ Quando `damageType = "Weapon"`, o valor é um UUID de arma:
 | `5F0AAF7A-4289-3998-D5FF-EB9A5CF7EF5C` | Operator |
 | `63E6C2B6-4A8E-869C-3D4C-E38355226584` | Ares |
 | `8DB0A1BF-4A50-832A-4566-FAAAA6D250CA` | Odin |
-| `EC845BF4-4F79-DDDA-A3DA-0DB3774B2794` | Knife (corpo a corpo) |
+| `EC845BF4-4F79-DDDA-A3DA-0DB3774B2794` | Knife (corpo a corpo — aparece em `economy.weapon`) |
+| `2F59173C-4BED-B6C3-2191-DEA9B58BE9C7` | Knife (corpo a corpo — aparece em `finishingDamage` com `damageType = "Melee"`) |
+
+> **Anomalia — habilidades classificadas como `"Weapon"`:** Em algumas versões da API do jogo, kills por certas habilidades de dano contínuo são registradas com `damageType = "Weapon"` em vez de `"Ability"`, usando UUIDs de habilidade como `damageItem`. Identificadas neste dataset:
+>
+> | UUID (`damageItem`) | Agente | Habilidade | Kills |
+> |---------------------|--------|------------|-------|
+> | `856D9A7E-4B06-DC37-15DC-9D809C37CB90` | Brimstone | Orbital Strike (ultimate X) | 481 |
+> | `95336AE4-45D4-1032-CFAF-6BAD01910607` | Neon | Overdrive (ultimate X) | 207 |
+> | `39099FB5-4293-DEF4-1E09-2E9080CE7456` | Brimstone | Incendiary (habilidade Q) | 42 |
+>
+> Ao filtrar kills por arma, **exclua esses UUIDs** ou trate-os separadamente como kills de habilidade.
 
 Quando `damageType = "Ability"`, o valor é um nome de habilidade:
 
@@ -445,6 +462,8 @@ Verificado em todos os **336 arquivos**:
 | Jogadores com `stats = null` | ⚠️ 22 casos — todos são observadores (`isObserver = true`) |
 | `coaches` presente | ℹ️ 180/336 arquivos (ausente em alguns torneios) |
 | Partidas com overtime | ℹ️ Placar > 13 rounds indica overtime |
+| Kills de habilidade como `damageType = "Weapon"` | ⚠️ 730 kills de Brimstone e Neon classificadas erroneamente — ver tabela de anomalias acima |
+| `characterId` não mapeado | ⚠️ 2 UUIDs com poucas ocorrências não identificados (ver tabela de agentes) |
 
 ---
 
