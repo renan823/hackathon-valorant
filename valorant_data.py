@@ -29,6 +29,15 @@ PADRAO_ARQUIVO = re.compile(
     r"(?P<time_a>.+)_(?P<placar_a>\d+)_x_(?P<placar_b>\d+)_(?P<time_b>.+)_(?P<mapa>[a-z]+)$"
 )
 
+# Torneio a partir do prefixo do arquivo. A fase vem da pasta (as fases da Univavá
+# ficam diretamente em data/, ex.: data/Classificatória 1/UNIVAVA_C1_...).
+TORNEIOS = {
+    "RUSHE": "Rush Series Esquenta",
+    "RUSH2": "Rush Series Esquenta 2",
+    "RUSH_INCLUSIVO": "Rush Series Inclusivo",
+    "UNIVAVA": "Univavá",
+}
+
 # Janela usada para considerar uma morte como "trocada" no cálculo do KAST.
 JANELA_TROCA_MS = 5000
 
@@ -49,14 +58,17 @@ def _formatar_time(slug):
 
 def _info_arquivo(caminho, pasta):
     """Extrai torneio, fase, data e nomes dos times a partir do caminho do arquivo."""
-    partes = caminho.relative_to(pasta).parts
     m = PADRAO_ARQUIVO.match(caminho.stem)
     if m is None:
         raise ValueError(f"Nome de arquivo fora do padrão: {caminho.name}")
+    torneio = next((nome for prefixo, nome in TORNEIOS.items()
+                    if m["prefixo"] == prefixo or m["prefixo"].startswith(prefixo + "_")), None)
+    if torneio is None:
+        raise ValueError(f"Prefixo de torneio desconhecido: {m['prefixo']} ({caminho.name})")
     return {
         "arquivo": caminho.name,
-        "torneio": partes[0],
-        "fase": partes[1] if len(partes) > 2 else partes[0],
+        "torneio": torneio,
+        "fase": caminho.relative_to(pasta).parent.name or torneio,
         "codigo": m["codigo"],
         "data": pd.to_datetime(m["data"], format="%d-%m-%y"),
         "time_a": _formatar_time(m["time_a"]),

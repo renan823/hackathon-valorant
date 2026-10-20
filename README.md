@@ -1,21 +1,36 @@
-## Hackathon Valorant
+# Hackathon Valorant — Documentação dos Dados
 
-Análise de 336 partidas de campeonatos universitários de Valorant (Rush Series Esquenta, Esquenta 2, Inclusivo e Univavá).
+Este repositório contém dados de partidas do torneio universitário de Valorant disponibilizados para o hackathon. Os dados estão no formato JSON, com **336 arquivos** distribuídos em 4 torneios.
 
-### Estrutura
+---
+
+## Executar
+```sh
+uv sync
+```
+
+Carregar dados
+```sh
+uv run loader.py
+```
+
+Criar/editar notebook marimo (abre no navegador)
+```sh
+uv run marimo edit <arquivo.py>
+```
+
+
+## Notebooks de análise (pandas)
 
 | caminho | conteúdo |
 |---|---|
-| `data/` | JSONs das partidas (formato match-v1 da Riot), um por mapa jogado |
-| `reference/valorant_reference.json` | tradução de UUIDs de agentes, armas, armaduras e mapas ([valorant-api.com](https://valorant-api.com), pt-BR) |
 | `valorant_data.py` | lê os JSONs e gera as tabelas `jogadores`, `rounds`, `economia` e `abates` |
+| `reference/valorant_reference.json` | tradução de UUIDs de agentes, armas, armaduras e mapas ([valorant-api.com](https://valorant-api.com), pt-BR) |
 | `valorant-data-preparation.ipynb` | limpeza e transformação dos dados (gera `processed/`) |
 | `valorant-exploratory-data-analysis.ipynb` | análise exploratória e análise do contexto competitivo |
 | `data-preparation.ipynb`, `exploratory-data-analysis.ipynb` | notebooks de aula originais (Iris/Boston), usados como roteiro |
 
-### Como executar
-
-```bash
+```sh
 uv venv .venv && uv pip install --python .venv/bin/python -r requirements.txt
 # ou: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 
@@ -24,3 +39,460 @@ uv venv .venv && uv pip install --python .venv/bin/python -r requirements.txt
 ```
 
 O notebook de preparação deve rodar primeiro: ele grava as bases tratadas em `processed/`, lidas pelo notebook de análise exploratória.
+
+## Estrutura de Pastas
+
+```
+data/
+├── Rush Series Esquenta/          # Torneio 1
+├── Rush Series Esquenta 2/        # Torneio 2
+├── Rush Series Inclusivo/         # Torneio 3
+├── Classificatória 1/
+├── Classificatória 2/
+├── Classificatória 3/
+├── Classificatória 4/
+└── Fase de Grupos/
+```
+
+## Nomenclatura dos Arquivos
+
+```
+<TORNEIO>_<ID>_<DATA>_<time1>_<score1>_x_<score2>_<time2>_<mapa>.json
+```
+
+Exemplo:
+```
+UNIVAVA_C1_002_27-06-26_poli_plague_10_x_13_unicamp_tritons_red_haven.json
+```
+
+| Parte | Valor | Significado |
+|-------|-------|-------------|
+| `UNIVAVA_C1` | prefixo | Identificador do torneio/fase |
+| `002` | número | Número sequencial da partida |
+| `27-06-26` | data | Data da partida (DD-MM-AA) |
+| `poli_plague` | time | Nome do time da esquerda (Red team) |
+| `10` | placar | Rounds vencidos pelo time da esquerda |
+| `x` | separador | — |
+| `13` | placar | Rounds vencidos pelo time da direita |
+| `unicamp_tritons_red` | time | Nome do time da direita (Blue team) |
+| `haven` | mapa | Mapa jogado |
+
+> **Atenção:** O time da esquerda no nome do arquivo corresponde ao `teamId = "Red"` no JSON, e o da direita ao `teamId = "Blue"`. Sempre confirme pelo placar numérico em `teams[].roundsWon`.
+
+---
+
+## Estrutura do JSON
+
+Cada arquivo representa uma partida completa e possui **5 chaves de topo**, presentes em todos os 336 arquivos.
+
+```json
+{
+  "matchInfo":    { ... },
+  "players":      [ ... ],
+  "coaches":      [ ... ],
+  "teams":        [ ... ],
+  "roundResults": [ ... ]
+}
+```
+
+---
+
+### `matchInfo` — Metadados da Partida
+
+Objeto único com informações gerais sobre a partida.
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `matchId` | `string` | UUID único da partida |
+| `mapId` | `string` | Caminho interno do mapa (ver tabela de mapas) |
+| `gameVersion` | `string` | Versão do cliente do jogo (ex: `release-13.00-...`) |
+| `gameLengthMillis` | `int` | Duração total da partida em milissegundos |
+| `gameStartMillis` | `int` | Timestamp Unix de início da partida (ms) |
+| `region` | `string` | Região do servidor — sempre `"br"` neste dataset |
+| `isCompleted` | `bool` | Indica se a partida foi concluída — sempre `true` neste dataset |
+| `isRanked` | `bool` | Indica se é ranqueada — sempre `false` (partidas customizadas) |
+| `gameMode` | `string` | Modo de jogo — sempre `"/Game/GameModes/Bomb/BombGameMode.BombGameMode_C"` (modo Spike) |
+| `provisioningFlowId` | `string` | Tipo de criação da partida — sempre `"CustomGame"` |
+| `queueId` | `string` | ID da fila — sempre vazio `""` (jogo customizado) |
+| `customGameName` | `string` | Nome customizado da sala — geralmente vazio |
+| `seasonId` | `string` | UUID do episódio/ato do jogo |
+| `premierMatchInfo` | `object` | Informações de partidas Premier — sempre vazio `{}` neste dataset |
+
+#### Tabela de Mapas (`mapId`)
+
+| `mapId` | Nome do Mapa |
+|---------|--------------|
+| `/Game/Maps/Ascent/Ascent` | Ascent |
+| `/Game/Maps/Triad/Triad` | Haven |
+| `/Game/Maps/Bonsai/Bonsai` | Split |
+| `/Game/Maps/Jam/Jam` | Lotus |
+| `/Game/Maps/Pitt/Pitt` | Pearl |
+| `/Game/Maps/Foxtrot/Foxtrot` | Breeze |
+| `/Game/Maps/Canyon/Canyon` | Fracture |
+| `/Game/Maps/Duality/Duality` | Bind |
+| `/Game/Maps/Port/Port` | Icebox |
+| `/Game/Maps/Juliett/Juliett` | Sunset |
+| `/Game/Maps/Infinity/Infinity` | Abyss |
+| `/Game/Maps/Plummet/Plummet` | Summit |
+
+---
+
+### `players` — Lista de Jogadores
+
+Array com um objeto por jogador. Partidas normais têm 10 jogadores (5 por time). Pode conter observadores adicionais.
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `puuid` | `string` | ID único do jogador (Player UUID) — chave de ligação entre todas as seções |
+| `gameName` | `string` | Nome de exibição do jogador (nick) |
+| `tagLine` | `string` | Tag do jogador (ex: `#BR1`) |
+| `teamId` | `string` | Time do jogador: `"Red"`, `"Blue"` ou `"Neutral"` (observador) |
+| `partyId` | `string` | UUID do grupo/party — jogadores no mesmo party compartilham este valor |
+| `characterId` | `string \| null` | UUID do agente selecionado (ver tabela de agentes). `null` se observador |
+| `competitiveTier` | `int` | Rank competitivo do jogador (0 = não ranqueado/oculto neste dataset) |
+| `isObserver` | `bool` | `true` se o jogador está apenas observando (sem participar ativamente) |
+| `playerCard` | `string` | UUID do card de jogador equipado (cosmético) |
+| `playerTitle` | `string` | UUID do título de jogador equipado (cosmético) |
+| `accountLevel` | `int` | Nível da conta do jogador |
+| `stats` | `object \| null` | Estatísticas agregadas da partida. `null` quando `isObserver = true` |
+
+#### `players[].stats` — Estatísticas Agregadas
+
+> Soma de todos os rounds jogados pelo jogador nesta partida.
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `score` | `int` | Pontuação total acumulada (base do ACS — Average Combat Score) |
+| `roundsPlayed` | `int` | Número de rounds em que o jogador participou |
+| `kills` | `int` | Total de eliminações |
+| `deaths` | `int` | Total de mortes |
+| `assists` | `int` | Total de assistências |
+| `playtimeMillis` | `int` | Tempo total de jogo em milissegundos |
+| `abilityCasts` | `object` | Contagem de uso de habilidades (ver abaixo) |
+
+#### `players[].stats.abilityCasts` — Uso de Habilidades
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `grenadeCasts` | `int` | Usos da habilidade de granada/C (Signature Ability em alguns agentes) |
+| `ability1Casts` | `int` | Usos da habilidade Q |
+| `ability2Casts` | `int` | Usos da habilidade E |
+| `ultimateCasts` | `int` | Usos da ultimate X |
+
+#### Tabela de Agentes (`characterId`)
+
+| `characterId` | Agente |
+|---------------|--------|
+| `add6443a-41bd-e414-f6ad-e58d267f4e95` | Jett |
+| `f94c3b30-42be-e959-889c-5aa313dba261` | Raze |
+| `bb2a4828-46eb-8cd1-e765-15848195d751` | Neon |
+| `0e38b510-41a8-5780-7e1f-c6776a3df9d3` | Yoru |
+| `0e38b510-41a8-5780-5e8f-568b2a4f2d6c` | Yoru |
+| `efba5359-4016-a1e5-7626-b1ae1f42a446` | Iso |
+| `efba5359-4016-a1e5-7626-b1ae76895940` | Iso |
+| `8e253930-4c05-31dd-1b6c-968525494517` | Sova |
+| `320b2a48-4d9b-a075-30f1-1f93a9b638fa` | Skye |
+| `6f2a04ca-43e0-be17-7f36-b3908627744d` | Skye |
+| `dade69b4-4f5a-8528-247b-219e5a1facd6` | Fade |
+| `e370fa57-4757-3604-3648-499e1f642d3f` | Gekko |
+| `5f8d3a7f-467b-97f3-062c-0567a4a74d44` | Breach |
+| `5f8d3a7f-467b-97f3-062c-13acf203c006` | Breach |
+| `a4971619-4bfe-b831-ff73-37bb1b630a86` | Omen |
+| `707eab51-4836-f488-046a-cda6bf494859` | Omen |
+| `22697a3d-45bf-8dd7-4fec-84a9e28c69d7` | Brimstone |
+| `9f0d8ba9-4140-b941-57d3-a7ad57c6b417` | Brimstone |
+| `41fb69c1-4189-7b37-f117-bcaf1e96f1bf` | Astra |
+| `95b78ed7-4637-86d9-7e41-71ba8c293152` | Harbor |
+| `07bc374a-4e44-8f27-3bfd-69df7b9e96c6` | Viper |
+| `1e58de9c-4950-5125-93e9-a0aee9f98746` | Killjoy |
+| `117ed9e3-49f3-6512-3ccf-0cada7e3823b` | Cypher |
+| `cc8b64c8-4b25-4ff9-6e7f-37b4da43d235` | Deadlock |
+| `569fdd95-4d10-43ab-ca70-79becc718b46` | Sage |
+| `601dbbe7-43ce-be57-2a40-4abd24953621` | KAY/O |
+| `1dbf2edd-4729-0984-3115-daa5eed44993` | Clove |
+| `a3bfb853-43b2-7238-a4f1-ad90e9e46bcc` | Reyna |
+| `eb93336a-449b-9c1e-0ac7-d761848a2619` | Phoenix |
+| `eb93336a-449b-9c1b-0a54-a891f7921d69` | Phoenix |
+| `df1cb487-4902-002e-5c17-d28e83e78588` | Chamber |
+| `7f94d92c-4234-0a36-9646-3a87eb8b5ecd` | Yoru |
+| `7f94d92c-4234-0a36-9646-3a87eb8b5c89` | Yoru (variante de patch) |
+| `b444168c-4e35-8076-db47-ef9bf368f384` | Tejo |
+| `92eeef5d-43b5-1d4a-8d03-b3927a09034b` | Agente não identificado (1 ocorrência) |
+
+> Alguns agentes aparecem com dois UUIDs distintos — variações de versão do jogo. Trate-os como o mesmo agente ao analisar.
+
+---
+
+### `coaches` — Lista de Técnicos
+
+Array com os técnicos (coaches) registrados na partida. Presente em **180 de 336 arquivos** (ausente em alguns torneios).
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `puuid` | `string` | UUID do técnico |
+| `teamId` | `string` | Time associado: `"Red"` ou `"Blue"` |
+
+> Técnicos **não** aparecem em `players` e **não** possuem estatísticas de partida.
+
+---
+
+### `teams` — Resultado por Time
+
+Array com exatamente **2 objetos**, um para cada time (`"Red"` e `"Blue"`).
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `teamId` | `string` | Identificador do time: `"Red"` ou `"Blue"` |
+| `won` | `bool` | `true` se o time venceu a partida |
+| `roundsPlayed` | `int` | Total de rounds jogados (igual para ambos os times) |
+| `roundsWon` | `int` | Rounds vencidos pelo time |
+| `numPoints` | `int` | Mesmo valor que `roundsWon` neste dataset |
+| `rank` | `int` | Posição final: `1` (vencedor) ou `2` (perdedor) |
+
+---
+
+### `roundResults` — Resultados por Round
+
+Array com um objeto por round jogado. Uma partida padrão tem entre 13 e 25 rounds (overtime incluído).
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `roundNum` | `int` | Número do round (começa em `0`) |
+| `roundResult` | `string` | Resultado descritivo do round (ver valores possíveis) |
+| `roundResultCode` | `string` | Código resumido do resultado (ver valores possíveis) |
+| `roundCeremony` | `string` | Cerimônia/destaque ao fim do round (ver valores possíveis) |
+| `winningTeam` | `string` | Time vencedor do round: `"Red"` ou `"Blue"` |
+| `winningTeamRole` | `string` | Papel do time vencedor: `"Attacker"` (atacante) ou `"Defender"` (defensor) |
+| `bombPlanter` | `string \| null` | `puuid` do jogador que plantou a spike. `null` se não houve planta |
+| `bombDefuser` | `string \| null` | `puuid` do jogador que desarmou a spike. `null` se não houve desarmamento |
+| `plantRoundTime` | `int` | Tempo (ms desde o início do round) em que a spike foi plantada. `0` se não houve planta |
+| `plantSite` | `string` | Site onde a spike foi plantada: `"A"`, `"B"`, `"C"` ou `""` (sem planta) |
+| `plantLocation` | `object` | Coordenadas `{x, y}` da planta no mapa. `{0,0}` se não houve planta |
+| `plantPlayerLocations` | `array \| null` | Posições de todos os jogadores no momento da planta (ver estrutura abaixo). `null` se não houve planta |
+| `defuseRoundTime` | `int` | Tempo (ms desde o início do round) do desarmamento. `0` se não houve |
+| `defuseLocation` | `object` | Coordenadas `{x, y}` do desarmamento. `{0,0}` se não houve |
+| `defusePlayerLocations` | `array \| null` | Posições de todos os jogadores no momento do desarmamento. `null` se não houve |
+| `playerStats` | `array` | Estatísticas individuais de cada jogador neste round (ver seção abaixo) |
+
+#### Valores de `roundResult`
+
+| Valor | Significado |
+|-------|-------------|
+| `"Eliminated"` | Todos os jogadores do time perdedor foram eliminados |
+| `"Bomb defused"` | A spike foi desarmada pelos defensores |
+| `"Bomb detonated"` | A spike explodiu (atacantes venceram após a planta) |
+| `"Round timer expired"` | O tempo do round esgotou sem planta (defensores vencem) |
+
+#### Valores de `roundResultCode`
+
+| Valor | Significado |
+|-------|-------------|
+| `"Elimination"` | Vitória por eliminação |
+| `"Defuse"` | Vitória por desarmamento |
+| `"Detonate"` | Vitória por detonação |
+| `""` | Sem código (timer expirado) |
+
+#### Valores de `roundCeremony`
+
+| Valor | Significado |
+|-------|-------------|
+| `"CeremonyDefault"` | Round normal, sem destaque especial |
+| `"CeremonyAce"` | Ace individual — um jogador eliminou os 5 adversários |
+| `"CeremonyTeamAce"` | Team Ace — cada jogador do time fez pelo menos 1 kill |
+| `"CeremonyClutch"` | Clutch — 1 jogador venceu contra múltiplos adversários |
+| `"CeremonyCloser"` | Round decisivo (13º round de um time) |
+| `"CeremonyFlawless"` | Flawless — time venceu sem nenhum membro morrer |
+| `"CeremonyThrifty"` | Thrifty — time com equipamento inferior venceu o round |
+
+---
+
+### `roundResults[].plantPlayerLocations` / `defusePlayerLocations`
+
+Array de snapshots de posição de cada jogador no momento da planta ou desarmamento.
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `puuid` | `string` | Identificador do jogador |
+| `viewRadians` | `float` | Direção para onde o jogador está olhando (em radianos, 0–2π) |
+| `location.x` | `int` | Coordenada X no mapa |
+| `location.y` | `int` | Coordenada Y no mapa |
+
+> As coordenadas `{x, y}` usam o sistema de coordenadas interno do Valorant. O eixo Y é **invertido** em relação ao padrão matemático (valores mais negativos = mais ao norte no mapa).
+
+---
+
+### `roundResults[].playerStats` — Estatísticas por Jogador por Round
+
+Array com um objeto por jogador (10 por round). Contém kills, dano, economia e uso de habilidades **naquele round específico**.
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `puuid` | `string` | Identificador do jogador |
+| `score` | `int` | Pontuação do jogador neste round (contribui para o ACS) |
+| `kills` | `array` | Lista de kills realizadas neste round (ver estrutura abaixo) |
+| `damage` | `array` | Lista de registros de dano causado neste round (ver estrutura abaixo) |
+| `economy` | `object` | Estado econômico do jogador no início do round (ver abaixo) |
+| `ability` | `object` | Efeitos de habilidades neste round (ver abaixo) |
+
+---
+
+### `roundResults[].playerStats[].kills` — Detalhes de Cada Kill
+
+Array de kills realizadas por este jogador neste round.
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `timeSinceGameStartMillis` | `int` | Tempo desde o início da partida (ms) |
+| `timeSinceRoundStartMillis` | `int` | Tempo desde o início do round (ms) |
+| `killer` | `string` | `puuid` de quem realizou a kill |
+| `victim` | `string` | `puuid` de quem foi eliminado |
+| `victimLocation` | `object` | Coordenadas `{x, y}` da vítima no momento da morte |
+| `assistants` | `array` | Lista de `puuid`s de jogadores que deram assistência |
+| `playerLocations` | `array` | Snapshot de posições de todos os jogadores no momento da kill (mesma estrutura de `plantPlayerLocations`) |
+| `finishingDamage` | `object` | Informações sobre o golpe final (ver abaixo) |
+
+#### `finishingDamage` — Golpe Final
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `damageType` | `string` | Tipo do dano: `"Weapon"`, `"Ability"`, `"Bomb"`, `"Crush"`, `"Fall"` |
+| `damageItem` | `string` | UUID da arma ou nome da habilidade usada (ver tabelas abaixo) |
+| `isSecondaryFireMode` | `bool` | `true` se foi com o modo de disparo alternativo (ex: zoom do Marshal) |
+
+#### Valores de `damageType`
+
+| Valor | Significado |
+|-------|-------------|
+| `"Weapon"` | Arma de fogo (pistola, rifle, etc.) — ver nota abaixo sobre anomalia com habilidades |
+| `"Ability"` | Habilidade de agente |
+| `"Melee"` | Faca (corpo a corpo) — `damageItem` será `2F59173C-4BED-B6C3-2191-DEA9B58BE9C7` |
+| `"Bomb"` | Explosão da spike |
+| `"Crush"` | Esmagamento (habilidades de área) |
+| `"Fall"` | Dano de queda |
+
+#### `damageItem` — Identificadores de Armas e Habilidades
+
+Quando `damageType = "Weapon"`, o valor é um UUID de arma:
+
+| UUID | Arma |
+|------|------|
+| `29A0CFAB-485B-F5D5-779A-B59F85E204A8` | Classic |
+| `42DA8CCC-40D5-AFFC-BEEC-15AA47B42EDA` | Shorty |
+| `44D4E95C-4157-0037-81B2-17841BF2E8E3` | Frenzy |
+| `1BAA85B4-4C70-1284-64BB-6481DFC3BB4E` | Ghost |
+| `E336C6B8-418D-9340-D77F-7A9E4CFE0702` | Sheriff |
+| `F7E1B454-4AD4-1063-EC0A-159E56B58941` | Stinger |
+| `462080D1-4035-2937-7C09-27AA2A5C27A7` | Spectre |
+| `9C82E19D-4575-0200-1A81-3EACF00CF872` | Bucky |
+| `910BE174-449B-C412-AB22-D0873436B21B` | Judge |
+| `AE3DE142-4D85-2547-DD26-4E90BED35CF7` | Bulldog |
+| `EE8E8D15-496B-07AC-E5F6-8FAE5D4C7B1A` | Guardian |
+| `4ADE7FAA-4CF1-8376-95EF-39884480959B` | Phantom |
+| `A03B24D3-4319-996D-0F8C-94BBFBA1DFC7` | Vandal |
+| `55D8A0F4-4274-CA67-FE2C-06AB45EFDF58` | Marshal |
+| `C4883E50-4494-202C-3EC3-6B8A9284F00B` | Outlaw |
+| `5F0AAF7A-4289-3998-D5FF-EB9A5CF7EF5C` | Operator |
+| `63E6C2B6-4A8E-869C-3D4C-E38355226584` | Ares |
+| `8DB0A1BF-4A50-832A-4566-FAAAA6D250CA` | Odin |
+| `EC845BF4-4F79-DDDA-A3DA-0DB3774B2794` | Knife (corpo a corpo — aparece em `economy.weapon`) |
+| `2F59173C-4BED-B6C3-2191-DEA9B58BE9C7` | Knife (corpo a corpo — aparece em `finishingDamage` com `damageType = "Melee"`) |
+
+> **Anomalia — habilidades classificadas como `"Weapon"`:** Em algumas versões da API do jogo, kills por certas habilidades de dano contínuo são registradas com `damageType = "Weapon"` em vez de `"Ability"`, usando UUIDs de habilidade como `damageItem`. Identificadas neste dataset:
+>
+> | UUID (`damageItem`) | Agente | Habilidade | Kills |
+> |---------------------|--------|------------|-------|
+> | `856D9A7E-4B06-DC37-15DC-9D809C37CB90` | Brimstone | Orbital Strike (ultimate X) | 481 |
+> | `95336AE4-45D4-1032-CFAF-6BAD01910607` | Neon | Overdrive (ultimate X) | 207 |
+> | `39099FB5-4293-DEF4-1E09-2E9080CE7456` | Brimstone | Incendiary (habilidade Q) | 42 |
+>
+> Ao filtrar kills por arma, **exclua esses UUIDs** ou trate-os separadamente como kills de habilidade.
+
+Quando `damageType = "Ability"`, o valor é um nome de habilidade:
+
+| Valor | Significado |
+|-------|-------------|
+| `"Ability1"` | Habilidade Q do agente |
+| `"Ability2"` | Habilidade E do agente |
+| `"GrenadeAbility"` | Habilidade C do agente |
+| `"Ultimate"` | Ultimate X do agente |
+
+---
+
+### `roundResults[].playerStats[].damage` — Registro de Dano
+
+Array com um objeto para cada alvo que este jogador causou dano neste round.
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `receiver` | `string` | `puuid` do jogador que recebeu o dano |
+| `damage` | `int` | Total de pontos de dano causados |
+| `headshots` | `int` | Número de tiros na cabeça |
+| `bodyshots` | `int` | Número de tiros no corpo |
+| `legshots` | `int` | Número de tiros nas pernas |
+
+---
+
+### `roundResults[].playerStats[].economy` — Economia do Round
+
+Estado do inventário e dinheiro do jogador **no início do round**.
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `loadoutValue` | `int` | Valor total do equipamento (arma + armadura) em créditos |
+| `remaining` | `int` | Créditos restantes após as compras |
+| `spent` | `int` | Créditos gastos na fase de compra |
+| `weapon` | `string` | UUID da arma principal equipada (ver tabela de armas) |
+| `armor` | `string` | UUID da armadura equipada (ver tabela abaixo) |
+
+#### Tabela de Armaduras (`armor`)
+
+| UUID | Armadura | Custo |
+|------|----------|-------|
+| `4DEC83D5-4902-9AB3-BED6-A7A390761157` | Light Shield (Colete Leve) | 400 cr |
+| `822BCAB2-40A2-324E-C137-E09195AD7692` | Heavy Shield (Colete Pesado) | 1000 cr |
+| `B1B9086D-41BD-A516-5D29-E3B34A6F1644` | Heavy Shield (variante) | 1000 cr |
+| `""` (vazio) | Sem armadura | — |
+
+---
+
+### `roundResults[].playerStats[].ability` — Efeitos de Habilidades
+
+Objeto com efeitos especiais registrados pelas habilidades do jogador neste round. **Todos os campos estão `null` neste dataset** — o campo existe estruturalmente mas não possui dados populados.
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `grenadeEffects` | `null` | Efeitos da habilidade C |
+| `ability1Effects` | `null` | Efeitos da habilidade Q |
+| `ability2Effects` | `null` | Efeitos da habilidade E |
+| `ultimateEffects` | `null` | Efeitos da ultimate X |
+
+---
+
+## Consistência dos Dados
+
+Verificado em todos os **336 arquivos**:
+
+| Verificação | Resultado |
+|-------------|-----------|
+| Todas as 5 chaves de topo presentes | ✅ 336/336 arquivos |
+| `roundResults` sempre populado | ✅ Nenhum arquivo com 0 rounds |
+| `isCompleted` sempre `true` | ✅ Todas as partidas concluídas |
+| `gameMode` sempre Spike (Bomb) | ✅ Modo padrão competitivo |
+| `region` sempre `"br"` | ✅ Servidor brasileiro |
+| Jogadores com `stats = null` | ⚠️ 22 casos — todos são observadores (`isObserver = true`) |
+| `coaches` presente | ℹ️ 180/336 arquivos (ausente em alguns torneios) |
+| Partidas com overtime | ℹ️ Placar > 13 rounds indica overtime |
+| Kills de habilidade como `damageType = "Weapon"` | ⚠️ 730 kills de Brimstone e Neon classificadas erroneamente — ver tabela de anomalias acima |
+| `characterId` não mapeado | ⚠️ 2 UUIDs com poucas ocorrências não identificados (ver tabela de agentes) |
+
+---
+
+## Dicas para Análise
+
+- **Identificar jogadores**: use `puuid` como chave primária. `gameName + tagLine` podem mudar entre partidas.
+- **Calcular ACS**: `stats.score / stats.roundsPlayed` por partida, ou some os `score` de cada round em `roundResults[].playerStats[].score`.
+- **KAST**: percorra `roundResults` para identificar rounds onde o jogador fez kill, assist, sobreviveu ou foi tradado.
+- **Dano por round (ADR)**: some `damage[].damage` de cada round em `playerStats` e divida por `roundsPlayed`.
+- **Headshot %**: some `headshots` e divida por `(headshots + bodyshots + legshots)` em `playerStats[].damage`.
+- **Economia**: use `economy.loadoutValue` para classificar rounds como eco (< 2000 cr), semi-buy (2000–3500 cr) ou full-buy (> 3500 cr).
+- **Posicionamento**: as coordenadas `{x, y}` em `playerLocations`, `victimLocation`, `plantLocation` e `defuseLocation` são comparáveis dentro do mesmo mapa. O eixo Y é invertido.
