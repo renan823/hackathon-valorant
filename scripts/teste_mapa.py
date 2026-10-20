@@ -4,9 +4,14 @@ from io import BytesIO
 from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
+from pathlib import Path
+
+# Raiz do repositório (este script fica em scripts/).
+RAIZ = Path(__file__).resolve().parents[1]
+FIGURAS = RAIZ / 'outputs' / 'figures'
 
 # 1. Carregar o JSON da partida
-json_file_path = '/home/dante/Documentos/GitHub/hackathon-valorant/data/Univavá/Classificatória 1/UNIVAVA_C1_117_28-06-26_octacore_python_7_x_13_ufu_saints_lotus.json'
+json_file_path = RAIZ / 'data' / 'Classificatória 1' / 'UNIVAVA_C1_117_28-06-26_octacore_python_7_x_13_ufu_saints_lotus.json'
 
 with open(json_file_path, 'r', encoding='utf-8') as f:
     match_data = json.load(f)
@@ -77,5 +82,5 @@ plt.title(f'Locais de Plant da Spike — {map_name}')
 plt.legend(loc='upper right')
 plt.axis('off')
 
-plt.savefig(f'plants_{map_name.lower()}.png', bbox_inches='tight', dpi=300)
+plt.savefig(FIGURAS / f'plants_{map_name.lower()}.png', bbox_inches='tight', dpi=300)
 plt.show()

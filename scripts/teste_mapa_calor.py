@@ -8,11 +8,16 @@ import matplotlib.pyplot as plt
 from scipy.ndimage import gaussian_filter
 import matplotlib.colors as mcolors
 import numpy as np
+from pathlib import Path
+
+# Raiz do repositório (este script fica em scripts/).
+RAIZ = Path(__file__).resolve().parents[1]
+FIGURAS = RAIZ / 'outputs' / 'figures'
 
 # ==========================================
 # 1. CONFIGURAÇÕES DA PESQUISA
 # ==========================================
-FOLDER_PATH = '/home/dante/Documentos/GitHub/hackathon-valorant/data/Univavá/Classificatória 1/'
+FOLDER_PATH = RAIZ / 'data' / 'Classificatória 1'
 TARGET_MAP_NAME = 'Haven'  # Nome do mapa (ex: 'Lotus', 'Ascent', 'Bind')
 
 PLOTAR_PONTOS = True
@@ -176,5 +181,5 @@ fig.patch.set_facecolor('#1a1a1a')
 
 # Guardar com nome dinâmico
 nome_ficheiro = 'heatmap_plants_equipa.png' if TEAM_PLAYERS else 'heatmap_plants_globais.png'
-plt.savefig(nome_ficheiro, bbox_inches='tight', dpi=300, facecolor=fig.get_facecolor())
+plt.savefig(FIGURAS / nome_ficheiro, bbox_inches='tight', dpi=300, facecolor=fig.get_facecolor())
 plt.show()

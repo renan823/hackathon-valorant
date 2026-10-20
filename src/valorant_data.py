@@ -3,7 +3,7 @@
 As funções aqui apenas *achatam* os JSONs: os problemas dos dados brutos (observadores
 sem estatísticas, strings vazias no lugar de valores ausentes, colunas constantes etc.)
 são mantidos de propósito, pois o tratamento é feito passo a passo em
-`valorant-data-preparation.ipynb`.
+`notebooks/valorant-data-preparation.ipynb`.
 
 Tabelas produzidas por `carregar_tabelas()`:
 - `jogadores`: uma linha por jogador por partida (inclui observadores);
@@ -19,9 +19,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-RAIZ = Path(__file__).resolve().parent
+# Raiz do repositório (este arquivo fica em src/).
+RAIZ = Path(__file__).resolve().parents[1]
 PASTA_DADOS = RAIZ / "data"
 ARQUIVO_REFERENCIA = RAIZ / "reference" / "valorant_reference.json"
+# Bases tratadas geradas pelo notebook de preparação (não versionadas).
+PASTA_PROCESSADOS = RAIZ / "outputs" / "processed"
 
 # Ex.: RUSH2_030a_21-06-26_azure_bears_golden_13_x_9_ufmt_turuna_fracture
 PADRAO_ARQUIVO = re.compile(

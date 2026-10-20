@@ -4,43 +4,59 @@ Este repositório contém dados de partidas do torneio universitário de Valoran
 
 ---
 
-## Executar
-```sh
-uv sync
+## Organização do repositório
+
+```
+hackathon-valorant/
+├── data/                   # JSONs brutos das partidas (não editar) — ver "Estrutura de data/"
+├── reference/              # tabelas de referência (UUID -> nome de agentes, armas, armaduras e mapas)
+├── src/
+│   └── valorant_data.py    # lê os JSONs e gera as tabelas jogadores, rounds, economia e abates
+├── notebooks/
+│   ├── valorant-data-preparation.ipynb          # limpeza e transformação (gera outputs/processed/)
+│   ├── valorant-exploratory-data-analysis.ipynb # análise exploratória e do contexto competitivo
+│   └── aula/               # notebooks de aula originais (Iris/Boston), usados como roteiro
+├── scripts/                # scripts de visualização sobre o mapa (plants, heatmap, visão dos abates)
+├── brainstorming/          # ETL para SQLite + notebook marimo (projeto uv próprio)
+├── vava/                   # app React/Vite: mapa de calor de kills por partida
+├── outputs/
+│   ├── figures/            # figuras geradas pelos scripts
+│   └── processed/          # bases tratadas em CSV (geradas, não versionadas)
+└── requirements.txt        # dependências de notebooks/ e scripts/
 ```
 
-Carregar dados
-```sh
-uv run loader.py
-```
+## Como executar
 
-Criar/editar notebook marimo (abre no navegador)
-```sh
-uv run marimo edit <arquivo.py>
-```
+Todos os comandos abaixo partem da **raiz do repositório**.
 
-
-## Notebooks de análise (pandas)
-
-| caminho | conteúdo |
-|---|---|
-| `valorant_data.py` | lê os JSONs e gera as tabelas `jogadores`, `rounds`, `economia` e `abates` |
-| `reference/valorant_reference.json` | tradução de UUIDs de agentes, armas, armaduras e mapas ([valorant-api.com](https://valorant-api.com), pt-BR) |
-| `valorant-data-preparation.ipynb` | limpeza e transformação dos dados (gera `processed/`) |
-| `valorant-exploratory-data-analysis.ipynb` | análise exploratória e análise do contexto competitivo |
-| `data-preparation.ipynb`, `exploratory-data-analysis.ipynb` | notebooks de aula originais (Iris/Boston), usados como roteiro |
+**Notebooks e scripts (pandas)**
 
 ```sh
 uv venv .venv && uv pip install --python .venv/bin/python -r requirements.txt
 # ou: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 
-.venv/bin/jupyter nbconvert --to notebook --execute --inplace valorant-data-preparation.ipynb
-.venv/bin/jupyter nbconvert --to notebook --execute --inplace valorant-exploratory-data-analysis.ipynb
+# a preparação roda primeiro: grava outputs/processed/, lido pela análise exploratória
+.venv/bin/jupyter nbconvert --to notebook --execute --inplace notebooks/valorant-data-preparation.ipynb
+.venv/bin/jupyter nbconvert --to notebook --execute --inplace notebooks/valorant-exploratory-data-analysis.ipynb
+
+.venv/bin/python scripts/teste_mapa_calor.py
 ```
 
-O notebook de preparação deve rodar primeiro: ele grava as bases tratadas em `processed/`, lidas pelo notebook de análise exploratória.
+**ETL em SQLite + marimo (`brainstorming/`)** — o loader lê `./data` e grava `./valorant.db` na pasta atual, por isso deve ser executado da raiz:
 
-## Estrutura de Pastas
+```sh
+uv sync --project brainstorming
+uv run --project brainstorming brainstorming/loader.py
+uv run --project brainstorming marimo edit brainstorming/notebook.py
+```
+
+**App web (`vava/`)**
+
+```sh
+cd vava && npm install && npm run dev
+```
+
+## Estrutura de `data/`
 
 ```
 data/

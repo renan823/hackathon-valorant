@@ -8,11 +8,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button
 from matplotlib.patches import Wedge
+from pathlib import Path
+
+# Raiz do repositório (este script fica em scripts/).
+RAIZ = Path(__file__).resolve().parents[1]
 
 # ==========================================
 # 1. PARÂMETROS DE ENTRADA E CONFIGURAÇÃO
 # ==========================================
-BASE_DIR = '/home/dante/Documentos/GitHub/hackathon-valorant/data/'
+BASE_DIR = RAIZ / 'data'
 FILE_NAME = 'UNIVAVA_C1_117_28-06-26_octacore_python_7_x_13_ufu_saints_lotus.json'
 TARGET_ROUND_NUM = 1  # Número do round que deseja analisar (1, 2, 3...)
 
