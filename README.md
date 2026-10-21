@@ -17,6 +17,7 @@ hackathon-valorant/
 │   ├── valorant-exploratory-data-analysis.ipynb # análise exploratória e do contexto competitivo
 │   └── aula/               # notebooks de aula originais (Iris/Boston), usados como roteiro
 ├── scripts/                # scripts de visualização sobre o mapa (plants, heatmap, visão dos abates)
+├── backend/                # API FastAPI do dashboard (dados em memória) — ver docs/backend/
 ├── brainstorming/          # ETL para SQLite + notebook marimo (projeto uv próprio)
 ├── vava/                   # app React/Vite: mapa de calor e grafo de embates por partida
 ├── docs/                   # specs (ex.: docs/backend/spec.md — backend do dashboard)
@@ -51,7 +52,18 @@ uv run --project brainstorming brainstorming/loader.py
 uv run --project brainstorming marimo edit brainstorming/notebook.py
 ```
 
-**App web (`vava/`)**
+**Backend (`backend/`)**: API do dashboard. Lê `data/` na inicialização e serve tudo em `/api`.
+
+```sh
+uv pip install --python .venv/bin/python -r backend/requirements.txt
+.venv/bin/uvicorn app.main:app --reload --app-dir backend --port 8000
+# documentação interativa: http://localhost:8000/docs
+.venv/bin/pytest backend/tests
+```
+
+Spec, plano e tarefas em [`docs/backend/`](docs/backend/).
+
+**App web (`vava/`)**: o dev server do Vite repassa `/api` para o backend na porta 8000.
 
 ```sh
 cd vava && npm install && npm run dev

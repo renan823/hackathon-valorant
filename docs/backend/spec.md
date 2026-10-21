@@ -62,7 +62,7 @@ data/*.json ──► src/valorant_data.py ──► backend/app/dados.py ──
 
 ```
 backend/
-├── requirements.txt          # fastapi, uvicorn[standard], pandas, numpy, pytest, httpx
+├── requirements.txt          # fastapi, uvicorn[standard], pandas, numpy, pytest, httpx2
 ├── app/
 │   ├── main.py               # cria o app, CORS, inclui routers, carrega BASE no startup
 │   ├── dados.py              # carga + limpeza + enriquecimento → BASE; partida_bruta()

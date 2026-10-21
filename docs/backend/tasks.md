@@ -29,13 +29,13 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
 
 ## Fase 0: Esqueleto (Pessoa A)
 
-- [ ] **T0.1 Dependências** · 10 min · Dono: ___
+- [x] **T0.1 Dependências** · 10 min · Dono: Claude
   - *Arquivos:* `backend/requirements.txt` (`fastapi`, `uvicorn[standard]`, `pandas==3.0.6`, `numpy==2.5.4`,
-    `pytest`, `httpx`)
+    `pytest`, `httpx2`)
   - *Aceite:* `uv pip install --python .venv/bin/python -r backend/requirements.txt` funciona e
     `.venv/bin/python -c "import fastapi, uvicorn"` não dá erro.
 
-- [ ] **T0.2 Estrutura e stubs** · 30 min · Dono: ___ · *Depende:* T0.1
+- [x] **T0.2 Estrutura e stubs** · 30 min · Dono: Claude · *Depende:* T0.1
   - *Arquivos:* toda a árvore da spec (seção 4.1): `main.py`, `dados.py`, `filtros.py`, `metricas.py`,
     `mapas.py`, `routers/*.py`, `analises/__init__.py`, `tests/`.
   - Cada router já declara **todas** as rotas da spec (seção 8), com os parâmetros, e responde
@@ -45,12 +45,12 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
   - *Aceite:* `.venv/bin/uvicorn app.main:app --app-dir backend` sobe; o `/docs` lista as 19 rotas da spec;
     `/api/saude` responde 200.
 
-- [ ] **T0.3 Proxy do Vite e README** · 10 min · Dono: ___ · *Depende:* T0.2
+- [x] **T0.3 Proxy do Vite e README** · 10 min · Dono: Claude · ⚠️ proxy não testado: sem Node na máquina em que foi feito · *Depende:* T0.2
   - *Arquivos:* `vava/vite.config.js` (`server.proxy: {'/api': 'http://localhost:8000'}`), `README.md`
     (seção "Como executar" → backend).
   - *Aceite:* com backend e `npm run dev` rodando, `fetch('/api/saude')` no navegador devolve 200.
 
-- [ ] **T0.4 Base de testes** · 10 min · Dono: ___ · *Depende:* T0.2
+- [x] **T0.4 Base de testes** · 10 min · Dono: Claude · *Depende:* T0.2
   - *Arquivos:* `backend/tests/conftest.py` (fixture de sessão com `with TestClient(app) as c`),
     `backend/tests/test_smoke.py` com `test_saude`.
   - *Aceite:* `.venv/bin/pytest backend/tests` passa.
