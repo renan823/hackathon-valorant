@@ -200,6 +200,31 @@ estão registrados desde a Fase 0, os PRs não se tocam.
 | D1 | Rating composto × ACS como métrica principal (spec, seção 10, item 1) | Nenhum: o padrão funciona | ACS |
 | D2 | Quantas pessoas no backend e qual o prazo do hackathon | A divisão da seção 5 e as estimativas podem não caber | 4 pessoas, ~12 h somadas |
 | D3 | Quem é a Pessoa A, B, C e D | Ninguém se apropria das fases | — |
+| D4 | Corte mínimo de rounds do ranking de jogadores (`min_rounds`). Com 50, o 1º lugar tem só 3 partidas (TORONTO#lulu, ACS 345) e o top 10 tem mediana de 4,5 partidas | O ranking da Home e da página Ranking destaca amostras pequenas | 50 (spec, seção 8.2) |
+| D5 | Corte mínimo de partidas dos times na Home (`top_times`) | Times com 1–2 partidas e 100% de vitórias no topo | 8 (o mesmo da EDA) |
+
+Números para a discussão de D4 e D5 (todos os torneios, sem filtros):
+
+| `min_rounds` | Jogadores no ranking | 1º lugar | Mediana de partidas no top 10 |
+|---|---|---|---|
+| 50 | 329 | TORONTO#lulu (3 partidas, ACS 345,4) | 4,5 |
+| **100** | 222 | lule#dfnt (12 partidas, ACS 287,3) | 12 |
+| 150 | 151 | lule#dfnt | 12,5 |
+| 200 | 122 | lule#dfnt | 13 |
+
+| `min_partidas` (times) | Times no ranking | 1º lugar |
+|---|---|---|
+| 0 | 68 | Ceub Octopus (9-0) |
+| 5 | 47 | Ceub Octopus (9-0) |
+| **8** | 34 | Ceub Octopus (9-0) |
+| 10 | 29 | Macklogic Red (10-1) |
+
+Sugestão para D4: 100 rounds. O topo estabiliza e ainda sobram mais da metade dos jogadores. D1 e D4
+podem ser decididos juntos: um rating composto não resolve sozinho o problema de amostra.
+
+Como mudar depois da decisão: D4 é a constante `MIN_ROUNDS_PADRAO` em `backend/app/routers/jogadores.py`;
+D5 é `MIN_PARTIDAS_HOME` em `backend/app/routers/geral.py`. O front pode sobrescrever as duas pelos
+parâmetros `min_rounds` e `min_partidas`.
 
 ## 8. Fora deste plano
 
