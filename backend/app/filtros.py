@@ -5,18 +5,26 @@ Uso nos routers: `filtros: Filtros = Depends()`. Cada parâmetro aceita múltipl
 só nos endpoints de ranking.
 """
 
+from typing import Annotated
+
+import pandas as pd
 from fastapi import Query
+
+Valores = list[str] | None
+
+# Filtros aplicados direto pela coluna de mesmo nome; `time` tem coluna configurável.
+COLUNAS = ("torneio", "fase", "mapa", "agente", "funcao")
 
 
 class Filtros:
     def __init__(
         self,
-        torneio: list[str] | None = Query(None, description="Ex.: Univavá"),
-        fase: list[str] | None = Query(None, description="Ex.: Fase de Grupos"),
-        mapa: list[str] | None = Query(None, description="Ex.: Ascent"),
-        time: list[str] | None = Query(None, description="time_id, ex.: azure_bears_golden"),
-        agente: list[str] | None = Query(None, description="Ex.: Omen"),
-        funcao: list[str] | None = Query(None, description="Controlador, Duelista, Iniciador ou Sentinela"),
+        torneio: Annotated[Valores, Query(description="Ex.: Univavá")] = None,
+        fase: Annotated[Valores, Query(description="Ex.: Fase de Grupos")] = None,
+        mapa: Annotated[Valores, Query(description="Ex.: Ascent")] = None,
+        time: Annotated[Valores, Query(description="time_id, ex.: azure_bears_golden")] = None,
+        agente: Annotated[Valores, Query(description="Ex.: Omen")] = None,
+        funcao: Annotated[Valores, Query(description="Controlador, Duelista, Iniciador ou Sentinela")] = None,
     ):
         self.torneio = torneio
         self.fase = fase
@@ -26,5 +34,14 @@ class Filtros:
         self.funcao = funcao
 
     def aplicar(self, df, col_time="time_id"):
-        """Filtra `df` só pelas colunas que ele tem; `col_time` em tupla aplica OU (T1.7)."""
-        raise NotImplementedError("T1.7")
+        """Filtra `df` só pelas colunas que ele tem; `col_time` em tupla aplica OU entre as colunas."""
+        mascara = pd.Series(True, index=df.index)
+        for coluna in COLUNAS:
+            valores = getattr(self, coluna)
+            if valores and coluna in df.columns:
+                mascara &= df[coluna].isin(valores)
+        if self.time:
+            colunas = [c for c in ((col_time,) if isinstance(col_time, str) else col_time) if c in df.columns]
+            if colunas:
+                mascara &= pd.concat([df[c].isin(self.time) for c in colunas], axis=1).any(axis=1)
+        return df[mascara]

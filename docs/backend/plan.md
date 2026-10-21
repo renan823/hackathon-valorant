@@ -59,6 +59,7 @@ class Base:
     carregado_em: datetime
 
 BASE: Base | None = None     # preenchido no startup
+def base() -> Base           # routers usam dados.base(); falha clara se a carga não rodou
 ```
 
 Colunas garantidas, além das que o ETL já produz:
@@ -88,7 +89,7 @@ class Filtros:
     # min_rounds, ordenar, ordem e limite NÃO são filtros: são parâmetros só dos endpoints de ranking
 
 # dados.py
-def para_json(obj) -> dict | list | int | float | str | bool | None
+def para_json(obj, casas=2) -> dict | list | int | float | str | bool | None   # casas=4 para coordenadas
 
 # metricas.py
 SOMAS = ["score", "rounds_jogados", "kills", "deaths", "assists", "dano", "headshots", "bodyshots",

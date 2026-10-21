@@ -22,7 +22,15 @@ def saude():
 
 @router.get("/filtros")
 def opcoes_de_filtro():
-    raise HTTPException(501, "Não implementado (T1.9)")
+    b = dados.base()
+    agentes = b.jogadores.drop_duplicates("agente").sort_values("agente")
+    return dados.para_json({
+        "torneios": [{"nome": t, "fases": sorted(g["fase"].unique())} for t, g in b.partidas.groupby("torneio")],
+        "mapas": sorted(b.partidas["mapa"].unique()),  # só os mapas jogados (R8)
+        "times": [{"id": t.time_id, "nome": t.nome} for t in b.times.itertuples()],
+        "agentes": [{"nome": a.agente, "funcao": a.funcao} for a in agentes.itertuples()],
+        "funcoes": sorted(b.jogadores["funcao"].unique()),
+    })
 
 
 @router.get("/resumo")

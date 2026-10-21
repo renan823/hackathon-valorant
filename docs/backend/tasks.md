@@ -63,7 +63,7 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
 
 ### ETL e mapas (Pessoa C)
 
-- [ ] **T1.1 Coordenadas e planter no ETL** · 30 min · Dono: ___ · *Depende:* T0.2
+- [x] **T1.1 Coordenadas e planter no ETL** · 30 min · Dono: Claude · *Depende:* T0.2
   - *Arquivos:* `src/valorant_data.py`
   - `abates`: novas colunas `vitima_x`, `vitima_y`, `killer_x`, `killer_y`, com coordenadas cruas do jogo e
     `None` quando o killer não está em `playerLocations`.
@@ -71,20 +71,22 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
   - *Aceite:* o número de linhas não muda (abates 46 753, rounds 6 618); `killer_x` nulo em 444 abates;
     `plant_x` preenchido em 4 653 rounds.
 
-- [ ] **T1.2 Corrigir FK, FD e KAST (R10)** · 30 min · Dono: ___ · *Depende:* T1.1
+- [x] **T1.2 Corrigir FK, FD e KAST (R10)** · 30 min · Dono: Claude · *Depende:* T1.1
   - *Arquivos:* `src/valorant_data.py` (`_processar_partida`)
   - First kill e first death passam a usar o primeiro abate **válido** do round; `com_kill` do KAST só conta
     killers de abates válidos. `first_kill_atacante` em `rounds` segue a mesma regra.
-  - *Aceite:* `Σ first_kills == Σ first_deaths ==` nº de rounds com pelo menos 1 abate válido; antes e
-    depois, no máximo 11 rounds mudam de first kill e no máximo 139 jogador × round perdem KAST.
+  - *Aceite:* `Σ first_kills == Σ first_deaths ==` nº de rounds com pelo menos 1 abate válido.
+  - *Resultado:* 6 588 = 6 588 = 6 588. O KAST caiu em 141 jogador × round, a maioria pelo auto-trade de
+    mortes por spike ou queda (spec, R10). O first kill mudou em 8 rounds; `n_abates` também passou a
+    contar só abates válidos.
 
-- [ ] **T1.3 Reexecutar notebooks** · 20 min · Dono: ___ · *Depende:* T1.2
+- [x] **T1.3 Reexecutar notebooks** · 20 min · Dono: Claude · só o KAST por função mudou no texto (≈ 68–72%) · *Depende:* T1.2
   - *Arquivos:* `notebooks/*.ipynb`, `outputs/processed/*.csv`
   - Rodar os dois notebooks com `nbconvert --execute --inplace`. Conferir e, se mudarem, atualizar nos
     textos da EDA: KAST r ≈ 0,59 (seção 10.7), FK 75% / 32% (seção 10.3) e a tabela "venceu × perdeu" (seção 10.1).
   - *Aceite:* os notebooks rodam sem erro e todo número citado nos textos confere com a saída.
 
-- [ ] **T1.4 Normalização de coordenadas** · 30 min · Dono: ___ · *Depende:* T0.2
+- [x] **T1.4 Normalização de coordenadas** · 30 min · Dono: Claude · *Depende:* T0.2
   - *Arquivos:* `reference/map_calibration.json` (cópia de `vava/assets/maps/calibration.json`),
     `backend/app/mapas.py`
   - `normalizar(mapa, x, y)` usa `x' = y·xMultiplier + xScalarToAdd`, `y' = x·yMultiplier + yScalarToAdd`, e
@@ -93,7 +95,7 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
 
 ### Dados (Pessoa A)
 
-- [ ] **T1.5a `dados.py`: partidas, times e jogadores** · 1 h · Dono: ___ · *Depende:* T1.1, T1.4, T1.6
+- [x] **T1.5a `dados.py`: partidas, times e jogadores** · 1 h · Dono: Claude · *Depende:* T1.1, T1.4, T1.6
   - *Arquivos:* `backend/app/dados.py`
   - `carregar()` chama `carregar_tabelas()` e depois `preparar()` e preenche `BASE`.
   - `jogadores`: sem observadores, `nick` mais recente, `time_id`, `adversario_id`.
@@ -103,7 +105,7 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
   - *Aceite:* 336 partidas, 411 jogadores (`puuid`), 68 times; todas as tabelas têm `match_id`, `torneio`,
     `fase`, `data` e `mapa`.
 
-- [ ] **T1.5b `dados.py`: rounds, abates e economia** · 1 h · Dono: ___ · *Depende:* T1.5a
+- [x] **T1.5b `dados.py`: rounds, abates e economia** · 1 h · Dono: Claude · *Depende:* T1.5a
   - `rounds`: colunas `*_id` dos times, `houve_plant`, `houve_defuse`, `agente_planter`, `funcao_planter` e
     `plant_x`/`plant_y` normalizados.
   - `abates`: `killer_time_id`, `vitima_time_id`, `lado_vitima`, `agente_killer`/`funcao_killer`,
@@ -112,7 +114,7 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
   - *Aceite:* `Σ abates.valido == Σ jogadores.kills` (3 360 de 3 360 jogador × partida); `meio` nunca nulo;
     as colunas do contrato (plano, seção 3.1) existem.
 
-- [ ] **T1.6 `para_json` e `partida_bruta`** · 20 min · Dono: ___ · *Depende:* T0.2
+- [x] **T1.6 `para_json` e `partida_bruta`** · 20 min · Dono: Claude · *Depende:* T0.2
   - *Arquivos:* `backend/app/dados.py`
   - *Aceite:* teste unitário em que `para_json` converte DataFrame, Series, dict aninhado, `np.int64`,
     `np.bool`, `NaN`, `pd.Timestamp` e float (arredondado para 2 casas) em tipos JSON. `partida_bruta(id)`
@@ -120,7 +122,7 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
 
 ### Filtros e métricas (Pessoa B)
 
-- [ ] **T1.7 `Filtros`** · 30 min · Dono: ___ · *Depende:* T0.2
+- [x] **T1.7 `Filtros`** · 30 min · Dono: Claude · *Depende:* T0.2
   - *Arquivos:* `backend/app/filtros.py`
   - *Aceite:* testes unitários com um DataFrame pequeno:
     - aceita múltiplos valores;
@@ -128,7 +130,7 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
     - `col_time` em tupla aplica OU;
     - sem filtros, devolve o `df` inteiro.
 
-- [ ] **T1.8 `agregar` e `ranking`** · 45 min · Dono: ___ · *Depende:* T0.2
+- [x] **T1.8 `agregar` e `ranking`** · 45 min · Dono: Claude · *Depende:* T0.2
   - *Arquivos:* `backend/app/metricas.py`
   - Métricas da spec (seção 6) somando antes de dividir. Divisão por zero (ex.: `deaths = 0`) → `None`.
   - `ranking()` aplica `min_rounds`, ordena e adiciona `posicao`.
@@ -136,11 +138,11 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
     linhas dele; `agregar(df, ["match_id", "puuid"])` reproduz o ACS de `outputs/processed/jogadores.csv`;
     329 jogadores com `min_rounds=50`.
 
-- [ ] **T1.9 `GET /api/filtros`** · 20 min · Dono: ___ · *Depende:* T1.5b, T1.6
+- [x] **T1.9 `GET /api/filtros`** · 20 min · Dono: Claude · *Depende:* T1.5b, T1.6
   - *Aceite:* 4 torneios (a Univavá com 5 fases); 10 mapas (sem Bind e Icebox, R8); 68 times; 28 agentes
     com função; 4 funções.
 
-**✔ Checkpoint 1:** `BASE`, `Filtros`, `agregar` e `/filtros` na `main`. Os routers da Fase 2 podem ser plugados.
+**✔ Checkpoint 1:** `BASE`, `Filtros`, `agregar` e `/filtros` na `main`. Critérios de aceite da fase em `backend/tests/test_nucleo.py`. Os routers da Fase 2 podem ser plugados.
 
 ---
 

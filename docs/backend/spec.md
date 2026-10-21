@@ -135,7 +135,7 @@ Regras que `dados.py` precisa aplicar:
 | R7 | `gameStartMillis` difere da data do arquivo em 3 partidas (fuso UTC). | Usar a data do arquivo. |
 | R8 | Amostra pequena: Pearl 3, Breeze 5, Fracture 2 partidas; Bind e Icebox não aparecem. | Toda análise por mapa devolve `n` (partidas/rounds) e o front sinaliza n < 5 partidas. `/filtros` lista só os mapas presentes. |
 | R9 | Times com nomes parecidos (`ufg_eagles`/`ufg_eagles_blue`/`ufg_gc_eagles`, `usp_stars`/`usp_stars_gc`…) têm 0 jogadores em comum: são times distintos. Duas orgs mudaram de nome com o mesmo núcleo (Unicamp Tritons Red → Black, Caap Momentum → Malditos). | Identidade do time = slug. O perfil do jogador lista todos os times dele. |
-| R10 | Em `_processar_partida`, o first kill e o first death usam o primeiro registro de `kills` do round, e o KAST credita "kill" a quem aparece como killer, ambos sem excluir os registros do R1. O first kill sai errado em 11 rounds (em 3 deles muda o lado); o KAST é creditado indevidamente em até 139 jogador × round. | Calcular FK, FD e o crédito de kill do KAST só com abates válidos (plano, Fase 1). |
+| R10 | Em `_processar_partida`, o first kill e o first death usam o primeiro registro de `kills` do round, e o KAST credita "kill" a quem aparece como killer, ambos sem excluir os registros do R1. Além disso, o registro de quem morre para a spike ou de queda (killer = vítima) casava consigo mesmo no teste de trade, e o jogador contava como "trocado". | FK, FD, trades e crédito de kill do KAST usam só abates válidos; `n_abates` também. **Corrigido (T1.2):** o KAST caiu em 141 jogador × round (138 pelo auto-trade, 2 por trade com teamkill, 1 pelo crédito de kill); o first kill mudou em 8 rounds (em 4 muda o lado); `n_abates` caiu em 256 rounds. |
 
 Calibração de coordenadas: conferida visualmente nos 10 mapas jogados. Com os multiplicadores oficiais os
 plants caem nos sites. A calibração empírica antiga de `vava/src/constants.js` não trocava x↔y e foi substituída.
@@ -168,7 +168,8 @@ em aberto (seção 10).
 ## 7. Convenções da API
 
 - Prefixo `/api`, apenas `GET`, respostas JSON com nomes em `snake_case` e em português, os mesmos das tabelas.
-- `NaN` vira `null`; floats são arredondados para 2 casas.
+- `NaN` vira `null`; floats são arredondados para 2 casas, exceto as coordenadas de mapa, que usam 4
+  (2 casas equivalem a ~10 px num minimapa de 1024 px).
 - Listas voltam como array puro (sem paginação). Endpoints de ranking aceitam `limite`.
 - Erros usam o padrão do FastAPI: `404 {"detail": "Jogador não encontrado"}`.
 - Coordenadas de mapa sempre normalizadas em `[0, 1]` (x → direita, y → baixo), prontas para desenhar sobre a
