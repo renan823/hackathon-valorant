@@ -1,21 +1,51 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Tokens (spec 6.2). Tema escuro só. As cores de dados foram validadas contra --surface (F12, F13). */
 :root {
+  color-scheme: dark;
+
   --bg:        #0a0a0f;
   --surface:   #12121a;
   --surface2:  #1a1a26;
   --border:    #2a2a3a;
-  --accent:    #ff4655;
+  --accent:    #ff4655;   /* só interface: logo, link ativo, foco; nunca dados */
   --accent-dim:#c83040;
   --text:      #e8e8f0;
-  --text-muted:#6e6e88;
+  --text-muted:#8a8aa3;   /* era #6e6e88, que tinha 3,5–4,0:1; este tem 5,1–5,9:1 */
   --win:       #4caf50;
   --loss:      #ff5252;
-  --font:      'Inter', system-ui, sans-serif;
+  --font:      'Inter Variable', system-ui, sans-serif;
+
+  /* Dados. Time e lado nunca são coloridos na mesma visão (F12). */
+  --time-a:    #199e70;
+  --time-b:    #c98500;
+  --atk:       #e66767;
+  --def:       #3987e5;
+  --bom:       var(--win);
+  --ruim:      var(--loss);
+  --neutro:    #383835;   /* meio da escala divergente (F15) */
+  --outros:    var(--text-muted);
+
+  /* Séries dos gráficos, em ordem fixa (F13). */
+  --serie-1:   #3987e5;
+  --serie-2:   #d95926;
+  --serie-3:   #199e70;
+  --serie-4:   #c98500;
+  --serie-5:   #d55181;
+  --serie-6:   #008300;
+  --serie-7:   #9085e9;
+  --serie-8:   #e66767;
+
+  /* Layout (spec 6.6). Faixas de largura usadas nos @media: 1280, 1024 e 768 px. */
+  --largura-max:   1440px;
+  --respiro:       clamp(12px, 3vw, 32px);
+  --altura-navbar: 56px;
+  --raio:          6px;
+  --espaco:        16px;
 }
 
 html, body, #root {
-  height: 100%;
+  min-height: 100%;
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
@@ -23,6 +53,14 @@ html, body, #root {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
+
+h1, h2, h3 { line-height: 1.2; font-weight: 700; }
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1rem; }
+
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--accent); }
 
 code {
   font-family: monospace;
@@ -32,5 +70,102 @@ code {
   font-size: 0.85em;
 }
 
-button { cursor: pointer; font: inherit; }
+button { cursor: pointer; font: inherit; color: inherit; }
 ul { list-style: none; }
+img { max-width: 100%; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* --- Estrutura ------------------------------------------------------------------------------- */
+
+/* Conteúdo centralizado com no máximo 1440 px e respiro lateral fluido. */
+.conteudo {
+  width: 100%;
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: var(--espaco) var(--respiro);
+}
+
+/* Grade fluida: os itens se reorganizam sozinhos, sem breakpoint (tiles, KPIs, cards de mapa). */
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--grade-min, 160px), 1fr));
+  gap: 12px;
+}
+
+/* O que é largo rola dentro do próprio bloco; a página nunca rola na horizontal (spec 6.6). */
+.rolagem-x {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  max-width: 100%;
+}
+
+/* --- Peças ----------------------------------------------------------------------------------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--raio);
+  padding: var(--espaco);
+  min-width: 0;   /* deixa o conteúdo encolher dentro de grids e flex */
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+.chip:hover { color: var(--text); border-color: var(--text-muted); }
+.chip--ativo,
+.chip--ativo:hover { background: var(--surface2); color: var(--text); border-color: var(--accent); }
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--raio);
+  background: var(--surface2);
+  font-size: 0.875rem;
+}
+.botao:hover { border-color: var(--text-muted); }
+.botao--fantasma { background: transparent; }
+
+.numero { font-variant-numeric: tabular-nums; }
+.muted { color: var(--text-muted); }
+.bom { color: var(--bom); }
+.ruim { color: var(--ruim); }
+
+/* Texto só para leitores de tela. */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* --- Faixas de largura (spec 6.6) ------------------------------------------------------------ */
+
+@media (max-width: 767px) {
+  :root { --espaco: 12px; }
+  h1 { font-size: 1.4rem; }
+}
+
+/* Toque: alvos de pelo menos 44 px. */
+@media (pointer: coarse) {
+  .chip, .botao { min-height: 44px; }
+}
