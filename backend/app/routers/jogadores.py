@@ -14,7 +14,8 @@ router = APIRouter(prefix="/jogadores", tags=["jogadores"])
 COLUNAS_RANKING = ["posicao", "puuid", "nick", "time_id", "time", "partidas", "vitorias", "win_pct", "rounds",
                    "kills", "deaths", "assists", "mais_menos", "acs", "adr", "kd", "kast_pct", "hs_pct",
                    "kpr", "apr", "fk_round", "fd_round", "multikills", "agente_principal", "funcao_principal"]
-MIN_ROUNDS_PADRAO = 50
+# Decisão D4 (plano do backend, §7): com 50 rounds o 1º lugar tinha só 3 partidas; com 100 o topo estabiliza.
+MIN_ROUNDS_PADRAO = 100
 
 
 def mais_frequente(df, chave, coluna):

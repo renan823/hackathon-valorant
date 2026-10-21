@@ -1,7 +1,7 @@
 # Spec — Backend do dashboard (VAVA Stats)
 
 > Status: **implementada** (fases 0–4 concluídas em 21/10/2026) · Ver [plan.md](plan.md) e [tasks.md](tasks.md)
-> Decisões em aberto para o time: D1–D5 no [plan.md](plan.md#7-decisões-pendentes-do-time).
+> Decisões do time no [plan.md](plan.md#7-decisões-pendentes-do-time): D1, D4 e D5 decididas em 21/10/2026; D2 e D3 em aberto.
 
 ## 1. Objetivo
 
@@ -169,8 +169,8 @@ Ela **sempre soma antes de dividir**, para ponderar pelos rounds; nunca faz a m�
 | `win_pct` | 100 · partidas vencidas / partidas |
 | `mais_menos` | Σ kills − Σ deaths |
 
-Ordenação padrão do ranking: `acs`. Um "rating" composto, como o HLTV Rating do csstats, fica como questão
-em aberto (seção 10).
+Ordenação padrão do ranking: `acs`. Um "rating" composto, como o HLTV Rating do csstats, ficou de fora por
+decisão do time (D1, seção 10).
 
 ## 7. Convenções da API
 
@@ -222,7 +222,7 @@ ataque com e sem first kill (75,4% / 32,3%) e % de abates com Vandal ou Phantom.
 ### 8.2 Jogadores
 
 **`GET /api/jogadores`**: ranking (Leaderboards). Filtros comuns + `ordenar` (qualquer métrica, padrão
-`acs`), `ordem` (`desc`), `min_rounds` (padrão 50), `limite` (padrão 100).
+`acs`), `ordem` (`desc`), `min_rounds` (padrão 100, decisão D4), `limite` (padrão 100).
 
 ```json
 [{ "posicao": 1, "puuid": "…", "nick": "Driblas#TTS", "time_id": "unicamp_tritons_red", "time": "Unicamp Tritons Red",
@@ -408,9 +408,9 @@ uv pip install --python .venv/bin/python -r backend/requirements.txt
 
 ## 10. Questões em aberto
 
-1. **Rating composto**: criamos um "VAVA Rating" (por exemplo, combinação de KAST, ADR, KPR e FK) para ser
-   o número principal do ranking, como o HLTV Rating no csstats, ou ficamos com ACS? *Sugestão: começar com
-   ACS e adicionar o rating como análise depois.* Ver também D4 (corte mínimo de rounds) no [plan.md](plan.md#7-decisões-pendentes-do-time).
+1. ~~**Rating composto**~~: decidido em 21/10/2026 ficar com ACS (D1); o rating pode entrar depois como
+   análise. O corte mínimo do ranking passou a 100 rounds (D4). Ver o [plan.md](plan.md#7-decisões-pendentes-do-time)
+   e a [spec do front](../frontend/spec.md#12-decisões) (F1 e F2).
 2. ~~**Identidade dos times**~~: resolvido pela validação (R9). O slug identifica o time.
 3. **Futuro**: clutches (1vX), trades, "jogou com" (aba Played With do csstats), comparação de jogadores e
    o visualizador de visão no abate (`scripts/teste_mapa_visao_kills.py`). Todos cabem no padrão

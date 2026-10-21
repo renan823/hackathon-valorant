@@ -1,7 +1,7 @@
 # Plano — Backend do dashboard (VAVA Stats)
 
 > Implementa a [spec.md](spec.md). Tarefas em [tasks.md](tasks.md). **Status: fases 0–4 concluídas** (21/10/2026);
-> ficam em aberto as decisões D1–D5 (seção 7).
+> D1, D4 e D5 foram decididas em 21/10/2026; D2 e D3 continuam em aberto (seção 7).
 > Ambiente: Python 3.12 · pandas 3.0 · `.venv` na raiz · `uv` instalado.
 
 ## 1. Estratégia
@@ -76,7 +76,7 @@ Colunas garantidas, além das que o ETL já produz:
 | `economia` | como o ETL produz, com `arma` e `armadura` traduzidas. **Nenhum endpoint inicial usa**; fica carregada para análises futuras |
 
 `posicao_ranking` no perfil do jogador é a posição no ranking global, com os parâmetros padrão
-(`acs`, `min_rounds=50`). É `null` quando o jogador não atinge o mínimo de rounds.
+(`acs`, `min_rounds=MIN_ROUNDS_PADRAO`, 100 desde a D4). É `null` quando o jogador não atinge o mínimo de rounds.
 
 ### 3.2 Assinaturas do núcleo
 
@@ -198,11 +198,11 @@ estão registrados desde a Fase 0, os PRs não se tocam.
 
 | # | Decisão | Impacto se não decidir | Padrão adotado |
 |---|---|---|---|
-| D1 | Rating composto × ACS como métrica principal (spec, seção 10, item 1) | Nenhum: o padrão funciona | ACS |
+| D1 | Rating composto × ACS como métrica principal (spec, seção 10, item 1) | Nenhum: o padrão funciona | **Decidido (21/10/2026): ACS.** Motivo na [spec do front](../frontend/spec.md#12-decisões), F2 |
 | D2 | Quantas pessoas no backend e qual o prazo do hackathon | A divisão da seção 5 e as estimativas podem não caber | 4 pessoas, ~12 h somadas |
 | D3 | Quem é a Pessoa A, B, C e D | Ninguém se apropria das fases | — |
-| D4 | Corte mínimo de rounds do ranking de jogadores (`min_rounds`). Com 50, o 1º lugar tem só 3 partidas (TORONTO#lulu, ACS 345) e o top 10 tem mediana de 4,5 partidas | O ranking da Home e da página Ranking destaca amostras pequenas | 50 (spec, seção 8.2) |
-| D5 | Corte mínimo de partidas dos times na Home (`top_times`) | Times com 1–2 partidas e 100% de vitórias no topo | 8 (o mesmo da EDA) |
+| D4 | Corte mínimo de rounds do ranking de jogadores (`min_rounds`). Com 50, o 1º lugar tem só 3 partidas (TORONTO#lulu, ACS 345) e o top 10 tem mediana de 4,5 partidas | O ranking da Home e da página Ranking destaca amostras pequenas | **Decidido (21/10/2026): 100**, aplicado em `MIN_ROUNDS_PADRAO` (F1 da spec do front) |
+| D5 | Corte mínimo de partidas dos times na Home (`top_times`) | Times com 1–2 partidas e 100% de vitórias no topo | **Decidido (21/10/2026): 8** (o mesmo da EDA), também o padrão do Ranking › Times no front (F1) |
 
 Números para a discussão de D4 e D5 (todos os torneios, sem filtros):
 
@@ -221,7 +221,8 @@ Números para a discussão de D4 e D5 (todos os torneios, sem filtros):
 | 10 | 29 | Macklogic Red (10-1) |
 
 Sugestão para D4: 100 rounds. O topo estabiliza e ainda sobram mais da metade dos jogadores. D1 e D4
-podem ser decididos juntos: um rating composto não resolve sozinho o problema de amostra.
+podem ser decididos juntos: um rating composto não resolve sozinho o problema de amostra. Foi o que se
+decidiu em 21/10/2026: ACS com corte de 100 rounds.
 
 Como mudar depois da decisão: D4 é a constante `MIN_ROUNDS_PADRAO` em `backend/app/routers/jogadores.py`;
 D5 é `MIN_PARTIDAS_HOME` em `backend/app/routers/geral.py`. O front pode sobrescrever as duas pelos
@@ -231,4 +232,4 @@ parâmetros `min_rounds` e `min_partidas`.
 
 - O rating composto (spec, seção 10, item 1) segue com ACS como métrica padrão. Pode virar uma análise
   depois sem mudar nenhum endpoint.
-- O frontend no layout do csstats terá plano próprio (`docs/frontend/`) quando o backend chegar à Fase 2.
+- O frontend no layout do csstats tem spec própria em [`docs/frontend/spec.md`](../frontend/spec.md).

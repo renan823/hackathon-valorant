@@ -65,7 +65,8 @@ São 19 rotas (jogadores, times, partidas, heatmap, busca, resumo da Home e aná
 na spec. Para criar uma análise nova basta um arquivo em `backend/app/analises/` (passo a passo na spec, §8.5).
 Spec, plano e tarefas em [`docs/backend/`](docs/backend/).
 
-**App web (`vava/`)**: o dev server do Vite repassa `/api` para o backend na porta 8000.
+**App web (`vava/`)**: o dev server do Vite repassa `/api` para o backend na porta 8000. A spec do novo
+dashboard, com as decisões de front, está em [`docs/frontend/spec.md`](docs/frontend/spec.md).
 
 ```sh
 cd vava && npm install && npm run dev

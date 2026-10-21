@@ -3,7 +3,7 @@
 > Implementa o [plan.md](plan.md) a partir da [spec.md](spec.md). Marque `[x]` ao concluir e anote o
 > responsável em **Dono**. As pessoas A–D seguem a divisão sugerida no plano (seção 5).
 
-> **Decisões em aberto para o time:** D1–D5 no [plan.md](plan.md#7-decisões-pendentes-do-time) (seção 7).
+> **Decisões do time:** D1, D4 e D5 decididas em 21/10/2026; D2 e D3 em aberto ([plan.md](plan.md#7-decisões-pendentes-do-time), seção 7).
 
 **Como ler cada tarefa:** *Arquivos* = o que a tarefa cria ou altera · *Depende* = o que precisa estar pronto
 antes · *Aceite* = como provar que terminou. Estimativas em horas de uma pessoa.
@@ -157,7 +157,7 @@ Formatos conforme a spec (seção 8).
 
 - [x] **T2.1 `GET /api/jogadores`** · 45 min · Dono: Claude
   - `time`, `agente_principal` e `funcao_principal` = o mais frequente nas partidas filtradas.
-  - *Aceite:* sem parâmetros devolve 100 linhas, todas com `rounds ≥ 50`, ordenadas por `acs`;
+  - *Aceite:* sem parâmetros devolve 100 linhas, todas com `rounds ≥ 50` (≥ 100 desde a D4), ordenadas por `acs`;
     `ordenar=kd` reordena; `ordenar=xyz` → 422; `mapa=Ascent` muda os números.
 
 - [x] **T2.2 `GET /api/jogadores/distribuicao`** · 20 min · Dono: Claude · *Depende:* T2.1
@@ -165,7 +165,7 @@ Formatos conforme a spec (seção 8).
 
 - [x] **T2.3 `GET /api/jogadores/{puuid}`** · 45 min · Dono: Claude · *Depende:* T2.1
   - *Aceite:* para um jogador com 2 nicks, `nicks_anteriores` tem 1 item; jogador em 2 times (R9) lista os
-    dois; `Σ armas.kills` = kills válidos dele; `posicao_ranking` é `null` se ele tiver menos de 50 rounds.
+    dois; `Σ armas.kills` = kills válidos dele; `posicao_ranking` é `null` se ele tiver menos de 50 rounds (100 desde a D4).
 
 - [x] **T2.4 `GET /api/jogadores/{puuid}/partidas`** · 20 min · Dono: Claude
   - *Aceite:* nº de linhas = partidas do jogador; ordem por data decrescente; `kills` = `stats.kills`.
@@ -285,4 +285,5 @@ Latência medida em 21/10/2026 (mediana de 5 chamadas, servidor local):
 | `/jogadores` | 52 |
 | demais rotas | < 50 |
 
-**Pendências que ficam:** decisões D1–D5 (plano §7).
+**Pendências que ficam:** decisões D2 e D3 (plano §7). D1, D4 e D5 foram decididas em 21/10/2026; a D4 mudou
+`MIN_ROUNDS_PADRAO` para 100 e os testes de `test_dominios.py` foram ajustados (103 passam).

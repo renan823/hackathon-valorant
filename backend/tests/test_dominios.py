@@ -3,6 +3,7 @@
 import pytest
 
 from app import dados
+from app.routers.jogadores import MIN_ROUNDS_PADRAO
 
 
 @pytest.fixture(scope="module")
@@ -20,7 +21,7 @@ def ok(cliente, url, **params):
 
 def test_ranking_padrao(cliente):
     r = ok(cliente, "/api/jogadores")
-    assert len(r) == 100 and all(x["rounds"] >= 50 for x in r)
+    assert len(r) == 100 and all(x["rounds"] >= MIN_ROUNDS_PADRAO for x in r)
     acs = [x["acs"] for x in r]
     assert acs == sorted(acs, reverse=True) and r[0]["posicao"] == 1
     assert {"agente_principal", "funcao_principal", "time"} <= set(r[0])
@@ -37,7 +38,7 @@ def test_ranking_ordenar_e_filtros(cliente):
 
 def test_distribuicao(cliente):
     d = ok(cliente, "/api/jogadores/distribuicao", bins=10)
-    assert len(d) == 10 and sum(x["jogadores"] for x in d) == 329
+    assert len(d) == 10 and sum(x["jogadores"] for x in d) == 222  # jogadores com 100+ rounds (D4)
     assert d[-1]["pct_acumulado"] == pytest.approx(100)
 
 
@@ -55,7 +56,8 @@ def test_perfil_jogador(cliente, base):
     assert len(ok(cliente, f"/api/jogadores/{multi[multi > 1].index[0]}")["times"]) > 1
 
     rounds = j.groupby("puuid")["rounds_jogados"].sum()
-    assert ok(cliente, f"/api/jogadores/{rounds[rounds < 50].index[0]}")["resumo"]["posicao_ranking"] is None
+    abaixo = rounds[rounds < MIN_ROUNDS_PADRAO].index[0]
+    assert ok(cliente, f"/api/jogadores/{abaixo}")["resumo"]["posicao_ranking"] is None
     assert cliente.get("/api/jogadores/nao-existe").status_code == 404
 
 
