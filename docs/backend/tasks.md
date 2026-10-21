@@ -3,6 +3,8 @@
 > Implementa o [plan.md](plan.md) a partir da [spec.md](spec.md). Marque `[x]` ao concluir e anote o
 > responsável em **Dono**. As pessoas A–D seguem a divisão sugerida no plano (seção 5).
 
+> **Decisões em aberto para o time:** D1–D5 no [plan.md](plan.md#7-decisões-pendentes-do-time) (seção 7).
+
 **Como ler cada tarefa:** *Arquivos* = o que a tarefa cria ou altera · *Depende* = o que precisa estar pronto
 antes · *Aceite* = como provar que terminou. Estimativas em horas de uma pessoa.
 
@@ -212,7 +214,7 @@ Formatos conforme a spec (seção 8).
   - *Aceite:* `mapa=Ascent&tipo=plants` → `total = 1049`; `tipo=mortes&agente=Jett` só traz mortes de Jetts;
     `tipo=kills` ignora abates não válidos e sem posição; sem `mapa` → 422.
 
-- [x] **T2.15 `GET /api/resumo`** · 30 min · Dono: Claude · ⏳ `kpis` vazio até as análises da Fase 3 devolverem o campo `kpi` · *Depende:* T2.1, T2.5, T2.10, T3.2–T3.4, T3.7
+- [x] **T2.15 `GET /api/resumo`** · 30 min · Dono: Claude · `kpis` vêm das análises da Fase 3 · *Depende:* T2.1, T2.5, T2.10, T3.2–T3.4, T3.7
   - *Aceite:* contadores 336 partidas / 411 jogadores / 68 times / 6 618 rounds / 46 371 abates válidos;
     8 últimas partidas; top 5 jogadores e top 5 times; `kpis` vindos das análises, sem recalcular.
 
@@ -222,7 +224,7 @@ Formatos conforme a spec (seção 8).
 
 ## Fase 3: Análises (Pessoa D)
 
-- [ ] **T3.1 Registro e router** · 45 min · Dono: ___ · *Depende:* T1.5a, T1.6, T1.7
+- [x] **T3.1 Registro e router** · 45 min · Dono: Claude · *Depende:* T1.5a, T1.6, T1.7
   - *Arquivos:* `backend/app/analises/__init__.py`, `backend/app/routers/analises.py`
   - Decorator `@analise`, `REGISTRO` e autoimport com `pkgutil.iter_modules`.
   - *Aceite:* criar um arquivo de teste com `@analise` faz a análise aparecer em `/api/analises` sem tocar
@@ -231,17 +233,17 @@ Formatos conforme a spec (seção 8).
 Uma análise por arquivo em `backend/app/analises/`. Cada uma devolve `n` (R8), e o valor de referência
 abaixo é o *Aceite* sem filtros.
 
-- [ ] **T3.2 `lado_por_mapa.py`** · 20 min · Dono: ___ · ataque vence 51,8% no geral; Ascent pende para a defesa.
-- [ ] **T3.3 `first_kill.py`** · 20 min · Dono: ___ · o ataque vence 75,4% com first kill e 32,3% sem (só rounds com abate; a EDA dá 32,1% porque inclui rounds sem abate). Pode variar um pouco após T1.2.
-- [ ] **T3.4 `pistol.py`** · 20 min · Dono: ___ · o vencedor do pistol vence o round seguinte em 86,5%.
-- [ ] **T3.5 `vantagem_economica.py`** · 30 min · Dono: ___ · curva em S, sem pistols: ~49% em ±2 mil; satura em 16–19% e 81–86%.
-- [ ] **T3.6 `compras.py`** · 30 min · Dono: ___ · matriz ataque × defesa com n ≥ 30; full × full ≈ 50%.
-- [ ] **T3.7 `meta_armas.py`** · 20 min · Dono: ___ · abates válidos: Vandal 37,6%, Phantom 24,3%.
-- [ ] **T3.8 `meta_agentes.py`** · 30 min · Dono: ___ · pick rate e win rate por agente × mapa; Omen é o mais escolhido (588).
-- [ ] **T3.9 `metricas_vitoria.py`** · 30 min · Dono: ___ · correlação ponto-bisserial com `venceu`; KAST é a maior (r ≈ 0,59).
-- [ ] **T3.10 `plant_sites.py`** · 20 min · Dono: ___ · Haven: C 464 / A 404 / B 148; Lotus: C 546 / A 482 / B 226.
+- [x] **T3.2 `lado_por_mapa.py`** · 20 min · Dono: Claude · ataque vence 51,8% no geral; Ascent pende para a defesa.
+- [x] **T3.3 `first_kill.py`** · 20 min · Dono: Claude · o ataque vence 75,4% com first kill e 32,3% sem (só rounds com abate; a EDA dá 32,1% porque inclui rounds sem abate). Após a T1.2: **75,5% e 32,2%**.
+- [x] **T3.4 `pistol.py`** · 20 min · Dono: Claude · o vencedor do pistol vence o round seguinte em 86,5%.
+- [x] **T3.5 `vantagem_economica.py`** · 30 min · Dono: Claude · curva em S, sem pistols: ~49% em ±2 mil; satura em 16–19% e 81–86%.
+- [x] **T3.6 `compras.py`** · 30 min · Dono: Claude · matriz ataque × defesa com n ≥ 30; full × full ≈ 50%.
+- [x] **T3.7 `meta_armas.py`** · 20 min · Dono: Claude · abates válidos: Vandal 37,6%, Phantom 24,3%.
+- [x] **T3.8 `meta_agentes.py`** · 30 min · Dono: Claude · pick rate e win rate por agente × mapa; Omen é o mais escolhido (588).
+- [x] **T3.9 `metricas_vitoria.py`** · 30 min · Dono: Claude · correlação ponto-bisserial com `venceu`; KAST é a maior (r ≈ 0,59).
+- [x] **T3.10 `plant_sites.py`** · 20 min · Dono: Claude · Haven: C 464 / A 404 / B 148; Lotus: C 546 / A 482 / B 226.
 
-**✔ Checkpoint 3:** `/api/analises` lista 9 análises e todas respondem com os valores de referência.
+**✔ Checkpoint 3:** `/api/analises` lista 9 análises e todas respondem com os valores de referência. Critérios em `backend/tests/test_analises.py`; cada análise responde em < 50 ms e `/resumo` (com os 4 KPIs) em ~150 ms.
 
 ---
 

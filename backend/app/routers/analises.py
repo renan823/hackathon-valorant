@@ -2,6 +2,8 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from app import dados
+from app.analises import REGISTRO, metadados
 from app.filtros import Filtros
 
 router = APIRouter(prefix="/analises", tags=["analises"])
@@ -9,9 +11,14 @@ router = APIRouter(prefix="/analises", tags=["analises"])
 
 @router.get("")
 def lista():
-    raise HTTPException(501, "Não implementado (T3.1)")
+    return [metadados(a) for a in REGISTRO.values()]
 
 
 @router.get("/{analise_id}")
 def executar(analise_id: str, filtros: Filtros = Depends()):
-    raise HTTPException(501, "Não implementado (T3.1)")
+    if analise_id not in REGISTRO:
+        raise HTTPException(404, "Análise não encontrada")
+    registro = REGISTRO[analise_id]
+    resultado = registro["funcao"](dados.base(), filtros)
+    return dados.para_json({**metadados(registro), "dados": resultado["dados"],
+                            "insight": resultado.get("insight"), "kpi": resultado.get("kpi")})

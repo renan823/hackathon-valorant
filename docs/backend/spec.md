@@ -326,18 +326,39 @@ def lado_por_mapa(base, filtros):
 - **`GET /api/analises/{id}`** + filtros comuns: `{id, titulo, descricao, categoria, grafico, dados: [...], insight, kpi}`
 - `kpi` (opcional): `{titulo, valor, unidade, descricao}`. As análises usadas na Home (8.1) precisam devolvê-lo.
 - Tipos de gráfico suportados: `barras`, `linha`, `dispersao`, `tabela`, `matriz` (heatmap 2D) e `kpi`.
-  O campo `grafico` diz quais colunas de `dados` vão em cada eixo. Opcionais: `serie` (cor) e `rotulo_x`/`rotulo_y`.
+  O campo `grafico` diz quais colunas de `dados` vão em cada eixo:
+
+  | Campo | Uso |
+  |---|---|
+  | `tipo` | obrigatório |
+  | `x`, `y` | colunas dos eixos (no `kpi`: rótulo e valor de cada card) |
+  | `serie` | coluna que define a cor/grupo |
+  | `rotulo_x`, `rotulo_y` | títulos dos eixos |
+  | `referencia` | linha de referência no eixo y (ex.: 50 para "equilíbrio") |
+  | `valor`, `n`, `ordem`, `min_n` | `matriz`: coluna da cor, coluna da amostra, ordem das categorias e amostra mínima para exibir o valor |
+  | `colunas` | `tabela`: colunas na ordem de exibição |
+
+- Categorias usadas hoje (abas da página Análises): `mapas`, `momentos`, `economia`, `meta`, `jogadores`.
+
+**Como criar uma análise nova** (nenhum outro arquivo muda):
+
+1. Criar `backend/app/analises/<nome>.py` com uma função decorada por `@analise(...)`, como no exemplo acima.
+2. Aplicar os filtros com `filtros.aplicar(df)`; na tabela `rounds`, usar `col_time=TIMES_ROUND`.
+3. Retornar `vazio()` quando os filtros não deixarem dados, e `n` (rounds/partidas) em cada linha (R8).
+4. Opcional: `kpi(titulo, valor, descricao)` para virar card; para aparecer na Home, incluir o id em
+   `KPIS_HOME` (`routers/geral.py`).
+5. Adicionar o valor de referência em `tests/test_analises.py`.
 
 Análises iniciais, portadas da seção 10 da EDA:
 
 | id | Pergunta | Gráfico |
 |---|---|---|
-| `lado-por-mapa` | Ataque ou defesa é favorecido em cada mapa? | barras |
-| `first-kill` | Quanto vale abrir o round com um abate? | barras |
-| `pistol` | Quem vence o pistol converte os rounds seguintes? | kpi |
+| `lado-por-mapa` | Ataque ou defesa é favorecido em cada mapa? (KPI) | barras |
+| `first-kill` | Quanto vale abrir o round com um abate? (KPI) | barras |
+| `pistol` | Quem vence o pistol converte o round seguinte? (KPI) | kpi |
 | `vantagem-economica` | Win% do ataque por diferença de loadout (curva em S) | linha |
 | `compras` | Win% do ataque por tipo de compra (ataque × defesa) | matriz |
-| `meta-armas` | Quais armas mais matam? | barras |
+| `meta-armas` | Quais armas mais matam? (KPI) | barras |
 | `meta-agentes` | Pick rate e win rate por agente e mapa | tabela |
 | `metricas-vitoria` | Qual métrica individual mais se associa à vitória? | barras |
 | `plant-sites` | Onde a spike é plantada em cada mapa? | barras |
@@ -379,7 +400,7 @@ uv pip install --python .venv/bin/python -r backend/requirements.txt
 
 1. **Rating composto**: criamos um "VAVA Rating" (por exemplo, combinação de KAST, ADR, KPR e FK) para ser
    o número principal do ranking, como o HLTV Rating no csstats, ou ficamos com ACS? *Sugestão: começar com
-   ACS e adicionar o rating como análise depois.*
+   ACS e adicionar o rating como análise depois.* Ver também D4 (corte mínimo de rounds) no [plan.md](plan.md#7-decisões-pendentes-do-time).
 2. ~~**Identidade dos times**~~: resolvido pela validação (R9). O slug identifica o time.
 3. **Futuro**: clutches (1vX), trades, "jogou com" (aba Played With do csstats), comparação de jogadores e
    o visualizador de visão no abate (`scripts/teste_mapa_visao_kills.py`). Todos cabem no padrão
