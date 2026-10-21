@@ -18,7 +18,8 @@ hackathon-valorant/
 │   └── aula/               # notebooks de aula originais (Iris/Boston), usados como roteiro
 ├── scripts/                # scripts de visualização sobre o mapa (plants, heatmap, visão dos abates)
 ├── brainstorming/          # ETL para SQLite + notebook marimo (projeto uv próprio)
-├── vava/                   # app React/Vite: mapa de calor de kills por partida
+├── vava/                   # app React/Vite: mapa de calor e grafo de embates por partida
+├── docs/                   # specs (ex.: docs/backend/spec.md — backend do dashboard)
 ├── outputs/
 │   ├── figures/            # figuras geradas pelos scripts
 │   └── processed/          # bases tratadas em CSV (geradas, não versionadas)
@@ -86,14 +87,14 @@ UNIVAVA_C1_002_27-06-26_poli_plague_10_x_13_unicamp_tritons_red_haven.json
 | `UNIVAVA_C1` | prefixo | Identificador do torneio/fase |
 | `002` | número | Número sequencial da partida |
 | `27-06-26` | data | Data da partida (DD-MM-AA) |
-| `poli_plague` | time | Nome do time da esquerda (Red team) |
+| `poli_plague` | time | Nome do time da esquerda |
 | `10` | placar | Rounds vencidos pelo time da esquerda |
 | `x` | separador | — |
 | `13` | placar | Rounds vencidos pelo time da direita |
-| `unicamp_tritons_red` | time | Nome do time da direita (Blue team) |
+| `unicamp_tritons_red` | time | Nome do time da direita |
 | `haven` | mapa | Mapa jogado |
 
-> **Atenção:** O time da esquerda no nome do arquivo corresponde ao `teamId = "Red"` no JSON, e o da direita ao `teamId = "Blue"`. Sempre confirme pelo placar numérico em `teams[].roundsWon`.
+> **Atenção:** a posição no nome do arquivo **não** indica o lado `Red`/`Blue` do JSON: o time da esquerda é o `Red` em apenas 160 das 336 partidas. Como o JSON não traz o nome dos times, associe cada `teamId` ao nome pelo placar (`teams[].roundsWon` = placar no nome do arquivo), como faz `src/valorant_data.py`. O placar nunca empata, então a associação é sempre única.
 
 ---
 
@@ -197,45 +198,38 @@ Array com um objeto por jogador. Partidas normais têm 10 jogadores (5 por time)
 
 #### Tabela de Agentes (`characterId`)
 
-| `characterId` | Agente |
-|---------------|--------|
-| `add6443a-41bd-e414-f6ad-e58d267f4e95` | Jett |
-| `f94c3b30-42be-e959-889c-5aa313dba261` | Raze |
-| `bb2a4828-46eb-8cd1-e765-15848195d751` | Neon |
-| `0e38b510-41a8-5780-7e1f-c6776a3df9d3` | Yoru |
-| `0e38b510-41a8-5780-5e8f-568b2a4f2d6c` | Yoru |
-| `efba5359-4016-a1e5-7626-b1ae1f42a446` | Iso |
-| `efba5359-4016-a1e5-7626-b1ae76895940` | Iso |
-| `8e253930-4c05-31dd-1b6c-968525494517` | Sova |
-| `320b2a48-4d9b-a075-30f1-1f93a9b638fa` | Skye |
-| `6f2a04ca-43e0-be17-7f36-b3908627744d` | Skye |
-| `dade69b4-4f5a-8528-247b-219e5a1facd6` | Fade |
-| `e370fa57-4757-3604-3648-499e1f642d3f` | Gekko |
-| `5f8d3a7f-467b-97f3-062c-0567a4a74d44` | Breach |
-| `5f8d3a7f-467b-97f3-062c-13acf203c006` | Breach |
-| `a4971619-4bfe-b831-ff73-37bb1b630a86` | Omen |
-| `707eab51-4836-f488-046a-cda6bf494859` | Omen |
-| `22697a3d-45bf-8dd7-4fec-84a9e28c69d7` | Brimstone |
-| `9f0d8ba9-4140-b941-57d3-a7ad57c6b417` | Brimstone |
-| `41fb69c1-4189-7b37-f117-bcaf1e96f1bf` | Astra |
-| `95b78ed7-4637-86d9-7e41-71ba8c293152` | Harbor |
-| `07bc374a-4e44-8f27-3bfd-69df7b9e96c6` | Viper |
-| `1e58de9c-4950-5125-93e9-a0aee9f98746` | Killjoy |
-| `117ed9e3-49f3-6512-3ccf-0cada7e3823b` | Cypher |
-| `cc8b64c8-4b25-4ff9-6e7f-37b4da43d235` | Deadlock |
-| `569fdd95-4d10-43ab-ca70-79becc718b46` | Sage |
-| `601dbbe7-43ce-be57-2a40-4abd24953621` | KAY/O |
-| `1dbf2edd-4729-0984-3115-daa5eed44993` | Clove |
-| `a3bfb853-43b2-7238-a4f1-ad90e9e46bcc` | Reyna |
-| `eb93336a-449b-9c1e-0ac7-d761848a2619` | Phoenix |
-| `eb93336a-449b-9c1b-0a54-a891f7921d69` | Phoenix |
-| `df1cb487-4902-002e-5c17-d28e83e78588` | Chamber |
-| `7f94d92c-4234-0a36-9646-3a87eb8b5ecd` | Yoru |
-| `7f94d92c-4234-0a36-9646-3a87eb8b5c89` | Yoru (variante de patch) |
-| `b444168c-4e35-8076-db47-ef9bf368f384` | Tejo |
-| `92eeef5d-43b5-1d4a-8d03-b3927a09034b` | Agente não identificado (1 ocorrência) |
+Agentes que aparecem no dataset, com o número de escolhas (jogador × partida). A fonte é `reference/valorant_reference.json` (valorant-api.com), que também traz a função de cada agente. Cada agente tem um único UUID e todos os `characterId` do dataset estão mapeados.
 
-> Alguns agentes aparecem com dois UUIDs distintos — variações de versão do jogo. Trate-os como o mesmo agente ao analisar.
+| `characterId` | Agente | Função | Escolhas |
+|---|---|---|---|
+| `41fb69c1-4189-7b37-f117-bcaf1e96f1bf` | Astra | Controlador | 55 |
+| `9f0d8ba9-4140-b941-57d3-a7ad57c6b417` | Brimstone | Controlador | 10 |
+| `1dbf2edd-4729-0984-3115-daa5eed44993` | Clove | Controlador | 13 |
+| `95b78ed7-4637-86d9-7e41-71ba8c293152` | Harbor | Controlador | 19 |
+| `8e253930-4c05-31dd-1b6c-968525494517` | Omen | Controlador | 588 |
+| `707eab51-4836-f488-046a-cda6bf494859` | Viper | Controlador | 111 |
+| `0e38b510-41a8-5780-5e8f-568b2a4f2d6c` | Iso | Duelista | 4 |
+| `add6443a-41bd-e414-f6ad-e58d267f4e95` | Jett | Duelista | 329 |
+| `bb2a4828-46eb-8cd1-e765-15848195d751` | Neon | Duelista | 211 |
+| `eb93336a-449b-9c1b-0a54-a891f7921d69` | Phoenix | Duelista | 389 |
+| `f94c3b30-42be-e959-889c-5aa313dba261` | Raze | Duelista | 173 |
+| `a3bfb853-43b2-7238-a4f1-ad90e9e46bcc` | Reyna | Duelista | 10 |
+| `df1cb487-4902-002e-5c17-d28e83e78588` | Waylay | Duelista | 51 |
+| `7f94d92c-4234-0a36-9646-3a87eb8b5c89` | Yoru | Duelista | 47 |
+| `5f8d3a7f-467b-97f3-062c-13acf203c006` | Breach | Iniciador | 31 |
+| `dade69b4-4f5a-8528-247b-219e5a1facd6` | Fade | Iniciador | 202 |
+| `e370fa57-4757-3604-3648-499e1f642d3f` | Gekko | Iniciador | 2 |
+| `601dbbe7-43ce-be57-2a40-4abd24953621` | KAY/O | Iniciador | 21 |
+| `6f2a04ca-43e0-be17-7f36-b3908627744d` | Skye | Iniciador | 67 |
+| `320b2a48-4d9b-a075-30f1-1f93a9b638fa` | Sova | Iniciador | 391 |
+| `b444168c-4e35-8076-db47-ef9bf368f384` | Tejo | Iniciador | 6 |
+| `22697a3d-45bf-8dd7-4fec-84a9e28c69d7` | Chamber | Sentinela | 154 |
+| `117ed9e3-49f3-6512-3ccf-0cada7e3823b` | Cypher | Sentinela | 188 |
+| `cc8b64c8-4b25-4ff9-6e7f-37b4da43d235` | Deadlock | Sentinela | 2 |
+| `1e58de9c-4950-5125-93e9-a0aee9f98746` | Killjoy | Sentinela | 117 |
+| `569fdd95-4d10-43ab-ca70-79becc718b46` | Sage | Sentinela | 28 |
+| `92eeef5d-43b5-1d4a-8d03-b3927a09034b` | Veto | Sentinela | 1 |
+| `efba5359-4016-a1e5-7626-b1ae76895940` | Vyse | Sentinela | 140 |
 
 ---
 
@@ -371,57 +365,61 @@ Array de kills realizadas por este jogador neste round.
 
 | Campo | Tipo | Descrição |
 |-------|------|-----------|
-| `damageType` | `string` | Tipo do dano: `"Weapon"`, `"Ability"`, `"Bomb"`, `"Crush"`, `"Fall"` |
+| `damageType` | `string` | Tipo do dano: `"Weapon"`, `"Ability"`, `"Melee"`, `"Bomb"`, `"Crush"`, `"Fall"` |
 | `damageItem` | `string` | UUID da arma ou nome da habilidade usada (ver tabelas abaixo) |
 | `isSecondaryFireMode` | `bool` | `true` se foi com o modo de disparo alternativo (ex: zoom do Marshal) |
 
 #### Valores de `damageType`
 
-| Valor | Significado |
-|-------|-------------|
-| `"Weapon"` | Arma de fogo (pistola, rifle, etc.) — ver nota abaixo sobre anomalia com habilidades |
-| `"Ability"` | Habilidade de agente |
-| `"Melee"` | Faca (corpo a corpo) — `damageItem` será `2F59173C-4BED-B6C3-2191-DEA9B58BE9C7` |
-| `"Bomb"` | Explosão da spike |
-| `"Crush"` | Esmagamento (habilidades de área) |
-| `"Fall"` | Dano de queda |
+| Valor | Significado | Kills |
+|-------|-------------|-------|
+| `"Weapon"` | Arma de fogo (pistola, rifle etc.). Ver a nota sobre habilidades abaixo | 45121 |
+| `"Ability"` | Habilidade de agente | 1238 |
+| `"Melee"` | Faca (corpo a corpo); `damageItem` = `2F59173C-4BED-B6C3-2191-DEA9B58BE9C7` | 15 |
+| `"Bomb"` | Explosão da spike | 327 |
+| `"Fall"` | Dano de queda | 48 |
+| `"Crush"` | Esmagamento | 4 |
+
+> **Nem todo item de `kills` é um abate.** A lista inclui 373 registros com `killer = victim` (spike 327, queda 40, habilidade 5, esmagamento 1) e 9 teamkills. Esses registros **não** entram em `stats.kills`: removendo-os, a soma das kills dos rounds bate com `stats.kills` para todos os jogadores. Para métricas, armas e duelos, use só os abates com `killer != victim` e times diferentes.
 
 #### `damageItem` — Identificadores de Armas e Habilidades
 
-Quando `damageType = "Weapon"`, o valor é um UUID de arma:
+Quando `damageType = "Weapon"` (ou `"Melee"`), o valor é um UUID de arma. Tabela gerada a partir de `reference/valorant_reference.json` com os itens presentes no dataset (abates = `finishingDamage`; rounds = `economy.weapon`):
 
-| UUID | Arma |
-|------|------|
-| `29A0CFAB-485B-F5D5-779A-B59F85E204A8` | Classic |
-| `42DA8CCC-40D5-AFFC-BEEC-15AA47B42EDA` | Shorty |
-| `44D4E95C-4157-0037-81B2-17841BF2E8E3` | Frenzy |
-| `1BAA85B4-4C70-1284-64BB-6481DFC3BB4E` | Ghost |
-| `E336C6B8-418D-9340-D77F-7A9E4CFE0702` | Sheriff |
-| `F7E1B454-4AD4-1063-EC0A-159E56B58941` | Stinger |
-| `462080D1-4035-2937-7C09-27AA2A5C27A7` | Spectre |
-| `9C82E19D-4575-0200-1A81-3EACF00CF872` | Bucky |
-| `910BE174-449B-C412-AB22-D0873436B21B` | Judge |
-| `AE3DE142-4D85-2547-DD26-4E90BED35CF7` | Bulldog |
-| `EE8E8D15-496B-07AC-E5F6-8FAE5D4C7B1A` | Guardian |
-| `4ADE7FAA-4CF1-8376-95EF-39884480959B` | Phantom |
-| `A03B24D3-4319-996D-0F8C-94BBFBA1DFC7` | Vandal |
-| `55D8A0F4-4274-CA67-FE2C-06AB45EFDF58` | Marshal |
-| `C4883E50-4494-202C-3EC3-6B8A9284F00B` | Outlaw |
-| `5F0AAF7A-4289-3998-D5FF-EB9A5CF7EF5C` | Operator |
-| `63E6C2B6-4A8E-869C-3D4C-E38355226584` | Ares |
-| `8DB0A1BF-4A50-832A-4566-FAAAA6D250CA` | Odin |
-| `EC845BF4-4F79-DDDA-A3DA-0DB3774B2794` | Knife (corpo a corpo — aparece em `economy.weapon`) |
-| `2F59173C-4BED-B6C3-2191-DEA9B58BE9C7` | Knife (corpo a corpo — aparece em `finishingDamage` com `damageType = "Melee"`) |
+| UUID | Item | Categoria | Abates | Rounds equipada |
+|------|------|-----------|--------|-----------------|
+| `410B2E0B-4CEB-1321-1727-20858F7F3477` | Bandit | Sidearm | 949 | 1678 |
+| `29A0CFAB-485B-F5D5-779A-B59F85E204A8` | Classic | Sidearm | 1632 | 5743 |
+| `44D4E95C-4157-0037-81B2-17841BF2E8E3` | Frenzy | Sidearm | 56 | 121 |
+| `1BAA85B4-4C70-1284-64BB-6481DFC3BB4E` | Ghost | Sidearm | 2554 | 3268 |
+| `E336C6B8-418D-9340-D77F-7A9E4CFE0702` | Sheriff | Sidearm | 3175 | 6636 |
+| `42DA8CCC-40D5-AFFC-BEEC-15AA47B42EDA` | Shorty | Sidearm | 69 | 86 |
+| `462080D1-4035-2937-7C09-27AA2A5C27A7` | Spectre | SMG | 919 | 1336 |
+| `F7E1B454-4AD4-1063-EC0A-159E56B58941` | Stinger | SMG | 453 | 1137 |
+| `910BE174-449B-C412-AB22-D0873436B21B` | Bucky | Shotgun | 70 | 212 |
+| `EC845BF4-4F79-DDDA-A3DA-0DB3774B2794` | Judge | Shotgun | 143 | 297 |
+| `AE3DE142-4D85-2547-DD26-4E90BED35CF7` | Bulldog | Rifle | 1127 | 1723 |
+| `4ADE7FAA-4CF1-8376-95EF-39884480959B` | Guardian | Rifle | 1643 | 2645 |
+| `EE8E8D15-496B-07AC-E5F6-8FAE5D4C7B1A` | Phantom | Rifle | 11259 | 14453 |
+| `9C82E19D-4575-0200-1A81-3EACF00CF872` | Vandal | Rifle | 17428 | 23012 |
+| `8DB0A1BF-4A50-832A-4566-FAAAA6D250CA` | Warden | Rifle | 1 | 1 |
+| `C4883E50-4494-202C-3EC3-6B8A9284F00B` | Marshal | Sniper | 237 | 429 |
+| `A03B24D3-4319-996D-0F8C-94BBFBA1DFC7` | Operator | Sniper | 1611 | 2089 |
+| `5F0AAF7A-4289-3998-D5FF-EB9A5CF7EF5C` | Outlaw | Sniper | 484 | 720 |
+| `55D8A0F4-4274-CA67-FE2C-06AB45EFDF58` | Ares | Heavy | 16 | 29 |
+| `63E6C2B6-4A8E-869C-3D4C-E38355226584` | Odin | Heavy | 396 | 549 |
+| `2F59173C-4BED-B6C3-2191-DEA9B58BE9C7` | Faca (`Confronto` no reference) | Melee | 15 | 0 |
 
-> **Anomalia — habilidades classificadas como `"Weapon"`:** Em algumas versões da API do jogo, kills por certas habilidades de dano contínuo são registradas com `damageType = "Weapon"` em vez de `"Ability"`, usando UUIDs de habilidade como `damageItem`. Identificadas neste dataset:
+> **Habilidades registradas como `"Weapon"`:** habilidades que funcionam como arma aparecem com `damageType = "Weapon"` e um UUID próprio como `damageItem`. No reference elas têm `categoria = "Ability"`. O agente de quem matou confirma a atribuição:
 >
 > | UUID (`damageItem`) | Agente | Habilidade | Kills |
 > |---------------------|--------|------------|-------|
-> | `856D9A7E-4B06-DC37-15DC-9D809C37CB90` | Brimstone | Orbital Strike (ultimate X) | 481 |
-> | `95336AE4-45D4-1032-CFAF-6BAD01910607` | Neon | Overdrive (ultimate X) | 207 |
-> | `39099FB5-4293-DEF4-1E09-2E9080CE7456` | Brimstone | Incendiary (habilidade Q) | 42 |
+> | `856D9A7E-4B06-DC37-15DC-9D809C37CB90` | Chamber | Headhunter | 481 |
+> | `95336AE4-45D4-1032-CFAF-6BAD01910607` | Neon | Overdrive (ultimate) | 207 |
+> | `39099FB5-4293-DEF4-1E09-2E9080CE7456` | Chamber | Tour de Force (ultimate) | 42 |
+> | `""` (vazio) | Chamber | não identificada (168 de 169 com `isSecondaryFireMode = true`) | 169 |
 >
-> Ao filtrar kills por arma, **exclua esses UUIDs** ou trate-os separadamente como kills de habilidade.
+> Ao analisar armas, separe esses itens pela `categoria` do reference ou trate-os como kills de habilidade.
 
 Quando `damageType = "Ability"`, o valor é um nome de habilidade:
 
@@ -464,9 +462,9 @@ Estado do inventário e dinheiro do jogador **no início do round**.
 
 | UUID | Armadura | Custo |
 |------|----------|-------|
-| `4DEC83D5-4902-9AB3-BED6-A7A390761157` | Light Shield (Colete Leve) | 400 cr |
-| `822BCAB2-40A2-324E-C137-E09195AD7692` | Heavy Shield (Colete Pesado) | 1000 cr |
-| `B1B9086D-41BD-A516-5D29-E3B34A6F1644` | Heavy Shield (variante) | 1000 cr |
+| `4DEC83D5-4902-9AB3-BED6-A7A390761157` | Light Shield (Armadura Leve) | 400 cr |
+| `822BCAB2-40A2-324E-C137-E09195AD7692` | Heavy Shield (Armadura Pesada) | 1000 cr |
+| `B1B9086D-41BD-A516-5D29-E3B34A6F1644` | Regen Shield (Escudo Regenerativo) | 650 cr |
 | `""` (vazio) | Sem armadura | — |
 
 ---
@@ -498,8 +496,17 @@ Verificado em todos os **336 arquivos**:
 | Jogadores com `stats = null` | ⚠️ 22 casos — todos são observadores (`isObserver = true`) |
 | `coaches` presente | ℹ️ 180/336 arquivos (ausente em alguns torneios) |
 | Partidas com overtime | ℹ️ Placar > 13 rounds indica overtime |
-| Kills de habilidade como `damageType = "Weapon"` | ⚠️ 730 kills de Brimstone e Neon classificadas erroneamente — ver tabela de anomalias acima |
-| `characterId` não mapeado | ⚠️ 2 UUIDs com poucas ocorrências não identificados (ver tabela de agentes) |
+| `matchId` único | ✅ 336/336 |
+| Placar do nome do arquivo = `teams[].roundsWon` | ✅ 336/336 |
+| 5 × 5 jogadores ativos por partida | ✅ 336/336 |
+| `roundNum` sequencial, lados trocam no round 13, `stats.roundsPlayed` = nº de rounds | ✅ 336/336 |
+| `characterId` e UUIDs de arma/armadura mapeados no reference | ✅ todos |
+| Time da esquerda do arquivo = `Red` | ⚠️ só em 160/336: associe pelo placar |
+| Itens de `kills` que não são abates (killer = vítima, teamkill) | ⚠️ 382: excluir para bater com `stats.kills` |
+| Kills de habilidade como `damageType = "Weapon"` | ⚠️ 899 de Chamber e Neon (730 com UUID de habilidade + 169 sem UUID); ver a nota acima |
+| Posição do killer ausente em `playerLocations` | ℹ️ 444 (373 de killer = vítima + 71 sem snapshot do killer) |
+| `gameStartMillis` × data do nome do arquivo | ℹ️ 3 partidas diferem em 1 dia (fuso UTC) |
+| Mapas jogados | ℹ️ 10. Bind e Icebox não aparecem; Pearl, Breeze e Fracture têm de 2 a 5 partidas |
 
 ---
 
@@ -510,5 +517,5 @@ Verificado em todos os **336 arquivos**:
 - **KAST**: percorra `roundResults` para identificar rounds onde o jogador fez kill, assist, sobreviveu ou foi tradado.
 - **Dano por round (ADR)**: some `damage[].damage` de cada round em `playerStats` e divida por `roundsPlayed`.
 - **Headshot %**: some `headshots` e divida por `(headshots + bodyshots + legshots)` em `playerStats[].damage`.
-- **Economia**: use `economy.loadoutValue` para classificar rounds como eco (< 2000 cr), semi-buy (2000–3500 cr) ou full-buy (> 3500 cr).
-- **Posicionamento**: as coordenadas `{x, y}` em `playerLocations`, `victimLocation`, `plantLocation` e `defuseLocation` são comparáveis dentro do mesmo mapa. O eixo Y é invertido.
+- **Economia**: some `economy.loadoutValue` dos 5 jogadores e classifique a compra do time (critério do vlr.gg, usado em `src/valorant_data.py`): eco (< 5 mil cr), semi-eco (< 10 mil), semi-buy (< 20 mil) e full buy (≥ 20 mil). Os rounds 1 e 13 são pistol.
+- **Posicionamento**: as coordenadas `{x, y}` em `playerLocations`, `victimLocation`, `plantLocation` e `defuseLocation` são comparáveis dentro do mesmo mapa. Para desenhar sobre o minimapa, use a calibração oficial em `vava/assets/maps/calibration.json` (valorant-api), que **troca os eixos**: `u = y · xMultiplier + xScalarToAdd` (horizontal) e `v = x · yMultiplier + yScalarToAdd` (vertical), ambos em [0, 1].

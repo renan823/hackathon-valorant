@@ -256,6 +256,8 @@ def _processar_partida(caminho, pasta, ref):
                 "match_id": mi["matchId"], "torneio": info["torneio"], "mapa": base["mapa"],
                 "round": n + 1, "tempo_round_s": k["timeSinceRoundStartMillis"] / 1000,
                 "killer": k["killer"], "vitima": k["victim"],
+                # Spike, queda e teamkill aparecem em `kills`, mas não contam em stats.kills.
+                "valido": k["killer"] != k["victim"] and time_do.get(k["killer"]) != time_do.get(k["victim"]),
                 "time_killer": nomes.get(time_do.get(k["killer"])),
                 "lado_killer": papeis.get(time_do.get(k["killer"])),
                 "n_assistencias": len(k["assistants"]),

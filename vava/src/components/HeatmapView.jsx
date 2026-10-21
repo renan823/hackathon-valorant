@@ -51,6 +51,7 @@ function HeatmapView({ meta, matchData, onBack }) {
 
     return kills
       .filter(k => {
+        if (mode === 'killer' && !k.valid) return false
         const targetPuuid = mode === 'victim' ? k.victimPuuid : k.killerPuuid
         if (filterTeam !== 'all') {
           const p = killData.playerMap[targetPuuid]

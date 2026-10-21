@@ -21,7 +21,8 @@ export default function MatchGraph({ matchData }) {
 
 		// Dicionário para armazenar o total de kills de cada jogador
 		const playerKills = {};
-		matchData.players.forEach(p => { playerKills[p.puuid] = 0; });
+		const playerTeam = {};
+		matchData.players.forEach(p => { playerKills[p.puuid] = 0; playerTeam[p.puuid] = p.teamId; });
 
 		const linksMap = {};
 
@@ -31,7 +32,8 @@ export default function MatchGraph({ matchData }) {
 					const k = kill.killer;
 					const v = kill.victim;
 
-					if (k === v) return;
+					// Ignora spike/queda (killer = vítima) e teamkills, como em stats.kills
+					if (k === v || playerTeam[k] === playerTeam[v]) return;
 
 					// Acumula os abates individuais para calcular o tamanho do nó depois
 					if (playerKills[k] !== undefined) {

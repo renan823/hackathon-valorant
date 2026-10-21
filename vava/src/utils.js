@@ -1,4 +1,4 @@
-import { CALIBRATION } from './constants'
+import CALIBRATION from '../assets/maps/calibration.json'
 
 export function toTitleCase(str) {
   return str
@@ -77,16 +77,11 @@ export function extractKillData(matchData, mapName) {
   const cal = CALIBRATION[mapName]
   if (!cal) return null
 
-  const { xMin, xMax, yMin, yMax } = cal
-  const xRange = xMax - xMin
-  const yRange = yMax - yMin
-
-  // TODO: orientação do eixo Y pode estar invertida dependendo do mapa.
-  // Se os pontos aparecerem espelhados verticalmente na imagem, trocar:
-  //   ny = 1 - (y - yMin) / yRange
+  // Calibração oficial da valorant-api: o eixo horizontal da imagem vem do y do jogo e o vertical do x.
+  const { xMultiplier, yMultiplier, xScalarToAdd, yScalarToAdd } = cal
   const norm = (x, y) => ({
-    nx: Math.max(0, Math.min(1, (x - xMin) / xRange)),
-    ny: Math.max(0, Math.min(1, (y - yMin) / yRange)),
+    nx: Math.max(0, Math.min(1, y * xMultiplier + xScalarToAdd)),
+    ny: Math.max(0, Math.min(1, x * yMultiplier + yScalarToAdd)),
   })
 
   // puuid → { name, teamId }
@@ -113,6 +108,8 @@ export function extractKillData(matchData, mapName) {
         const kNorm = killerEntry ? norm(killerEntry.location.x, killerEntry.location.y) : null
 
         kills.push({
+          // Spike, queda e teamkill entram em `kills`, mas não contam como abate em stats.kills.
+          valid: killer !== victim && playerMap[killer]?.teamId !== playerMap[victim]?.teamId,
           victimNx: vNorm.nx,
           victimNy: vNorm.ny,
           killerNx: kNorm?.nx ?? null,
