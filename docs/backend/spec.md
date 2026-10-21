@@ -203,11 +203,12 @@ Todos aceitam múltiplos valores (`?mapa=Ascent&mapa=Haven`). Os parâmetros `mi
 |---|---|---|
 | `GET /api/saude` | healthcheck | `{status, partidas, carregado_em}` |
 | `GET /api/filtros` | opções para os dropdowns | `{torneios: [{nome, fases[]}], mapas[], times: [{id, nome}], agentes: [{nome, funcao}], funcoes[]}` |
-| `GET /api/resumo` | dados da Home | `{contadores: {partidas, jogadores, times, rounds, abates}, kpis: [{titulo, valor, unidade, descricao}], ultimas_partidas: [Partida]×8, top_jogadores: [LinhaRanking]×5, top_times: [LinhaTime]×5}` |
+| `GET /api/resumo` | dados da Home | `{contadores: {partidas, jogadores, times, rounds, abates}, kpis: [{analise_id, titulo, valor, unidade, descricao}], ultimas_partidas: [Partida]×8, top_jogadores: [LinhaRanking]×5, top_times: [LinhaTime]×5}`. `abates` conta só os válidos; `top_times` exige ≥ 8 partidas |
 | `GET /api/busca?q=` | busca da navbar (jogador ou time) | `[{tipo: "jogador" \| "time", id, nome, detalhe}]` (até 10, busca por substring sem acento) |
 | `GET /api/heatmap` | pontos sobre o mapa | ver 8.6 |
 
-`kpis` da Home vêm dos achados da EDA, calculados ao vivo: % de rounds vencidos pelo ataque (51,8%), % em que
+`kpis` da Home vêm do campo `kpi` das análises `lado-por-mapa`, `pistol`, `first-kill` e `meta-armas` (8.5), sem
+recalcular nada. São os achados da EDA, calculados ao vivo: % de rounds vencidos pelo ataque (51,8%), % em que
 o vencedor do pistol também vence o **round seguinte** (86,5%; nos 2 rounds seguintes cai para 62,9%), win% do
 ataque com e sem first kill (75,4% / 32,3%) e % de abates com Vandal ou Phantom.
 
@@ -224,6 +225,9 @@ ataque com e sem first kill (75,4% / 32,3%) e % de abates com Vandal ou Phantom.
    "agente_principal": "Jett", "funcao_principal": "Duelista" }]
 ```
 
+Cada linha também traz `kills`, `deaths`, `assists` e `mais_menos`. `time` e `agente_principal` são os mais
+frequentes nas partidas filtradas.
+
 **`GET /api/jogadores/distribuicao?metrica=acs&bins=20`**: histograma, como a distribuição de rating do
 csstats. Formato: `[{inicio, fim, jogadores, pct, pct_acumulado}]`.
 
@@ -234,8 +238,8 @@ csstats. Formato: `[{inicio, fim, jogadores, pct, pct_acumulado}]`.
   "resumo": { /* mesmas métricas da linha do ranking */ "posicao_ranking": 14 },
   "por_agente": [{ "agente": "Jett", "funcao": "Duelista", "partidas": 6, "win_pct": 50.0, "acs": 240.1, "kd": 1.2 }],
   "por_mapa":   [{ "mapa": "Ascent", "partidas": 4, "win_pct": 75.0, "acs": 228.0, "kd": 1.4 }],
-  "armas":      [{ "meio": "Vandal", "kills": 81, "pct": 41.3 }],
-  "evolucao":   [{ "match_id": "…", "data": "2026-06-27", "mapa": "Haven", "acs": 182.9, "kd": 0.81, "venceu": true }] }
+  "armas":      [{ "meio": "Vandal", "categoria_meio": "Rifle", "kills": 81, "pct": 41.3 }],
+  "evolucao":   [{ "match_id": "…", "data": "2026-06-27", "mapa": "Haven", "venceu": true, "acs": 182.9, "adr": 128.5, "kd": 0.81, "kast_pct": 73.9 }] }
 ```
 
 **`GET /api/jogadores/{puuid}/partidas`**: histórico (aba Matches do csstats). Uma linha por partida:
@@ -244,7 +248,7 @@ kills, deaths, assists, mais_menos, acs, adr, kast_pct, hs_pct, first_kills, mul
 
 ### 8.3 Times
 
-**`GET /api/times`**: ranking de times. Filtros comuns.
+**`GET /api/times`**: ranking de times. Filtros comuns + `min_partidas` (padrão 0) e `limite`.
 `[{posicao, time_id, nome, partidas, vitorias, derrotas, win_pct, rounds_ganhos, rounds_perdidos, saldo_rounds,
 atk_win_pct, def_win_pct, pistol_win_pct}]`, ordenado por `win_pct` e depois por `saldo_rounds`.
 
@@ -280,17 +284,18 @@ vencedor_id, n_rounds, duracao_min, mvp: {puuid, nick, acs}}`
 ```
 
 **`GET /api/partidas/{id}/rounds`**: round a round (barra de rounds e economia do csstats).
-`[{round, metade, vencedor_id, lado_vencedor, resultado, ceremonia, plant_site, houve_defuse,
-compra_atk, compra_def, loadout_atk, loadout_def, time_atacante_id, first_kill: {killer, vitima, tempo_s}}]`
+`[{round, metade, pistol, time_atacante_id, time_defensor_id, vencedor_id, lado_vencedor, resultado, ceremonia,
+houve_plant, plant_site, houve_defuse, compra_atk, compra_def, loadout_atk, loadout_def,
+first_kill: {killer: {puuid, nick, time_id}, vitima: {puuid, nick, time_id}, tempo_s} | null}]`
 
 **`GET /api/partidas/{id}/abates`**: kill feed e heatmap da partida. Devolve todos os abates; o frontend
 filtra por round, time ou jogador sem nova requisição.
-`{mapa, abates: [{round, tempo_s, valido, killer: {puuid, nick, time_id}, vitima: {puuid, nick, time_id}, meio, assistencias,
+`{mapa, abates: [{round, tempo_s, valido, killer: {puuid, nick, time_id}, vitima: {puuid, nick, time_id}, meio, categoria_meio, assistencias,
 killer_pos: {x, y} | null, vitima_pos: {x, y}}]}`. Inclui os registros com `valido: false` (spike, queda,
 teamkill, R1) para o kill feed; o heatmap de kills da partida deve ignorá-los.
 
 **`GET /api/partidas/{id}/duelos`**: grafo de embates. A lógica de `MatchGraph.jsx` passa para o backend.
-`{nos: [{id: puuid, nick, time_id, kills}], arestas: [{a, b, kills_a, kills_b, total}]}`
+`{nos: [{id: puuid, nick, time_id, agente, kills}], arestas: [{a, b, kills_a, kills_b, total}]}` (só abates válidos)
 
 ### 8.5 Análises (o ponto de extensão)
 
@@ -318,7 +323,8 @@ def lado_por_mapa(base, filtros):
 - `analises/__init__.py` importa automaticamente todos os módulos da pasta (`pkgutil`). **Criar o arquivo é o
   suficiente** para a análise aparecer na API e no dashboard.
 - **`GET /api/analises`**: `[{id, titulo, descricao, categoria, grafico}]`
-- **`GET /api/analises/{id}`** + filtros comuns: `{id, titulo, descricao, categoria, grafico, dados: [...], insight}`
+- **`GET /api/analises/{id}`** + filtros comuns: `{id, titulo, descricao, categoria, grafico, dados: [...], insight, kpi}`
+- `kpi` (opcional): `{titulo, valor, unidade, descricao}`. As análises usadas na Home (8.1) precisam devolvê-lo.
 - Tipos de gráfico suportados: `barras`, `linha`, `dispersao`, `tabela`, `matriz` (heatmap 2D) e `kpi`.
   O campo `grafico` diz quais colunas de `dados` vão em cada eixo. Opcionais: `serie` (cor) e `rotulo_x`/`rotulo_y`.
 
@@ -342,11 +348,11 @@ Análises iniciais, portadas da seção 10 da EDA:
 
 | Parâmetro | Valores |
 |---|---|
-| `mapa` | obrigatório (as coordenadas só são comparáveis dentro do mesmo mapa) |
+| `mapa` | obrigatório e único: é o filtro comum `mapa`, que aqui precisa de exatamente um valor (as coordenadas só são comparáveis dentro do mesmo mapa) |
 | `tipo` | `kills` (posição do killer), `mortes` (posição da vítima), `plants` |
 | `jogador` | `puuid` (opcional) |
 | `lado` | `Attacker`/`Defender` (opcional) |
-| + filtros comuns | `torneio`, `fase`, `time`, `agente`, `funcao` |
+| + filtros comuns | `torneio`, `fase`, `mapa`, `time`, `agente`, `funcao` |
 
 Os filtros de pessoa (`jogador`, `time`, `agente`, `funcao`, `lado`) se referem a quem **faz** a ação do `tipo`:
 o killer em `kills`, a vítima em `mortes` e quem plantou em `plants`. Exemplo: `tipo=mortes&agente=Jett` mostra

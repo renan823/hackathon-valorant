@@ -153,70 +153,70 @@ Formatos conforme a spec (seção 8).
 
 ### `routers/jogadores.py` (Pessoa B) · *Depende:* T1.5b, T1.7, T1.8
 
-- [ ] **T2.1 `GET /api/jogadores`** · 45 min · Dono: ___
+- [x] **T2.1 `GET /api/jogadores`** · 45 min · Dono: Claude
   - `time`, `agente_principal` e `funcao_principal` = o mais frequente nas partidas filtradas.
   - *Aceite:* sem parâmetros devolve 100 linhas, todas com `rounds ≥ 50`, ordenadas por `acs`;
     `ordenar=kd` reordena; `ordenar=xyz` → 422; `mapa=Ascent` muda os números.
 
-- [ ] **T2.2 `GET /api/jogadores/distribuicao`** · 20 min · Dono: ___ · *Depende:* T2.1
+- [x] **T2.2 `GET /api/jogadores/distribuicao`** · 20 min · Dono: Claude · *Depende:* T2.1
   - *Aceite:* `Σ jogadores` = nº de elegíveis; `pct_acumulado` termina em 100; `bins` respeitado.
 
-- [ ] **T2.3 `GET /api/jogadores/{puuid}`** · 45 min · Dono: ___ · *Depende:* T2.1
+- [x] **T2.3 `GET /api/jogadores/{puuid}`** · 45 min · Dono: Claude · *Depende:* T2.1
   - *Aceite:* para um jogador com 2 nicks, `nicks_anteriores` tem 1 item; jogador em 2 times (R9) lista os
     dois; `Σ armas.kills` = kills válidos dele; `posicao_ranking` é `null` se ele tiver menos de 50 rounds.
 
-- [ ] **T2.4 `GET /api/jogadores/{puuid}/partidas`** · 20 min · Dono: ___
+- [x] **T2.4 `GET /api/jogadores/{puuid}/partidas`** · 20 min · Dono: Claude
   - *Aceite:* nº de linhas = partidas do jogador; ordem por data decrescente; `kills` = `stats.kills`.
 
 ### `routers/partidas.py` (Pessoa A) · *Depende:* T1.5b, T1.7, T1.8
 
-- [ ] **T2.5 `GET /api/partidas`** · 30 min · Dono: ___
+- [x] **T2.5 `GET /api/partidas`** · 30 min · Dono: Claude
   - *Aceite:* 336 sem filtros; data decrescente; `time=ufmt_turuna` devolve 36 partidas; `mvp` = maior ACS.
 
-- [ ] **T2.6 `GET /api/partidas/{id}`** · 45 min · Dono: ___
+- [x] **T2.6 `GET /api/partidas/{id}`** · 45 min · Dono: Claude
   - *Aceite:* 2 times × 5 jogadores; placar igual ao nome do arquivo; `atk_rounds + def_rounds = placar`.
 
-- [ ] **T2.7 `GET /api/partidas/{id}/rounds`** · 30 min · Dono: ___
+- [x] **T2.7 `GET /api/partidas/{id}/rounds`** · 30 min · Dono: Claude
   - *Aceite:* nº de itens = `n_rounds`; o `first_kill` de cada round é o primeiro abate válido.
 
-- [ ] **T2.8 `GET /api/partidas/{id}/abates`** · 30 min · Dono: ___
+- [x] **T2.8 `GET /api/partidas/{id}/abates`** · 30 min · Dono: Claude
   - *Aceite:* inclui os registros não válidos com `valido: false`, para o kill feed mostrar mortes por spike
     e queda; `killer_pos` é `null` quando ausente; coordenadas em `[0,1]`.
 
-- [ ] **T2.9 `GET /api/partidas/{id}/duelos`** · 30 min · Dono: ___
+- [x] **T2.9 `GET /api/partidas/{id}/duelos`** · 30 min · Dono: Claude
   - *Aceite:* `Σ arestas.total` = abates válidos da partida; `Σ nos.kills` = `Σ stats.kills`.
 
 ### `routers/times.py` (Pessoa C) · *Depende:* T1.5b, T1.7, T1.8
 
-- [ ] **T2.10 `GET /api/times`** · 45 min · Dono: ___
+- [x] **T2.10 `GET /api/times`** · 45 min · Dono: Claude
   - *Aceite:* com partidas ≥ 8 (filtro feito no teste), a ordem bate com a EDA (seção 10.6): Ceub Octopus
     (9-0, +76), Macklogic Red (10-1, +52), Ufu Saints (14-4, +66), Axis Anteaters, Azure Bears Golden (24-8, +174)…
     `atk_win_pct` e `def_win_pct` vêm de `rounds`.
 
-- [ ] **T2.11 `GET /api/times/{id}`** · 1 h · Dono: ___ · *Depende:* T2.10
+- [x] **T2.11 `GET /api/times/{id}`** · 1 h · Dono: Claude · *Depende:* T2.10
   - *Aceite:* `elenco` só com as partidas pelo time; `Σ por_mapa.partidas = resumo.partidas`; cada
     composição tem 5 agentes; `Σ confrontos.partidas = resumo.partidas`; `economia` usa `compra_atk` ou
     `compra_def` conforme o lado do time.
 
-- [ ] **T2.12 `GET /api/times/{id}/partidas`** · 10 min · Dono: ___ · *Depende:* T2.5
+- [x] **T2.12 `GET /api/times/{id}/partidas`** · 10 min · Dono: Claude · *Depende:* T2.5
   - Reaproveitar a função de T2.5 com `time` fixado.
 
 ### `routers/geral.py` (Pessoa B, ou D se estiver livre)
 
-- [ ] **T2.13 `GET /api/busca`** · 20 min · Dono: ___ · *Depende:* T1.5a
+- [x] **T2.13 `GET /api/busca`** · 20 min · Dono: Claude · *Depende:* T1.5a
   - *Aceite:* `q=unicamp` devolve os times Unicamp; a busca ignora acento e caixa; no máximo 10 resultados;
     `q` com menos de 2 caracteres → 422.
 
-- [ ] **T2.14 `GET /api/heatmap`** · 45 min · Dono: ___ · *Depende:* T1.5b, T1.7
+- [x] **T2.14 `GET /api/heatmap`** · 45 min · Dono: Claude · *Depende:* T1.5b, T1.7
   - Monta a visão por `tipo` (plano, seção 2) e depois aplica `Filtros`.
   - *Aceite:* `mapa=Ascent&tipo=plants` → `total = 1049`; `tipo=mortes&agente=Jett` só traz mortes de Jetts;
     `tipo=kills` ignora abates não válidos e sem posição; sem `mapa` → 422.
 
-- [ ] **T2.15 `GET /api/resumo`** · 30 min · Dono: ___ · *Depende:* T2.1, T2.5, T2.10, T3.2–T3.4, T3.7
+- [x] **T2.15 `GET /api/resumo`** · 30 min · Dono: Claude · ⏳ `kpis` vazio até as análises da Fase 3 devolverem o campo `kpi` · *Depende:* T2.1, T2.5, T2.10, T3.2–T3.4, T3.7
   - *Aceite:* contadores 336 partidas / 411 jogadores / 68 times / 6 618 rounds / 46 371 abates válidos;
     8 últimas partidas; top 5 jogadores e top 5 times; `kpis` vindos das análises, sem recalcular.
 
-**✔ Checkpoint 2:** as 19 rotas respondem 200 com dados reais.
+**✔ Checkpoint 2:** as 17 rotas de domínio respondem 200 com dados reais (as 2 de análises vêm na Fase 3). Critérios de aceite em `backend/tests/test_dominios.py`; todas abaixo de 300 ms (a mais lenta é `/heatmap` sem filtro de jogador, com ~160 ms).
 
 ---
 

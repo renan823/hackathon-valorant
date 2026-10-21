@@ -80,7 +80,9 @@ def preparar(tabelas, ref):
 
 def _preparar_jogadores(bruto):
     j = bruto[~bruto["is_observer"].astype(bool)].copy()
-    j[SOMAS] = j[SOMAS].astype(int)
+    # Viravam float por causa dos NaN dos observadores.
+    j[SOMAS + ["rounds_ganhos_time", "rounds_ganhos_adversario"]] = (
+        j[SOMAS + ["rounds_ganhos_time", "rounds_ganhos_adversario"]].astype(int))
     j["venceu"] = j["venceu"].astype(bool)
     # O mesmo puuid pode aparecer com até 3 nicks: exibimos o mais recente.
     j = j.rename(columns={"nick": "nick_partida"})
