@@ -1,6 +1,7 @@
 # Plano — Backend do dashboard (VAVA Stats)
 
-> Implementa a [spec.md](spec.md). Próximo passo: [tasks.md](tasks.md).
+> Implementa a [spec.md](spec.md). Tarefas em [tasks.md](tasks.md). **Status: fases 0–4 concluídas** (21/10/2026);
+> ficam em aberto as decisões D1–D5 (seção 7).
 > Ambiente: Python 3.12 · pandas 3.0 · `.venv` na raiz · `uv` instalado.
 
 ## 1. Estratégia

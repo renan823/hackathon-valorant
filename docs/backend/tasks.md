@@ -249,24 +249,40 @@ abaixo é o *Aceite* sem filtros.
 
 ## Fase 4: Qualidade (Pessoa A)
 
-- [ ] **T4.1 Smoke test completo** · 30 min · Dono: ___ · *Depende:* Checkpoints 2 e 3
+- [x] **T4.1 Smoke test completo** · 30 min · Dono: Claude · 19 rotas, 9 rotas de 404 e números de conferência; a lista de rotas é checada contra o OpenAPI · *Depende:* Checkpoints 2 e 3
   - *Arquivos:* `backend/tests/test_smoke.py`
   - Uma chamada por rota (status 200 e chaves principais), um 404 por recurso e os números da spec
     (seção 9): 51,8%, 86,5% e `Σ kills`.
   - *Aceite:* `pytest` passa em menos de 30 s.
 
-- [ ] **T4.2 Testes de consistência dos dados** · 30 min · Dono: ___ · *Depende:* T1.5b
+- [x] **T4.2 Testes de consistência dos dados** · 30 min · Dono: Claude · 3 sabotagens no ETL (R1 e duas do R10) foram detectadas. Limitação: o auto-trade do KAST (R10) não tem teste dedicado; foi validado na T1.2 comparando antes e depois · *Depende:* T1.5b
   - *Arquivos:* `backend/tests/test_dados.py`
   - As checagens da validação viram asserts sobre `BASE`: `match_id` único, 5×5 por partida, placar = soma
     dos rounds, lados trocam no round 13, todos os UUIDs mapeados, coordenadas em `[0,1]`, `Σ kills` batendo.
   - *Aceite:* passa; quebrar o ETL de propósito (ex.: remover o filtro `valido`) faz o teste falhar.
 
-- [ ] **T4.3 Desempenho** · 20 min · Dono: ___ · *Depende:* T4.1
+- [x] **T4.3 Desempenho** · 20 min · Dono: Claude · startup 4,4 s; pior rota `/resumo` com 139 ms; cache não foi necessário · *Depende:* T4.1
   - Medir `/jogadores/{puuid}`, `/times/{id}`, `/heatmap?mapa=Ascent&tipo=mortes` e `/resumo`.
   - *Aceite:* todos abaixo de 300 ms. Se o startup passar de 10 s, implementar o cache em pickle (plano, seção 6).
 
-- [ ] **T4.4 Fechamento da documentação** · 10 min · Dono: ___
+- [x] **T4.4 Fechamento da documentação** · 10 min · Dono: Claude
   - Status da spec → "implementada"; registrar na spec qualquer mudança de formato feita durante a
     implementação ; README com o comando de execução e o link para `/docs`.
 
-**✔ Checkpoint 4:** backend pronto para o frontend consumir.
+**✔ Checkpoint 4:** backend pronto para o frontend consumir. 103 testes passam em ~8 s.
+
+Latência medida em 21/10/2026 (mediana de 5 chamadas, servidor local):
+
+| Rota | ms |
+|---|---|
+| `/resumo` | 139 |
+| `/heatmap?mapa=Ascent&tipo=kills` | 138 |
+| `/heatmap?mapa=Ascent&tipo=mortes` | 123 |
+| `/times/{id}` | 115 |
+| `/jogadores/{puuid}` | 112 |
+| `/partidas` | 59 |
+| `/partidas/{id}` | 54 |
+| `/jogadores` | 52 |
+| demais rotas | < 50 |
+
+**Pendências que ficam:** decisões D1–D5 (plano §7) e o proxy do Vite (T0.3), que não foi testado por falta de Node.

@@ -61,6 +61,8 @@ uv pip install --python .venv/bin/python -r backend/requirements.txt
 .venv/bin/pytest backend/tests
 ```
 
+São 19 rotas (jogadores, times, partidas, heatmap, busca, resumo da Home e análises plugáveis), documentadas
+na spec. Para criar uma análise nova basta um arquivo em `backend/app/analises/` (passo a passo na spec, §8.5).
 Spec, plano e tarefas em [`docs/backend/`](docs/backend/).
 
 **App web (`vava/`)**: o dev server do Vite repassa `/api` para o backend na porta 8000.

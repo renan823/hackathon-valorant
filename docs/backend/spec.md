@@ -1,6 +1,7 @@
 # Spec — Backend do dashboard (VAVA Stats)
 
-> Status: **aprovada para implementação** · Ver [plan.md](plan.md) e [tasks.md](tasks.md)
+> Status: **implementada** (fases 0–4 concluídas em 21/10/2026) · Ver [plan.md](plan.md) e [tasks.md](tasks.md)
+> Decisões em aberto para o time: D1–D5 no [plan.md](plan.md#7-decisões-pendentes-do-time).
 
 ## 1. Objetivo
 
@@ -79,8 +80,14 @@ backend/
 │       ├── __init__.py       # decorator @analise + registro + autoimport dos módulos
 │       ├── lado_por_mapa.py
 │       └── ...               # um arquivo por análise
+├── pytest.ini                # torna `app` importável ao rodar `pytest backend/tests` da raiz
 └── tests/
-    └── test_smoke.py         # chama cada endpoint e valida status 200 e formato
+    ├── conftest.py           # TestClient de sessão (carrega BASE uma vez)
+    ├── test_smoke.py         # uma chamada por rota + 404s + números de conferência (§9)
+    ├── test_dados.py         # consistência dos dados (§5.1) como asserts sobre BASE
+    ├── test_nucleo.py        # mapas, dados, filtros e métricas (fase 1)
+    ├── test_dominios.py      # routers de jogadores, partidas, times e geral (fase 2)
+    └── test_analises.py      # registro e valores de referência das análises (fase 3)
 ```
 
 Regra de organização: **routers só recebem parâmetros e chamam funções**. Toda a lógica de pandas fica em
@@ -392,9 +399,12 @@ uv pip install --python .venv/bin/python -r backend/requirements.txt
 ```
 
 - **Critério de pronto de um endpoint**: responde em menos de 300 ms localmente, aparece no `/docs` e tem
-  uma linha no `test_smoke.py`.
+  uma linha no `test_smoke.py`. O teste `test_smoke_cobre_todas_as_rotas` compara a lista de `ROTAS` com o
+  OpenAPI: uma rota nova sem linha no smoke test falha a suíte.
 - **Conferência dos números**: os valores agregados batem com a EDA. O smoke test valida, com tolerância:
   ataque vence 51,8% dos rounds; pistol → round seguinte 86,5%; Σ kills válidos = Σ `stats.kills`.
+- **Estado em 21/10/2026**: 103 testes passam em ~8 s; startup de ~4,4 s; todas as rotas abaixo de 140 ms
+  (mediana de 5 chamadas, servidor local). Não foi preciso o cache em pickle (plano §6).
 
 ## 10. Questões em aberto
 
