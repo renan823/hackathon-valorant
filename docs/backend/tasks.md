@@ -47,7 +47,7 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
   - *Aceite:* `.venv/bin/uvicorn app.main:app --app-dir backend` sobe; o `/docs` lista as 19 rotas da spec;
     `/api/saude` responde 200.
 
-- [x] **T0.3 Proxy do Vite e README** · 10 min · Dono: Claude · ⚠️ proxy não testado: sem Node na máquina em que foi feito · *Depende:* T0.2
+- [x] **T0.3 Proxy do Vite e README** · 10 min · Dono: Claude · proxy verificado em 21/10/2026 (Node 22.23.4): `/api/saude`, rotas com dados e 404 passam pela porta 5173 · *Depende:* T0.2
   - *Arquivos:* `vava/vite.config.js` (`server.proxy: {'/api': 'http://localhost:8000'}`), `README.md`
     (seção "Como executar" → backend).
   - *Aceite:* com backend e `npm run dev` rodando, `fetch('/api/saude')` no navegador devolve 200.
@@ -285,4 +285,4 @@ Latência medida em 21/10/2026 (mediana de 5 chamadas, servidor local):
 | `/jogadores` | 52 |
 | demais rotas | < 50 |
 
-**Pendências que ficam:** decisões D1–D5 (plano §7) e o proxy do Vite (T0.3), que não foi testado por falta de Node.
+**Pendências que ficam:** decisões D1–D5 (plano §7).
