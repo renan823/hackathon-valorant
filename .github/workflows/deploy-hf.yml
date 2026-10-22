@@ -1,0 +1,44 @@
+# Publica a app no Hugging Face Spaces a cada push na main; o Space builda o Dockerfile da raiz.
+# Configuração no GitHub (Settings → Secrets and variables → Actions):
+#   secret   HF_TOKEN  token "Write" do Hugging Face
+#   variable HF_SPACE  <usuario>/<space>, ex.: juanhpassos/vava-stats
+name: Deploy Hugging Face Space
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-hf
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install "huggingface_hub>=1,<3"
+
+      - name: README do Space (cabeçalho YAML exigido pelo Spaces)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: >
+          hf upload "${{ vars.HF_SPACE }}" deploy/README.md README.md
+          --repo-type space --commit-message "README do Space"
+
+      - name: Código e dados
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: >
+          hf upload "${{ vars.HF_SPACE }}" . .
+          --repo-type space --commit-message "Deploy ${GITHUB_SHA::7}"
+          --include Dockerfile --include .dockerignore
+          --include "apps/*" --include "packages/*" --include "reference/*" --include "data/*"
+          --exclude "*node_modules*" --exclude "apps/web/dist/*"
+          --exclude "*__pycache__*" --exclude "apps/api/tests/*"
