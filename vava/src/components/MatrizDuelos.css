@@ -1,0 +1,33 @@
+.matriz-duelos { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.matriz-duelos__eixos { font-size: 0.75rem; }
+
+.matriz-duelos__tabela { border-collapse: separate; border-spacing: 3px; font-size: 0.875rem; }
+
+.matriz-duelos__tabela th {
+  padding: 6px 8px;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+.matriz-duelos__tabela thead th { vertical-align: bottom; }
+.matriz-duelos__tabela tbody th { text-align: left; }
+
+/* Nomes na cor do texto, com uma borda na cor da equipe (F12). */
+.matriz-duelos__jogador { display: inline-flex; align-items: center; gap: 6px; max-width: 160px; padding-left: 6px; }
+.matriz-duelos__jogador--a { border-left: 3px solid var(--time-a); }
+.matriz-duelos__jogador--b { border-left: 3px solid var(--time-b); }
+
+.matriz-duelos__tabela td {
+  min-width: 64px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  text-align: center;
+  background: var(--surface2);
+  font-weight: 600;
+}
+.matriz-duelos__celula--a { background: color-mix(in oklab, var(--time-a) 30%, var(--surface)) !important; }
+.matriz-duelos__celula--b { background: color-mix(in oklab, var(--time-b) 30%, var(--surface)) !important; }
+
+.matriz-duelos__canto { background: none !important; }
+.matriz-duelos__total { color: var(--text-muted); background: none !important; font-weight: 500 !important; }
+.matriz-duelos__linha-total th { color: var(--text-muted); font-weight: 500; }

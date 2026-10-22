@@ -1,0 +1,20 @@
+.armas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+  gap: var(--espaco);
+  align-items: start;
+}
+.armas__grupo h2 { font-size: 0.9375rem; margin-bottom: 10px; }
+.armas__grupo ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+.armas__grupo li {
+  display: grid;
+  grid-template-columns: minmax(70px, 120px) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+}
+.armas__nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.armas__trilho { height: 10px; border-radius: 4px; background: var(--surface2); overflow: hidden; }
+.armas__barra { display: block; height: 100%; border-radius: 0 4px 4px 0; background: var(--serie-1); }
+.armas__valor { white-space: nowrap; font-weight: 600; }

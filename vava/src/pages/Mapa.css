@@ -1,0 +1,34 @@
+.mapa { display: flex; flex-direction: column; gap: var(--espaco); }
+
+.mapa__cabecalho {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 560px;
+  padding-top: 4px;
+}
+.mapa__cabecalho h1 { font-size: 2rem; }
+.mapa__voltar { display: inline-flex; align-items: center; gap: 4px; font-size: 0.8125rem; color: var(--text-muted); }
+.mapa__lados { margin-top: 8px; }
+
+/* Explorador à esquerda; top 10 e plants à direita (metades iguais: o top 10 cabe sem rolar). Uma coluna
+   abaixo de 1280 px. */
+.mapa__colunas { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--espaco); align-items: start; }
+@media (min-width: 1280px) {
+  .mapa__colunas { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+.mapa__lateral { display: flex; flex-direction: column; gap: var(--espaco); min-width: 0; }
+
+.mapa__explorador { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.mapa__explorador h2,
+.mapa__titulo h2 { font-size: 1rem; }
+/* Acima do mapa: navbar, título do card e os controles (tipo, lado e 5 filtros). */
+.mapa__explorador .painel-heatmap { --mapa-desconto: 250px; }
+
+.mapa__top { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.mapa__titulo { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.mapa__ver { display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--text-muted); }
+.mapa__nota { font-size: 0.75rem; }
+.mapa__jogador { display: inline-flex; align-items: center; gap: 10px; min-width: 0; max-width: 100%; }
+.mapa__posicao { flex-shrink: 0; min-width: 1.6em; color: var(--text-muted); text-align: right; }

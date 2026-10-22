@@ -1,37 +1,42 @@
-/* Minimapa + canvas do heatmap (base vinda do App.css antigo; o MapaCalor nasce na T3.1a). */
+.mapa-calor { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0; min-width: 0; }
 
-.heatmap-map-outer {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+/* Quadrado que cabe na altura da tela, inclusive com 768 px (spec 6.6 e 9). `--mapa-desconto` é a altura
+   ocupada acima e abaixo do mapa na página; cada página pode ajustar. */
+.mapa-calor__quadro {
+  position: relative;
+  width: min(100%, calc(100vh - var(--altura-navbar) - var(--mapa-desconto, 140px)));
+  min-width: 240px;
+  aspect-ratio: 1;
+  border-radius: var(--raio);
   overflow: hidden;
   background: #050508;
 }
 
-/* Shrink-wraps to the image's actual rendered dimensions */
-.heatmap-map-wrap {
-  position: relative;
-  display: inline-block;
-  line-height: 0;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.heatmap-map-img {
-  display: block;
-  max-height: calc(100vh - 130px);
-  max-width: 100%;
-  width: auto;
-  height: auto;
-  border-radius: 4px;
-}
-
-.heatmap-canvas {
+.mapa-calor__imagem,
+.mapa-calor__canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none;
+}
+.mapa-calor__imagem { object-fit: contain; user-select: none; }
+.mapa-calor__canvas { pointer-events: none; }
+
+.mapa-calor__legenda {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 16px;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+.mapa-calor__poucos { display: inline-flex; align-items: center; gap: 4px; }
+
+.mapa-calor__escala { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; }
+.mapa-calor__rampa {
+  width: 80px;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #a9390026, #d1521d66, #f57242a6, #ffa383d9, #fed3c4e6);
 }

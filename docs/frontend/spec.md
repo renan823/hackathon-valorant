@@ -107,20 +107,23 @@ vava/
     ├── components/          # peças reutilizáveis (seção 6.4)
     ├── graficos/            # GraficoAnalise + um arquivo por tipo de gráfico (seção 8)
     └── pages/
-        ├── Home.jsx, Ranking.jsx, Partidas.jsx, Analises.jsx, Analise.jsx, Mapas.jsx, Mapa.jsx, NaoEncontrado.jsx
+        ├── Home.jsx, Partidas.jsx, Analises.jsx, Analise.jsx, Mapas.jsx, Mapa.jsx, NaoEncontrado.jsx
+        ├── ranking/         # Ranking.jsx (título + abas) + Jogadores, Times
         ├── partida/         # Partida.jsx (cabeçalho + abas) + Placar, Rounds, Heatmap, Duelos
         ├── jogador/         # Jogador.jsx + Resumo, Partidas, Agentes, Mapas, Armas, Heatmap
         └── time/            # Time.jsx + VisaoGeral, Elenco, Mapas, Partidas, Confrontos, Heatmap
 ```
 
 Regra de organização: **páginas buscam dados; componentes só recebem props.** Assim um componente
-(`Tabela`, `MapaCalor`, `LinhaPartida`) serve a várias páginas sem saber de onde veio o dado.
+(`Tabela`, `MapaCalor`, `LinhaPartida`) serve a várias páginas sem saber de onde veio o dado. Exceções: `Busca`,
+`BarraFiltros` e `PainelHeatmap`, que existem para encapsular uma chamada sempre igual (`/busca`, `/filtros`,
+`/heatmap`) e recebem só o que muda nela.
 
 ### 4.2 O que acontece com o `vava/` atual
 
 | Arquivo | Destino |
 |---|---|
-| `HeatmapCanvas.jsx` | **Fica**: recebe `points` em `[0,1]`. Só a função de cor muda, trocando o arco-íris pela rampa da F14 |
+| `HeatmapCanvas.jsx` | **Fica**, reescrito na T3.1a: recebe pontos em `[0,1]`, usa a rampa da F14 no lugar do arco-íris e o "carimbo" da seção 9 no lugar de um gradiente por ponto |
 | `MatchGraph.jsx` | **Vira** `components/GrafoDuelos.jsx`: lê `nos`/`arestas` do `/duelos` em vez do JSON bruto; cores por time A/B |
 | `HeatmapView.jsx` | **Sai** na limpeza, porque usa o `extractKillData`. O markup e o CSS do mapa são a base do `components/MapaCalor.jsx` (imagem + canvas + contador); os controles sobem para as páginas |
 | `constants.js` | **Fica** (`MAP_IMAGES`) e ganha os ícones de round, o `CORES_SERIE` (8) e a rampa do heatmap (9) |
@@ -635,7 +638,7 @@ Regras do renderizador:
   vence mais), misturados com `color-mix(in oklab, …)`, com no máximo 50% do polo, atingido a 25 pontos de
   distância de 50. Assim o texto das células fica com 5,0:1 ou mais. Célula com `n < min_n`: fundo
   `--surface2` e "n < 30" em `--text-muted`.
-- Legenda sempre que houver 2+ séries, tooltip em todos os gráficos e "ver dados" (tabela) na tela cheia.
+- Legenda sempre que houver 2+ séries, tooltip em todos os gráficos e "ver dados" (tabela com todas as colunas) na tela cheia.
 
 **Como adicionar um tipo de gráfico novo:**
 
@@ -650,8 +653,8 @@ Regras do renderizador:
   calibração no front.
 - **Cor** (F14): uma rampa de um tom só no lugar do arco-íris atual. As paradas são `#a93900`, `#d1521d`,
   `#f57242`, `#ffa383` e `#fed3c4` (OKLCH L de 0,50 a 0,90, no matiz do laranja da série 2), com opacidade de
-  ~0,15 a ~0,9: mais claro e mais opaco = mais eventos. No `HeatmapCanvas`, só a função `heatColor(t)` muda
-  (interpolar entre as paradas).
+  ~0,15 a ~0,9: mais claro e mais opaco = mais eventos. A cor usa a raiz da densidade relativa, para o maior
+  foco não apagar o resto do mapa.
 - **Tamanho** (6.6): o mapa é quadrado, com `width: min(100%, calc(100vh − altura do cabeçalho))`, para caber
   em telas com 768 px de altura. O canvas usa `devicePixelRatio` (até 2) e, ao redimensionar, redesenha no
   máximo uma vez por quadro (`requestAnimationFrame`).
@@ -660,9 +663,11 @@ Regras do renderizador:
   - `GET /api/partidas/{id}/abates` (uma partida): o cliente filtra, porque a resposta já tem tudo.
 - O contador "N eventos" usa `total` (ou o tamanho da lista filtrada). Com menos de 20 pontos, o mapa de
   calor engana: mostrar o aviso "poucos eventos" (modo "pontos" é P2).
-- Desempenho: o maior caso, kills em Ascent sem filtro, tem 11.621 pontos (~276 KB). O `HeatmapCanvas` atual
-  cria um gradiente por ponto. Se o redesenho passar de ~200 ms, desenhar um "carimbo" pré-renderizado com
-  `drawImage` em vez de `createRadialGradient` a cada ponto.
+- Desempenho (medido na T3.1a): o maior caso, kills em Ascent sem filtro, tem 11.621 pontos (~276 KB). O
+  algoritmo antigo (um `createRadialGradient` por ponto, somando o alfa de 8 bits do canvas) levava ~306 ms e
+  deixava 67% dos pixels coloridos saturados. O `HeatmapCanvas` agora usa o "carimbo": um kernel gaussiano
+  pré-calculado, somado numa grade de 512 × 512 de números com casas decimais, que não satura. A montagem
+  leva ~110–140 ms e só roda quando os pontos mudam; redimensionar só redesenha a imagem pronta.
 
 ## 10. Execução e qualidade
 

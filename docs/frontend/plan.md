@@ -45,7 +45,8 @@ As decisões de produto e de visual estão na spec (F1–F17). Estas são as de 
 | Filtros e histórico | Mudar filtro, aba, ordenação ou corte cria uma entrada no histórico (`setSearchParams` sem `replace`) | O botão voltar desfaz a última mudança |
 | Chave do cache | `urlApi` ordena as chaves dos parâmetros | `?mapa=X&torneio=Y` e `?torneio=Y&mapa=X` viram a mesma entrada |
 | Links | `linkJogador(puuid)`, `linkTime(id)`, `linkPartida(id)`, `linkAnalise(id)`, `linkMapa(mapa)` em `formatos.js`. Até o passo 3.4, `linkTime(id)` aponta para `/partidas?time=<id>` | Um lugar só para as rotas (os puuids têm ~78 caracteres e são fáceis de errar). Antes da página do Time, o clique num time mostra as partidas dele; quando ela existir, a troca é uma linha |
-| Linhas clicáveis | Link na célula principal, estendido à linha toda por CSS; nada de `onClick` no `<tr>` | Funciona com teclado, botão do meio e "abrir em nova aba" |
+| Linhas clicáveis | Link de verdade na célula principal; as outras células têm uma cópia do link fora da ordem do Tab (`tabIndex=-1`, `aria-hidden`), exceto as que já têm links próprios. Nada de `onClick` no `<tr>` | Funciona com teclado (uma parada por linha), botão do meio e "abrir em nova aba". Um link estendido à linha por CSS não serve: a primeira coluna é sticky, e uma célula sticky prende o link estendido dentro dela |
+| Cabeçalho fixo | Só gruda em tabelas com `alturaMax` (rolagem vertical própria), usada nas tabelas longas | Dentro de um bloco com rolagem horizontal, `position: sticky; top` se prende a esse bloco, não à página |
 | Datas | `formatarData` corta a string `AAAA-MM-DD`; **nunca** `new Date("2026-09-27")` | Essa string é lida como meia-noite UTC: em UTC−3 o dia vira 26/09 |
 | Números | Instâncias de `Intl.NumberFormat("pt-BR")` criadas uma vez por formato | Consistente e barato em tabelas de 400 linhas |
 | Gráficos | `graficos/comum.js` com as props de eixo, grade e tooltip do tema escuro, usadas por todos os tipos | O recharts vem com cores de tema claro; um ajuste vale para todos |
@@ -63,7 +64,7 @@ Todas ficam dentro do layout `App` (`<Outlet/>`). A coluna "Fase" diz quando o s
 | Rota | Componente | Fase |
 |---|---|---|
 | `/` | `pages/Home` | 2 |
-| `/ranking`, `/ranking/times` | `pages/Ranking` (a aba vem da rota) | 2 (jogadores), 3 (times) |
+| `/ranking`, `/ranking/times` | `pages/ranking/Ranking` + abas `Jogadores` e `Times` (a aba vem da rota) | 2 (jogadores), 3 (times) |
 | `/partidas` | `pages/Partidas` | 1 |
 | `/partidas/:id` + `rounds`, `heatmap`, `duelos` | `pages/partida/Partida` (layout) + uma página por aba | 2 (placar, rounds), 3 |
 | `/jogadores/:puuid` + `partidas`, `agentes`, `mapas`, `armas`, `heatmap` | `pages/jogador/Jogador` + abas | 2 (resumo, partidas), 3 |
@@ -107,12 +108,14 @@ CATEGORIAS (rótulos das abas de Análises), CORES_SERIE (F13), RAMPA_CALOR (F14
 | `Tabela` | `linhas`, `colunas: [{chave, rotulo?, formato?, cor?, link?, alinhar?}]`, `ordenacao?: {coluna, ordem}`, `onOrdenar?` | Sem `onOrdenar`, ordena no cliente. `cor: true` aplica `corQualidade`; `link(linha)` vira o link da linha |
 | `StatTile` | `coluna`, `valor`, `rotulo?`, `legenda?` | Formata e colore pela coluna |
 | `Abas` | `itens: [{rotulo, para}]`, ou `parametro` + `itens: [{rotulo, valor}]` | `NavLink` nas rotas; query string nas Análises |
-| `BarraFiltros` | `campos` (subconjunto de `FILTROS`) | Opções de `/api/filtros` |
+| `BarraFiltros` | `campos` (subconjunto de `FILTROS`), `children?` (campos extras no começo da linha) | Opções de `/api/filtros`; "Limpar filtros" limpa só os `campos` |
 | `LinhaPartida` | `partida` (formato `Partida`), `timeId?` | Destaca o time quando recebe `timeId` |
-| `Nick`, `NomeTime`, `SeloAgente`, `AvisoAmostra` | `puuid` + `nick`; `id` + `nome` + `equipe?`; `agente`; `n` | |
+| `Nick`, `NomeTime`, `SeloAgente`, `AvisoAmostra` | `puuid` + `nick`; `id` + `nome` + `equipe?`; `agente`; `n` (dentro do card do item) ou `itens: [{nome, n}]` (lista) | |
 | `Busca` | `grande?` | Debounce de 250 ms, teclado (spec 7.9) |
 | `BarraRounds` | `rounds`, `partida`, `compacta?`, `selecionado?`, `onSelecionar?` | |
 | `MapaCalor` | `mapa`, `pontos: [x, y][]`, `total?` | Rampa da F14 |
+| `PainelHeatmap` | `mapas`, `filtro?` (`{jogador}` ou `{time}`), `tipos?` (kills, mortes, plants), `campos?` (filtros comuns) | Chips de mapa (só com 2+), tipo, lado e `BarraFiltros` em volta do `MapaCalor`; abas Heatmap do Jogador e do Time e explorador do Mapa |
+| `BarraLados` | `atk` (% de rounds do ataque) | Barra ataque \| defesa com a marca dos 50% e os dois números escritos; Mapas e Mapa |
 | `GraficoAnalise` | `analise` (resposta de `/api/analises/{id}`), `altura?` | Escolhe o gráfico por `grafico.tipo` (spec 8) |
 | `Histograma` | `faixas` (resposta de `/distribuicao`), `metrica` | |
 | `MatrizDuelos`, `GrafoDuelos` | `duelos` (resposta de `/duelos`), `partida` | |
@@ -244,8 +247,9 @@ cada um é uma demo completa:
 
 Some 2,5 h da Fase 4 a qualquer corte. Todos os cortes já são responsivos. Regras:
 
-- Só começar um passo se der para terminá-lo. Se a hora do envio chegar com um passo pela metade, a página
-  volta a ser stub e sai dos menus (ou o trabalho volta ao último commit).
+- Só começar um passo se der para terminá-lo. Se a hora do envio chegar com um passo pela metade, o trabalho
+  volta ao último commit e a página sai dos menus. (O stub "Em construção" foi removido na T3.6a, quando a
+  última rota sem página, `/mapas`, ganhou a sua.)
 - Se a demo valorizar o visual, o passo 3.1 (heatmap) pode vir antes do 2.6 (rounds): os dois são
   independentes.
 

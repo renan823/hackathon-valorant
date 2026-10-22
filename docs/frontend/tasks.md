@@ -80,7 +80,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
   - *Aceite:* os tokens têm os valores da spec; uma página provisória com um card, chips e uma linha de
     números não rola na horizontal em 390 px; o foco do teclado aparece em links e botões.
 
-- [ ] **T0.4 Rotas, layout e 404** · 45 min · plano 3.1, spec 6.1
+- [x] **T0.4 Rotas, layout e 404** · 45 min · plano 3.1, spec 6.1
   - *Arquivos:* `src/main.jsx` (`createBrowserRouter` + `RouterProvider`, com todas as rotas do plano 3.1),
     `src/App.jsx` + `App.css` (navbar, `<Outlet/>`, rodapé), `src/components/Navbar.jsx` + `.css`,
     `src/pages/EmConstrucao.jsx`, `src/pages/NaoEncontrado.jsx`.
@@ -90,7 +90,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
     Home; F5 em `/jogadores/abc/partidas` funciona; o link da página atual fica destacado; em 768 px o menu
     abre e fecha com mouse e com teclado.
 
-- [ ] **T0.5 `api.js` e aviso de backend fora do ar** · 35 min · spec 5.1, F10, plano 2
+- [x] **T0.5 `api.js` e aviso de backend fora do ar** · 35 min · spec 5.1, F10, plano 2
   - *Arquivos:* `src/api.js` (`urlApi`, `buscar`, `useApi`, `foraDoAr`, `ErroApi`); `src/App.jsx` (aviso e
     rodapé com o `/saude`).
   - *Aceite:*
@@ -102,13 +102,13 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
     - com o backend desligado aparece o aviso com o comando; ao religar, ele some em até 5 s, sem recarregar;
     - o rodapé mostra "336 partidas · dados carregados em …".
 
-- [ ] **T0.6 `filtros.js`** · 25 min · spec 5.2, F5
+- [x] **T0.6 `filtros.js`** · 25 min · spec 5.2, F5
   - *Arquivos:* `src/filtros.js` (`FILTROS`, `useFiltros`, `useParametro`).
   - Mudar um filtro cria uma entrada no histórico; trocar o torneio remove a fase que não pertence a ele
     (consulta `/api/filtros`).
   - *Aceite:* `npm run lint` passa; o comportamento é conferido na T1.3, a primeira usuária.
 
-- [ ] **T0.7 `formatos.js` e `constants.js`** · 35 min · spec 5.4 e 6.3, F13, F14, F16, F17
+- [x] **T0.7 `formatos.js` e `constants.js`** · 35 min · spec 5.4 e 6.3, F13, F14, F16, F17
   - *Arquivos:* `src/formatos.js` (`ROTULOS` copiado da spec 5.4, `rotulo`, `formatar`, `corQualidade` com os
     limiares da spec 6.3, `formatarData`, `dividirNick`, os links e `equipe`); `src/constants.js` (`RESULTADOS`,
     `CERIMONIAS`, `LADOS`, `CATEGORIAS`, `CORES_SERIE` e `RAMPA_CALOR`, mantendo `MAP_IMAGES`).
@@ -137,21 +137,21 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ## Fase 1: Partidas (≈ 2 h)
 
-- [ ] **T1.1 `Estado`** · 25 min · spec 6.5, plano 3.3
+- [x] **T1.1 `Estado`** · 25 min · spec 6.5, plano 3.3
   - *Arquivos:* `src/components/Estado.jsx` + `.css`.
   - Esqueletos `tabela`, `grafico` e `bloco`; erro com "tentar de novo"; `foraDoAr` → mensagem do backend;
     404 → `NaoEncontrado`; vazio → texto ("Nada encontrado para estes filtros." por padrão).
   - *Aceite:* conferido na T1.5: com o backend desligado, a página mostra a mensagem; depois de religar,
     "tentar de novo" carrega a lista.
 
-- [ ] **T1.2 `Nick` e `NomeTime`** · 15 min · spec 5.4, F12
+- [x] **T1.2 `Nick` e `NomeTime`** · 15 min · spec 5.4, F12
   - *Arquivos:* `src/components/Nick.jsx` e `NomeTime.jsx` (+ `.css`).
   - `Nick`: nome em destaque, `#tag` apagado, link `linkJogador` e reticências com o nick inteiro no `title`.
     `NomeTime`: link `linkTime` e, com `equipe`, um marcador na cor `--time-a`/`--time-b` (o nome fica na cor do
     texto).
   - *Aceite:* conferido na T1.5, no MVP e nos times de cada partida.
 
-- [ ] **T1.3 `BarraFiltros`** · 30 min · spec 5.2, F5
+- [x] **T1.3 `BarraFiltros`** · 30 min · spec 5.2, F5
   - *Arquivos:* `src/components/BarraFiltros.jsx` + `.css`.
   - Um select por item de `campos`, com as opções de `/api/filtros`, e "limpar filtros"; quebra em linhas em
     telas estreitas.
@@ -159,14 +159,14 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
     de `?torneio=Univavá&fase=Fase de Grupos`, trocar o torneio remove a fase da URL; voltar no navegador
     desfaz a troca.
 
-- [ ] **T1.4 `LinhaPartida`** · 30 min · spec 6.4 e 7.3
+- [x] **T1.4 `LinhaPartida`** · 30 min · spec 6.4 e 7.3
   - *Arquivos:* `src/components/LinhaPartida.jsx` + `.css`.
   - Miniatura do mapa, data, torneio · fase · `codigo`, time A placar × placar time B (vencedor em destaque),
     MVP (nick e ACS) e duração. Com `timeId`, destaca o time e mostra V ou D. Em tela estreita, quebra em duas
     linhas.
   - *Aceite:* conferido na T1.5.
 
-- [ ] **T1.5 Página Partidas** · 20 min · spec 7.3
+- [x] **T1.5 Página Partidas** · 20 min · spec 7.3
   - *Arquivos:* `src/pages/Partidas.jsx` + `.css`.
   - Filtros de torneio, fase, mapa e time; 30 partidas por vez e "carregar mais"; mais recentes primeiro.
   - *Aceite:* "336 partidas" sem filtro; a primeira é a Partida A, com MVP bielmonster#prime (ACS 379);
@@ -180,23 +180,24 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ### Passo 2.1: Partida › Placar (3,5 h)
 
-- [ ] **T2.1a `Tabela`** · 75 min · spec 6.4 e 6.6, plano 3.3
+- [x] **T2.1a `Tabela`** · 75 min · spec 6.4 e 6.6, plano 3.3
   - *Arquivos:* `src/components/Tabela.jsx` + `.css`.
   - Colunas declarativas (`chave`, `rotulo`, `formato`, `cor`, `link`, `alinhar`), com rótulo padrão
     `rotulo(chave)` e valor padrão `formatar(chave, valor)`. Ordenação no cliente (o clique alterna
-    decrescente e crescente, nulos por último) ou via `onOrdenar`. `cor: true` aplica `--bom`/`--ruim`. O link
-    da linha se estende por CSS, sem `onClick` no `<tr>`. Primeira coluna e cabeçalho fixos, rolagem própria e
-    densidade compacta abaixo de 1024 px.
+    decrescente e crescente, nulos por último) ou via `onOrdenar`. `cor: true` aplica `--bom`/`--ruim`. Linha
+    clicável sem `onClick` no `<tr>`: link de verdade na célula da coluna com `link` e cópias fora do Tab nas
+    outras (exceto colunas com `interativo: true`), porque a primeira coluna é sticky (plano, seção 2).
+    Primeira coluna fixa, rolagem própria, cabeçalho fixo com `alturaMax` e densidade compacta abaixo de 1024 px.
   - *Aceite:* conferido na T2.1d.
 
-- [ ] **T2.1b `Abas`, `StatTile` e `SeloAgente`** · 30 min · spec 6.4, F4
+- [x] **T2.1b `Abas`, `StatTile` e `SeloAgente`** · 30 min · spec 6.4, F4
   - *Arquivos:* `src/components/Abas.jsx`, `StatTile.jsx` e `SeloAgente.jsx` (+ `.css`).
   - `Abas` com `NavLink` (rotas) ou com um parâmetro da URL; em tela estreita, as abas rolam na horizontal.
     `StatTile` formata e colore pela coluna. `SeloAgente` mostra as iniciais num selo neutro, com o nome do
     agente no `title`.
   - *Aceite:* conferido nas T2.1c e T2.1d.
 
-- [ ] **T2.1c Partida: layout e cabeçalho** · 50 min · spec 7.4
+- [x] **T2.1c Partida: layout e cabeçalho** · 50 min · spec 7.4
   - *Arquivos:* `src/pages/partida/Partida.jsx` + `.css`.
   - Banner com a imagem do mapa esmaecida; torneio · fase · código · data · mapa · rounds · duração; os dois
     times com placar (vencedor em destaque e marcador de equipe) e a linha "ATK · DEF · pistols" de cada um;
@@ -205,7 +206,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
     Wolf Gaming 13 × 1 Minerva Thunders, "ATK 2 · DEF 11 · pistols 2" e "ATK 1 · DEF 0 · pistols 0";
     `/partidas/xyz` mostra "Não encontrado".
 
-- [ ] **T2.1d Partida › Placar** · 55 min · spec 7.4 e 6.3
+- [x] **T2.1d Partida › Placar** · 55 min · spec 7.4 e 6.3
   - *Arquivos:* `src/pages/partida/Placar.jsx` + `.css`.
   - Uma `Tabela` por time, ordenada por ACS: Jogador (selo + nick), K, D, A, +/−, ACS, ADR, KAST, HS%, FK, FD
     e MK, com cor por qualidade; selo de MVP; resumo do time (rounds de ataque e de defesa, pistols e first
@@ -217,7 +218,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ### Passo 2.2: Jogador (2,5 h)
 
-- [ ] **T2.2a Jogador: layout e cabeçalho** · 50 min · spec 7.5
+- [x] **T2.2a Jogador: layout e cabeçalho** · 50 min · spec 7.5
   - *Arquivos:* `src/pages/jogador/Jogador.jsx` + `.css`.
   - Nick, nicks anteriores, times (com o nº de partidas), agente e função principais e "#N no ranking" (ou
     "fora do ranking, menos de 100 rounds"). Tiles ACS, K/D, ADR, KAST, HS%, Win%, FK/R e +/− em grade
@@ -227,7 +228,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
     91,7%, FK/R 0,23 e +91; TORONTO#lulu mostra "fora do ranking"; `/jogadores/nao-existe` mostra "Não
     encontrado".
 
-- [ ] **T2.2b Jogador › Resumo** · 70 min · spec 7.5, plano 2
+- [x] **T2.2b Jogador › Resumo** · 70 min · spec 7.5, plano 2
   - *Arquivos:* `src/pages/jogador/Resumo.jsx` + `.css`; `src/graficos/comum.js` (props de eixo, grade e
     tooltip do tema escuro, usadas por todos os gráficos daqui em diante).
   - Gráfico de evolução: uma linha por partida, em ordem de data, com seletor ACS/ADR/K/D/KAST; o ponto é
@@ -237,7 +238,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
     Haven (4) e Split (2); armas Phantom 33,9%, Vandal 21,9% e Ghost 8,9% no topo; trocar a métrica muda o eixo
     e o tooltip.
 
-- [ ] **T2.2c Jogador › Partidas** · 30 min · spec 7.5
+- [x] **T2.2c Jogador › Partidas** · 30 min · spec 7.5
   - *Arquivos:* `src/pages/jogador/Partidas.jsx`.
   - `Tabela` com data, mapa, time, adversário, placar, V/D, agente, K, D, A, +/−, ACS, ADR, KAST, HS%, FK e
     MK; a linha abre a partida.
@@ -245,7 +246,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ### Passo 2.3: Home e busca (2 h)
 
-- [ ] **T2.3a `Busca`** · 50 min · spec 7.9
+- [x] **T2.3a `Busca`** · 50 min · spec 7.9
   - *Arquivos:* `src/components/Busca.jsx` + `.css`; `Navbar.jsx` passa a usar a busca.
   - Debounce de 250 ms, mínimo de 2 caracteres e até 10 resultados, com ícone de tipo, nome e detalhe. ↑/↓
     navegam, Enter abre o selecionado (ou o primeiro) e Esc fecha. Versão `grande` para a Home; em tela
@@ -254,7 +255,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
     link do time abre as partidas dele até a T3.4c); "stars" → Usp Stars e Usp Stars Gc; digitar "a" não gera
     requisição (aba Network).
 
-- [ ] **T2.3b Home** · 70 min · spec 7.1
+- [x] **T2.3b Home** · 70 min · spec 7.1
   - *Arquivos:* `src/pages/Home.jsx` + `.css`.
   - Título, busca grande e contadores; 4 cards de KPI com link para `/analises/<id>` (vira página na T2.4d);
     últimas partidas (`LinhaPartida`), top 5 jogadores e top 5 times. Duas colunas a partir de 1280 px, uma
@@ -266,7 +267,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ### Passo 2.4: Análises (3 h)
 
-- [ ] **T2.4a `GraficoAnalise`: barras, linha, kpi e tabela** · 75 min · spec 8, F13
+- [x] **T2.4a `GraficoAnalise`: barras, linha, kpi e tabela** · 75 min · spec 8, F13
   - *Arquivos:* `src/graficos/GraficoAnalise.jsx` (objeto `GRAFICOS`), `Barras.jsx`, `Linha.jsx` e `Kpis.jsx`
     (+ `.css`), com as props de `graficos/comum.js`.
   - Barras: `x`, `y`, `serie`, `referencia` (linha tracejada) e rótulos; horizontais com mais de 8 categorias;
@@ -276,7 +277,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
     `metrica` passam pelo `ROTULOS`.
   - *Aceite:* conferido na T2.4c.
 
-- [ ] **T2.4b `Matriz`** · 35 min · spec 8, F15
+- [x] **T2.4b `Matriz`** · 35 min · spec 8, F15
   - *Arquivos:* `src/graficos/Matriz.jsx` + `.css`.
   - Grade com `grafico.ordem` nos dois eixos (linhas = `y`, colunas = `x`). A cor é `color-mix(in oklab, …)`
     entre `--def`, `--neutro` e `--atk`, com no máximo 50% do polo. Célula com `n < min_n`: fundo `--surface2` e
@@ -285,7 +286,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
     (ataque × defesa: Eco × Eco, Eco × Full buy, Semi-eco × Eco, Semi-eco × Semi-eco e Semi-buy × Semi-eco);
     Full buy × Full buy fica em 49,5%, quase neutra.
 
-- [ ] **T2.4c Página Análises** · 45 min · spec 7.7 e 6.5
+- [x] **T2.4c Página Análises** · 45 min · spec 7.7 e 6.5
   - *Arquivos:* `src/pages/Analises.jsx` + `.css`; `src/components/AvisoAmostra.jsx` + `.css`.
   - Abas por categoria (da lista `/api/analises`, rótulos de `CATEGORIAS`, em `?categoria=`); `BarraFiltros`
     com os 6 filtros; card com título, insight, gráfico, descrição recolhível e link "abrir". Linhas com menos
@@ -299,7 +300,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
     - `metricas-vitoria`: "KAST" em 1º (r 0,59); `plant-sites`: seletor de mapa;
     - `?mapa=Ascent` muda os números, e `lado-por-mapa` fica com uma barra.
 
-- [ ] **T2.4d Análise em tela cheia** · 25 min · spec 7.7
+- [x] **T2.4d Análise em tela cheia** · 25 min · spec 7.7
   - *Arquivos:* `src/pages/Analise.jsx`.
   - O card em largura total, com a `BarraFiltros` e o `kpi` em destaque quando existir. "Ver dados" entra na
     T3.7.
@@ -308,7 +309,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ### Passo 2.5: Ranking (1,5 h)
 
-- [ ] **T2.5 Ranking de jogadores** · 1,5 h · spec 7.2
+- [x] **T2.5 Ranking de jogadores** · 1,5 h · spec 7.2
   - *Arquivos:* `src/pages/Ranking.jsx` + `.css`.
   - Abas Jogadores e Times (Times escondida até a T3.5b); chips de mapa, que rolam na horizontal em tela
     estreita; `BarraFiltros` (torneio, fase, time, agente, função); seletor de `min_rounds` (50, 100, 150, 200);
@@ -320,7 +321,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ### Passo 2.6: Partida › Rounds (3 h)
 
-- [ ] **T2.6a `BarraRounds`** · 70 min · spec 7.4, F12
+- [x] **T2.6a `BarraRounds`** · 70 min · spec 7.4, F12
   - *Arquivos:* `src/components/BarraRounds.jsx` + `.css`.
   - Uma coluna por round, com o ícone do `resultado` (`RESULTADOS`) na linha do time vencedor e na cor da
     equipe; divisor entre os rounds 12 e 13 e antes da prorrogação; selo de cerimônia; lado em texto ou
@@ -328,7 +329,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
     cabe.
   - *Aceite:* conferido nas T2.6b e T2.6c.
 
-- [ ] **T2.6b Partida › Rounds** · 60 min · spec 7.4
+- [x] **T2.6b Partida › Rounds** · 60 min · spec 7.4
   - *Arquivos:* `src/pages/partida/Rounds.jsx` + `.css`.
   - `BarraRounds` completa e o detalhe do round selecionado: quem atacou, compra e loadout de cada lado,
     plant, defuse e first kill. Kill feed do round a partir de `/abates`, com os registros `valido: false`
@@ -339,7 +340,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
     kill feed do round 10 mostra a morte de PUCC Tiezo#kuro para a spike e uma queda, e o do round 14 mostra 5
     quedas.
 
-- [ ] **T2.6c Economia e barra compacta no Placar** · 50 min · spec 7.4, plano 3.4
+- [x] **T2.6c Economia e barra compacta no Placar** · 50 min · spec 7.4, plano 3.4
   - *Arquivos:* `src/pages/partida/Rounds.jsx`, `src/pages/partida/Placar.jsx`.
   - Gráfico de linha com o loadout de cada time por round, nas cores das equipes; o valor de cada time vem de
     `loadout_atk` ou `loadout_def`, conforme o `time_atacante_id` do round. `BarraRounds` compacta no topo do
@@ -355,7 +356,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ### Passo 3.1: Heatmap (2,5 h)
 
-- [ ] **T3.1a `MapaCalor` e medição do pior caso** · 70 min · spec 9, F14, 6.6
+- [x] **T3.1a `MapaCalor` e medição do pior caso** · 70 min · spec 9, F14, 6.6
   - *Arquivos:* `src/components/MapaCalor.jsx` + `MapaCalor.css` (criado na T0.1),
     `src/components/HeatmapCanvas.jsx`, `src/pages/Mapa.jsx` (versão mínima).
   - `MapaCalor`: imagem do minimapa, canvas e contador "N eventos", com aviso "poucos eventos" abaixo de 20.
@@ -367,7 +368,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
     "carimbo" com `drawImage` foi aplicado (spec 9); em 1366×768 o mapa inteiro cabe sem rolar; com zoom de
     200% no navegador (simula tela de alta densidade), o calor não fica borrado.
 
-- [ ] **T3.1b Partida › Heatmap** · 80 min · spec 7.4 e 9, plano 3.4
+- [x] **T3.1b Partida › Heatmap** · 80 min · spec 7.4 e 9, plano 3.4
   - *Arquivos:* `src/pages/partida/Heatmap.jsx` + `.css`; a aba Heatmap passa a aparecer na Partida.
   - Usa `/abates` e `/rounds`, com filtros no cliente: tipo (Kills ou Mortes), time, jogador, metade e lado
     (derivado de `/rounds`). "Kills" ignora `valido: false` e `killer_pos: null`. Kill feed completo ao lado
@@ -378,7 +379,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ### Passo 3.2: Duelos (2 h)
 
-- [ ] **T3.2a `MatrizDuelos`** · 45 min · spec 7.4, plano 3.4
+- [x] **T3.2a `MatrizDuelos`** · 45 min · spec 7.4, plano 3.4
   - *Arquivos:* `src/components/MatrizDuelos.jsx` + `.css`; `src/pages/partida/Duelos.jsx`; a aba Duelos
     passa a aparecer na Partida.
   - Linhas com os jogadores do time A, colunas com os do time B; célula "kills_a–kills_b" com o fundo na cor
@@ -386,7 +387,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
   - *Aceite:* na Partida A, bielmonster#prime × swpz#1578 é 6–1, na cor de Wolf Gaming; a soma das células é
     94.
 
-- [ ] **T3.2b `GrafoDuelos`** · 75 min · spec 7.4
+- [x] **T3.2b `GrafoDuelos`** · 75 min · spec 7.4
   - *Arquivos:* `src/components/GrafoDuelos.jsx` (adaptado do `MatchGraph.jsx`, que sai);
     `src/pages/partida/Duelos.jsx` (alternância Matriz/Grafo).
   - Nós a partir de `nos` (tamanho por `kills`, cor da equipe), arestas a partir de `arestas`; largura e
@@ -396,14 +397,14 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ### Passo 3.3: Jogador, demais abas (1,5 h)
 
-- [ ] **T3.3a Jogador › Agentes, Mapas e Armas** · 50 min · spec 7.5
+- [x] **T3.3a Jogador › Agentes, Mapas e Armas** · 50 min · spec 7.5
   - *Arquivos:* `src/pages/jogador/Agentes.jsx`, `Mapas.jsx` e `Armas.jsx` (+ `.css`).
   - Agentes: `Tabela` de `por_agente`. Mapas: cards com a imagem do mapa ao fundo, em grade `auto-fit`. Armas:
     barras horizontais de `pct`, agrupadas por `categoria_meio`. Os "ver tudo" do Resumo passam a aparecer.
   - *Aceite:* lule#dfnt: Agentes com Sova, Jett e Fade; Mapas com 4 cards, Ascent (5 partidas) primeiro;
     Armas com Phantom (33,9%) em 1º.
 
-- [ ] **T3.3b Jogador › Heatmap** · 40 min · spec 7.5
+- [x] **T3.3b Jogador › Heatmap** · 40 min · spec 7.5
   - *Arquivos:* `src/pages/jogador/Heatmap.jsx`.
   - *Depende:* T3.1a.
   - `MapaCalor` com `/api/heatmap?mapa=<m>&jogador=<puuid>&tipo=kills|mortes`; o mapa vem de `por_mapa`
@@ -412,7 +413,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ### Passo 3.4: Time (2,5 h)
 
-- [ ] **T3.4a Time: layout, cabeçalho e Visão geral** · 60 min · spec 7.6
+- [x] **T3.4a Time: layout, cabeçalho e Visão geral** · 60 min · spec 7.6
   - *Arquivos:* `src/pages/time/Time.jsx` e `VisaoGeral.jsx` (+ `.css`).
   - Cabeçalho com nome, torneios, campanha, win% e saldo, e tiles de ATK%, DEF% e Pistol%. Visão geral: as 5
     últimas partidas, barras de win% por tipo de compra (com o nº de rounds) e resumo por mapa (cores de
@@ -420,14 +421,14 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
   - *Aceite:* `azure_bears_golden` mostra 3 torneios, 24-8, 75,0%, saldo +174, ATK 61,0%, DEF 67,2% e Pistol
     60,9%; Full buy com 71,2% em 389 rounds.
 
-- [ ] **T3.4b Time › Elenco, Mapas, Partidas e Confrontos** · 60 min · spec 7.6
+- [x] **T3.4b Time › Elenco, Mapas, Partidas e Confrontos** · 60 min · spec 7.6
   - *Arquivos:* `src/pages/time/Elenco.jsx`, `Mapas.jsx`, `Partidas.jsx` e `Confrontos.jsx`.
   - *Aceite* (`azure_bears_golden`): Elenco com 5 jogadores, greiN#quel em 1º (32 partidas); Mapas com 8 mapas
     e 14 composições, entre elas Astra, Cypher, Jett, Phoenix e Sova em Ascent (8-0); Partidas com 32 e filtros
     de torneio, fase e mapa; Confrontos com 16 adversários, Ceub Octopus Vulgaris em 1º (6 partidas, 5
     vitórias).
 
-- [ ] **T3.4c Time › Heatmap e links de time** · 30 min · spec 7.6, plano 2
+- [x] **T3.4c Time › Heatmap e links de time** · 30 min · spec 7.6, plano 2
   - *Arquivos:* `src/pages/time/Heatmap.jsx`; `src/formatos.js` (`linkTime` → `/times/<id>`).
   - *Depende:* T3.1a.
   - *Aceite:* o heatmap usa `/api/heatmap?mapa=<m>&time=<id>`; todo link de time (Home, Partidas, Placar,
@@ -435,13 +436,13 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ### Passo 3.5: Ranking, complementos (1 h)
 
-- [ ] **T3.5a `Histograma`** · 30 min · spec 7.2
+- [x] **T3.5a `Histograma`** · 30 min · spec 7.2
   - *Arquivos:* `src/components/Histograma.jsx` + `.css`; `src/pages/Ranking.jsx`.
   - Distribuição da métrica de `ordenar`, com os mesmos filtros e o mesmo `min_rounds`; tooltip com faixa,
     jogadores, % e % acumulado.
   - *Aceite:* sem filtros, 20 faixas somando 222 jogadores; ordenar por K/D troca o histograma para K/D.
 
-- [ ] **T3.5b Ranking › Times** · 30 min · spec 7.2, F1
+- [x] **T3.5b Ranking › Times** · 30 min · spec 7.2, F1
   - *Arquivos:* `src/pages/Ranking.jsx`; `src/pages/Home.jsx` ("ver ranking de times" aparece).
   - `/api/times` com `min_partidas=8` sempre enviado e seletor 0/5/8/10; ordenação no cliente mantendo a
     `posicao` da API.
@@ -449,13 +450,13 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ### Passo 3.6: Mapas (2 h)
 
-- [ ] **T3.6a Mapas: grade** · 40 min · spec 7.8
+- [x] **T3.6a Mapas: grade** · 40 min · spec 7.8
   - *Arquivos:* `src/pages/Mapas.jsx` + `.css`; `Navbar.jsx` (o link Mapas aparece).
   - 10 cards com a imagem do mapa ao fundo (grade `auto-fit`), com partidas e % de rounds do ataque, de
     `/analises/lado-por-mapa`.
   - *Aceite:* 10 cards; Ascent com 86 partidas e 47,3%; Pearl e Fracture com o `AvisoAmostra`.
 
-- [ ] **T3.6b Página do mapa** · 80 min · spec 7.8
+- [x] **T3.6b Página do mapa** · 80 min · spec 7.8
   - *Arquivos:* `src/pages/Mapa.jsx` + `.css`.
   - *Depende:* T3.1a e T2.4a.
   - Explorador de heatmap: tipo (Kills, Mortes, Plants), lado e `BarraFiltros` (torneio, fase, time, agente,
@@ -466,7 +467,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ### Passo 3.7: Análise, complementos (0,5 h)
 
-- [ ] **T3.7 "Ver dados" e `Dispersao`** · 30 min · spec 7.7 e 8, F13
+- [x] **T3.7 "Ver dados" e `Dispersao`** · 30 min · spec 7.7 e 8, F13
   - *Arquivos:* `src/pages/Analise.jsx`; `src/graficos/Dispersao.jsx`.
   - "Ver dados" alterna o gráfico com uma `Tabela` de todas as colunas de `dados`. `Dispersao`: `x`, `y` e
     `serie`, com até 3 categorias e o resto em "Outros".

@@ -1,0 +1,78 @@
+.busca {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  margin-left: auto;
+}
+
+.busca__icone {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.busca__campo {
+  width: 100%;
+  padding: 7px 10px 7px 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--raio);
+  background: var(--surface2);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.875rem;
+}
+.busca__campo::placeholder { color: var(--text-muted); }
+.busca__campo:focus { border-color: var(--text-muted); outline: none; }
+.busca__campo:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.busca__lista {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--raio);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.busca__item,
+.busca__aviso {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+.busca__item { cursor: pointer; color: var(--text-muted); }
+.busca__item--ativo { background: var(--surface2); color: var(--text); }
+
+.busca__nome { color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.busca__detalhe { margin-left: auto; flex-shrink: 0; font-size: 0.8125rem; }
+
+/* Versão grande, da Home. */
+.busca--grande { max-width: 640px; margin: 0 auto; }
+.busca--grande .busca__campo { padding: 14px 16px 14px 44px; font-size: 1.0625rem; border-radius: 10px; }
+.busca--grande .busca__icone { left: 14px; }
+
+/* Em tela estreita, a lista ocupa a largura toda (spec 7.9). */
+@media (max-width: 767px) {
+  .busca:not(.busca--grande) .busca__lista {
+    position: fixed;
+    top: calc(var(--altura-navbar) + 4px);
+    left: var(--respiro);
+    right: var(--respiro);
+  }
+}
+
+@media (pointer: coarse) {
+  .busca__item { min-height: 44px; }
+}

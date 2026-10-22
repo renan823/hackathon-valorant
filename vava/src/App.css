@@ -1,0 +1,25 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.layout__principal { flex: 1; }
+
+.layout__rodape {
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.aviso-backend {
+  background: color-mix(in oklab, var(--loss) 14%, var(--surface));
+  border-bottom: 1px solid color-mix(in oklab, var(--loss) 40%, var(--border));
+}
+.aviso-backend .conteudo { padding-top: 10px; padding-bottom: 10px; }
+.aviso-backend code { overflow-wrap: anywhere; }
+
+/* Páginas curtas de aviso: "Em construção" e "Não encontrado". */
+.pagina-aviso { padding-top: 48px; padding-bottom: 48px; }
+.pagina-aviso h1 { margin-bottom: 8px; }
+.pagina-aviso p + p { margin-top: 16px; }

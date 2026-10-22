@@ -1,0 +1,21 @@
+.cartao-analise { display: flex; flex-direction: column; gap: 12px; }
+
+.cartao-analise__cabecalho { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.cartao-analise__titulo { font-size: 1rem; }
+.cartao-analise--completo .cartao-analise__titulo { font-size: 1.5rem; }
+.cartao-analise__abrir { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; font-size: 0.8125rem; color: var(--text-muted); }
+
+.cartao-analise__insight {
+  padding: 10px 12px;
+  border-left: 3px solid var(--accent);
+  background: var(--surface2);
+  border-radius: 0 var(--raio) var(--raio) 0;
+  font-size: 0.875rem;
+}
+
+.cartao-analise__kpi { display: flex; align-items: baseline; gap: 10px; }
+.cartao-analise__kpi strong { font-size: 2rem; font-weight: 800; }
+
+.cartao-analise__descricao summary { cursor: pointer; font-size: 0.8125rem; color: var(--text-muted); }
+.cartao-analise__descricao p { margin-top: 6px; font-size: 0.8125rem; }
+.cartao-analise__alternar { display: flex; gap: 6px; }

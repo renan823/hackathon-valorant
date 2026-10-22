@@ -1,0 +1,32 @@
+.mapas-jogador__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+  color: inherit;
+  font-size: 0.8125rem;
+}
+.mapas-jogador__card:hover { border-color: var(--text-muted); color: inherit; }
+
+/* Minimapa esmaecido ao fundo, à direita. */
+.mapas-jogador__card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--imagem-mapa) right -30px center / auto 140% no-repeat;
+  opacity: 0.14;
+  pointer-events: none;
+}
+.mapas-jogador__card > * { position: relative; }
+
+.mapas-jogador__nome { font-size: 1.1rem; font-weight: 700; }
+
+.mapas-jogador__metricas {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+.mapas-jogador__metricas dt { font-size: 0.6875rem; color: var(--text-muted); }
+.mapas-jogador__metricas dd { font-size: 1rem; font-weight: 700; }

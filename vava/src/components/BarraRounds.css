@@ -1,0 +1,70 @@
+/* Faixas de altura fixa: os nomes à esquerda e as colunas dos rounds ficam alinhados. */
+.barra-rounds {
+  --br-cabecalho: 20px;
+  --br-cerimonia: 16px;
+  --br-celula: 28px;
+  --br-numero: 18px;
+  --br-largura: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.barra-rounds--compacta { --br-celula: 22px; --br-numero: 14px; --br-largura: 22px; --br-cerimonia: 12px; }
+
+.barra-rounds__corpo { display: flex; gap: 10px; min-width: 0; }
+
+.barra-rounds__rotulos {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  max-width: 150px;
+  min-width: 0;
+}
+.barra-rounds__nome { display: flex; align-items: center; min-width: 0; font-size: 0.8125rem; }
+
+.barra-rounds__cabecalho { display: block; height: var(--br-cabecalho); font-size: 0.6875rem; white-space: nowrap; }
+.barra-rounds__faixa-cerimonia { display: flex; align-items: flex-end; justify-content: center; height: var(--br-cerimonia); }
+.barra-rounds__faixa { display: flex; align-items: center; justify-content: center; height: var(--br-celula); }
+.barra-rounds__faixa-numero { display: flex; align-items: center; justify-content: center; height: var(--br-numero); font-size: 0.6875rem; }
+.barra-rounds__rotulos .barra-rounds__faixa-numero { justify-content: flex-start; }
+
+.barra-rounds__trilha { display: flex; gap: 0; flex: 1 1 auto; padding-bottom: 2px; }
+
+/* Divisor entre a 1ª e a 2ª metade e antes da prorrogação. */
+.barra-rounds__segmento { flex: 0 0 auto; }
+.barra-rounds__segmento + .barra-rounds__segmento { margin-left: 6px; padding-left: 6px; border-left: 2px solid var(--border); }
+.barra-rounds__colunas { display: flex; gap: 2px; }
+
+.barra-rounds__coluna {
+  display: flex;
+  flex-direction: column;
+  width: var(--br-largura);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  color: var(--text-muted);
+}
+button.barra-rounds__coluna:hover { background: var(--surface2); }
+.barra-rounds__coluna--ativa,
+button.barra-rounds__coluna--ativa:hover { background: var(--surface2); border-color: var(--text-muted); color: var(--text); }
+
+.barra-rounds__celula { border-radius: 3px; background: color-mix(in oklab, var(--surface2) 60%, transparent); }
+.barra-rounds__celula--a { color: var(--time-a); background: color-mix(in oklab, var(--time-a) 16%, transparent); }
+.barra-rounds__celula--b { color: var(--time-b); background: color-mix(in oklab, var(--time-b) 16%, transparent); }
+
+.barra-rounds__cerimonia { font-size: 0.625rem; font-weight: 700; color: var(--text); }
+
+.barra-rounds__legenda {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.75rem;
+}
+.barra-rounds__legenda li { display: inline-flex; align-items: center; gap: 4px; }
+.barra-rounds__legenda strong { color: var(--text); }
+
+.barra-rounds--compacta .barra-rounds__celula svg { width: 13px; height: 13px; }
+.barra-rounds--compacta .barra-rounds__nome { font-size: 0.75rem; }

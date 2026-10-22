@@ -1,0 +1,15 @@
+.partidas { display: flex; flex-direction: column; gap: var(--espaco); }
+
+.partidas__cabecalho {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.partidas__lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.partidas__mais { align-self: center; }

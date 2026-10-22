@@ -1,0 +1,43 @@
+/* Quebra em linhas sozinha quando não cabe (spec 6.6). */
+.barra-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 12px;
+}
+
+.barra-filtros__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 150px;
+  max-width: 240px;
+  min-width: 0;
+}
+
+.barra-filtros__rotulo {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.barra-filtros__select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--raio);
+  background: var(--surface2);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.875rem;
+}
+.barra-filtros__select:disabled { opacity: 0.6; }
+
+.barra-filtros__limpar { flex: 0 0 auto; }
+
+@media (max-width: 767px) {
+  .barra-filtros__campo { flex-basis: calc(50% - 6px); max-width: none; }
+}
+
+@media (pointer: coarse) {
+  .barra-filtros__select { min-height: 44px; }
+}

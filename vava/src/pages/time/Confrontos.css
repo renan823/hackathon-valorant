@@ -1,0 +1,2 @@
+/* Só 4 colunas: em tela larga, a tabela inteira deixaria os números longe do nome. */
+.confrontos-time { max-width: 720px; }

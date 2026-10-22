@@ -1,0 +1,39 @@
+.jogador { display: flex; flex-direction: column; gap: var(--espaco); }
+
+.jogador__cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px 32px;
+  padding-top: 8px;
+}
+
+.jogador__identidade { min-width: 0; }
+.jogador__nick {
+  font-size: 2rem;
+  overflow-wrap: anywhere;
+}
+.jogador__tag { color: var(--text-muted); font-weight: 500; }
+.jogador__antes { font-size: 0.8125rem; margin-top: 4px; }
+
+.jogador__dados {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  text-align: right;
+  font-size: 0.875rem;
+}
+.jogador__ranking { font-size: 1rem; }
+.jogador__ranking strong { font-size: 1.25rem; }
+.jogador__times { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 12px; }
+.jogador__time { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
+
+@media (max-width: 767px) {
+  .jogador__cabecalho { flex-direction: column; align-items: flex-start; }
+  .jogador__nick { font-size: 1.5rem; }
+  .jogador__dados { text-align: left; }
+  .jogador__times { justify-content: flex-start; }
+  .jogador__tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

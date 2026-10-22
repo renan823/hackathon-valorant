@@ -1,0 +1,23 @@
+.abas {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: thin;
+}
+
+.abas__item {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  white-space: nowrap;
+  box-shadow: inset 0 -2px 0 transparent;
+}
+.abas__item:hover { color: var(--text); }
+.abas__item.active { color: var(--text); box-shadow: inset 0 -2px 0 var(--accent); }
+
+@media (pointer: coarse) {
+  .abas__item { min-height: 44px; }
+}

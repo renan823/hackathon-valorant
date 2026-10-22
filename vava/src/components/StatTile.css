@@ -1,0 +1,22 @@
+.stat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--raio);
+}
+
+.stat-tile__rotulo {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Números grandes ficam com algarismos proporcionais; tabular-nums é só para colunas. */
+.stat-tile__valor { font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+
+.stat-tile__legenda { font-size: 0.75rem; color: var(--text-muted); }

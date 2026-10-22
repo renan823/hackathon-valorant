@@ -1,0 +1,6 @@
+.evento-abate { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; min-width: 0; }
+.evento-abate__meio { font-size: 0.75rem; padding: 0 4px; border: 1px solid var(--border); border-radius: 4px; }
+
+.marcador-equipe { display: inline-block; flex-shrink: 0; width: 4px; height: 0.9em; margin-right: 4px; border-radius: 2px; }
+.marcador-equipe--a { background: var(--time-a); }
+.marcador-equipe--b { background: var(--time-b); }

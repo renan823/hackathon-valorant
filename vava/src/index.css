@@ -102,6 +102,8 @@ img { max-width: 100%; }
   overflow-x: auto;
   overscroll-behavior-x: contain;
   max-width: 100%;
+  scrollbar-color: var(--border) transparent;
+  scrollbar-width: thin;
 }
 
 /* --- Peças ----------------------------------------------------------------------------------- */
@@ -169,3 +171,6 @@ img { max-width: 100%; }
 @media (pointer: coarse) {
   .chip, .botao { min-height: 44px; }
 }
+
+/* Selo do agente seguido do nome, em tabelas. */
+.selo-e-nome { display: inline-flex; align-items: center; gap: 8px; }

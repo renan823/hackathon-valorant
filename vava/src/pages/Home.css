@@ -1,0 +1,62 @@
+.home { display: flex; flex-direction: column; gap: 24px; }
+
+.home__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 32px 0 8px;
+  text-align: center;
+}
+.home__hero h1 { font-size: clamp(1.4rem, 3vw, 2rem); max-width: 22ch; }
+.home__hero .busca { width: 100%; }
+.home__contadores { font-size: 0.875rem; }
+
+.home__kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: inherit;
+}
+.home__kpi:hover { border-color: var(--text-muted); color: inherit; }
+.home__kpi-valor { font-size: 2rem; font-weight: 800; line-height: 1.1; }
+.home__kpi-titulo { font-weight: 600; }
+.home__kpi-descricao { font-size: 0.8125rem; }
+
+/* Duas colunas a partir de 1280 px; uma abaixo disso (spec 7.1). */
+.home__colunas {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--espaco);
+}
+@media (min-width: 1280px) {
+  .home__colunas { grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr); align-items: start; }
+}
+
+.home__bloco { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.home__lateral { display: flex; flex-direction: column; gap: var(--espaco); min-width: 0; }
+
+.home__titulo { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.home__titulo h2 { font-size: 1.05rem; }
+.home__ver { display: inline-flex; align-items: center; gap: 4px; font-size: 0.8125rem; color: var(--text-muted); }
+
+.home__partidas { display: flex; flex-direction: column; gap: 8px; }
+
+.home__top { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.home__top li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+}
+.home__quem { display: flex; flex-direction: column; min-width: 0; }
+.home__sub { font-size: 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.home__valor { font-weight: 600; white-space: nowrap; }
+.home__nota { font-size: 0.75rem; }
+
+/* Com a Home em duas colunas, a LinhaPartida tem menos espaço: usa o layout de notebook. */
+@media (min-width: 1280px) {
+  .home__partidas .linha-partida { grid-template-columns: 110px minmax(0, 1fr) minmax(0, 2fr); }
+  .home__partidas .linha-partida__extra { grid-column: 2 / -1; justify-content: flex-start; }
+}

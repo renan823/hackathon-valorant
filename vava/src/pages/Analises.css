@@ -1,0 +1,9 @@
+.analises { display: flex; flex-direction: column; gap: var(--espaco); }
+
+/* Dois cards por linha quando cabem (cada um com pelo menos 520 px); senão, um. */
+.analises__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
+  gap: var(--espaco);
+  align-items: start;
+}

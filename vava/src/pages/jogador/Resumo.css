@@ -1,0 +1,44 @@
+.resumo { display: flex; flex-direction: column; gap: var(--espaco); }
+
+.resumo__cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+}
+.resumo__cabecalho h2 { font-size: 1rem; }
+.resumo__metricas { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.resumo__legenda {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 0.75rem;
+}
+.resumo__ponto { width: 9px; height: 9px; border-radius: 50%; margin-left: 8px; }
+.resumo__ponto:first-child { margin-left: 0; }
+.resumo__ponto--v { background: var(--bom); }
+.resumo__ponto--d { border: 2px solid var(--ruim); }
+
+.resumo__tops {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.resumo__top-cabecalho { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.resumo__top h3 { font-size: 0.9375rem; }
+.resumo__ver { display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--text-muted); }
+.resumo__top ol { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.resumo__top li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 0.875rem;
+}
+.resumo__nome { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.resumo__valores { flex-shrink: 0; font-size: 0.8125rem; }

@@ -1,0 +1,12 @@
+.aviso-amostra {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.aviso-amostra svg { flex-shrink: 0; margin-top: 2px; }
+.aviso-amostra strong { color: var(--text); font-weight: 600; }
+
+/* Linha de tabela com amostra pequena. */
+.linha--amostra-pequena td { opacity: 0.5; }

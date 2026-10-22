@@ -1,0 +1,65 @@
+.visao { display: flex; flex-direction: column; gap: calc(var(--espaco) * 1.5); }
+
+.visao__bloco { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.visao__cabecalho { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.visao__cabecalho h2 { font-size: 1rem; }
+.visao__ver { display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--text-muted); }
+
+.visao__partidas { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+/* Economia à esquerda, mapas à direita; uma coluna abaixo de 1280 px (a tabela de mapas precisa de ~560 px). */
+.visao__grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: calc(var(--espaco) * 1.5);
+  align-items: start;
+}
+@media (max-width: 1279px) {
+  .visao__grade { grid-template-columns: minmax(0, 1fr); }
+}
+
+.visao__economia { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.visao__economia li {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) 80px;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+}
+.visao__compra { white-space: nowrap; }
+.visao__rounds { font-size: 0.8125rem; white-space: nowrap; text-align: right; }
+
+/* Barra de win%: escala fixa de 0 a 100%, com uma marca nos 50% que passa um pouco da trilha
+   (fica visível mesmo sobre a barra). */
+.visao__pct { display: flex; align-items: center; gap: 8px; }
+.visao__pct .numero { min-width: 46px; text-align: right; font-weight: 600; }
+.visao__escala { position: relative; flex: 1 1 auto; min-width: 64px; }
+.visao__escala::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  left: 50%;
+  width: 1px;
+  background: var(--text-muted);
+}
+.visao__trilho {
+  display: block;
+  height: 10px;
+  border-radius: 4px;
+  background: var(--surface2);
+  overflow: hidden;
+}
+.visao__barra { display: block; height: 100%; border-radius: 0 4px 4px 0; }
+.visao__barra--neutra { background: var(--text-muted); }
+.visao__barra--atk { background: var(--atk); }
+.visao__barra--def { background: var(--def); }
+
+/* Na tabela, a barra tem largura fixa e vai à direita, como o cabeçalho das colunas numéricas. */
+.visao .tabela .visao__pct { justify-content: flex-end; }
+.visao .tabela .visao__escala { flex: 0 0 72px; }
+
+.visao__legenda { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.75rem; }
+.visao__marca { width: 10px; height: 10px; border-radius: 2px; margin-left: 8px; }
+.visao__marca:first-child { margin-left: 0; }
+.visao__nota { margin-left: 4px; }
