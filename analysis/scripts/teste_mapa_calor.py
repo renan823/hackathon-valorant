@@ -11,7 +11,7 @@ import numpy as np
 from pathlib import Path
 
 # Raiz do repositório (este script fica em scripts/).
-RAIZ = Path(__file__).resolve().parents[1]
+RAIZ = Path(__file__).resolve().parents[2]
 FIGURAS = RAIZ / 'outputs' / 'figures'
 
 # ==========================================

@@ -19,8 +19,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-# Raiz do repositório (este arquivo fica em src/).
-RAIZ = Path(__file__).resolve().parents[1]
+# Raiz do repositório (este arquivo fica em packages/valorant-data/).
+RAIZ = Path(__file__).resolve().parents[2]
 PASTA_DADOS = RAIZ / "data"
 ARQUIVO_REFERENCIA = RAIZ / "reference" / "valorant_reference.json"
 # Bases tratadas geradas pelo notebook de preparação (não versionadas).

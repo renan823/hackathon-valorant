@@ -18,9 +18,9 @@ import pandas as pd
 from app import mapas
 from app.metricas import SOMAS
 
-# Raiz do repositório (este arquivo fica em backend/app/).
-RAIZ = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(RAIZ / "src"))
+# Raiz do repositório (este arquivo fica em apps/api/app/).
+RAIZ = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(RAIZ / "packages" / "valorant-data"))
 import valorant_data as vd  # noqa: E402
 
 # Colunas constantes ou sem uso analítico (mesmo critério do notebook de preparação).
@@ -43,7 +43,7 @@ BASE: Base | None = None
 
 
 def carregar():
-    """Lê data/ com src/valorant_data.py, aplica `preparar()` e preenche BASE."""
+    """Lê data/ com packages/valorant-data/valorant_data.py, aplica `preparar()` e preenche BASE."""
     global BASE
     BASE = preparar(vd.carregar_tabelas(), vd.carregar_referencia())
     partida_bruta.cache_clear()

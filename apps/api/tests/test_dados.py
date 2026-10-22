@@ -1,6 +1,6 @@
 """Consistência dos dados (validação de 21/10/2026, spec §5.1) como asserts sobre BASE.
 
-Se alguém mexer no ETL (src/valorant_data.py) ou em dados.py e quebrar uma invariante, estes testes acusam.
+Se alguém mexer no ETL (packages/valorant-data/valorant_data.py) ou em dados.py e quebrar uma invariante, estes testes acusam.
 Os critérios de colunas, coordenadas e Σ kills ficam em test_nucleo.py.
 """
 

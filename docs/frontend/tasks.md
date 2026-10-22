@@ -4,7 +4,7 @@
 > Uma pessoa, em sequência; a aplicação inteira sobe de uma vez no fim (plano, Q3).
 > **Em aberto:** Q1, o prazo do hackathon, que escolhe o corte (plano, seção 5).
 
-**Como ler cada tarefa:** *Arquivos* = o que a tarefa cria ou altera (caminhos relativos a `vava/`, salvo
+**Como ler cada tarefa:** *Arquivos* = o que a tarefa cria ou altera (caminhos relativos a `apps/web/`, salvo
 indicação) · *Depende* = só quando não basta a tarefa anterior · *Aceite* = como provar que terminou. As
 estimativas somam as horas do plano.
 
@@ -51,12 +51,12 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ## Fase 0: Fundação (≈ 3,5 h)
 
-- [x] **T0.1 Limpeza do `vava/`** · 20 min · F7
+- [x] **T0.1 Limpeza do `apps/web/`** · 20 min · F7
   - *Arquivos:* saem `src/components/DropZone.jsx`, `Sidebar.jsx`, `MatchCard.jsx` e `HeatmapView.jsx`,
     `src/utils.js`, `assets/maps/calibration.json` e `src/assets/`. Cria `src/components/MapaCalor.css` com as
     regras `.heatmap-map-*` e `.heatmap-canvas` tiradas do `App.css`, que fica vazio. `App.jsx` provisório (só o
     título). `index.html` com `lang="pt-BR"` e título "VAVA Stats"; `package.json` com `"name": "vava-stats"`;
-    o `README.md` do `vava/` vira um ponteiro para `docs/frontend/`.
+    o `README.md` do `apps/web/` vira um ponteiro para `docs/frontend/`.
   - *Aceite:* `grep -rn "extractKillData\|parseFilename\|readFileAsJSON\|DropZone" src` não acha nada;
     `HeatmapCanvas.jsx` e `MatchGraph.jsx` continuam; `npm run build` passa.
 
@@ -478,15 +478,15 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ### Passo 3.8: Ícones (1 h)
 
-- [x] **T3.8a `scripts/baixar_icones.py`** · 35 min · F4 (caminho a partir da raiz do repositório)
-  - *Arquivos:* `scripts/baixar_icones.py`; `vava/public/agentes/` e `vava/public/armas/` (gerados e
+- [x] **T3.8a `apps/web/scripts/baixar_icones.py`** · 35 min · F4 (caminho a partir da raiz do repositório)
+  - *Arquivos:* `apps/web/scripts/baixar_icones.py`; `apps/web/public/agentes/` e `apps/web/public/armas/` (gerados e
     versionados).
   - Lê `reference/valorant_reference.json`. Agentes: `https://media.valorant-api.com/agents/<uuid>/displayicon.png`,
     reduzido para 96 × 96 com Pillow (já no `requirements.txt`; o original tem ~570 KB). Armas fora da categoria
     Ability: `https://media.valorant-api.com/weapons/<uuid>/killstreamicon.png`, a silhueta de kill feed. Nome
     do arquivo: o nome em minúsculas, sem acentos nem símbolos (KAY/O → `kayo.png`). Pula o que já existe.
-    Roda com `.venv/bin/python scripts/baixar_icones.py` e precisa de internet uma vez só.
-  - *Aceite:* 29 ícones de agente (Miks incluso) e 21 de arma; `vava/public/agentes/` com menos de 1 MB;
+    Roda com `.venv/bin/python apps/web/scripts/baixar_icones.py` e precisa de internet uma vez só.
+  - *Aceite:* 29 ícones de agente (Miks incluso) e 21 de arma; `apps/web/public/agentes/` com menos de 1 MB;
     rodar de novo não baixa nada.
 
 - [x] **T3.8b Ícones na interface** · 25 min · F4
@@ -516,11 +516,11 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 - [x] **T4.3 Documentação** · 20 min
   - *Arquivos:* `docs/frontend/spec.md` (status "implementada" e o que mudou durante a implementação),
     `docs/frontend/plan.md` (status), `README.md` da raiz (comando do front, link para a spec) e o `README.md`
-    do `vava/`.
+    do `apps/web/`.
   - *Aceite:* quem ler só o README da raiz consegue subir backend e front.
 
 - [x] **T4.4 Envio único** · 35 min · plano Q3
-  - `.venv/bin/pytest backend/tests` (103 testes), `npm run lint` e `npm run build` passam; `npm run preview`
+  - `.venv/bin/pytest apps/api/tests` (103 testes), `npm run lint` e `npm run build` passam; `npm run preview`
     (porta 4173) abre direto `/partidas/<Partida A>/rounds` com dados da API.
   - *Aceite:* `git status` não lista `dist/` nem `node_modules/`; a aplicação inteira (backend, front, docs e
     ícones) sobe de uma vez.

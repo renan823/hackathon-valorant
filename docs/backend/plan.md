@@ -39,7 +39,7 @@ Fase 0 ─► Fase 1 ─┬─► Fase 2 (domínios) ─┬─► Fase 4 (testes
 | Métricas | `agregar(df, chaves)` soma e depois divide (spec, seção 6) | Uma fórmula para scoreboard, ranking, perfis e times |
 | Análises | Decorator `@analise` + `pkgutil` importando a pasta `analises/` | Nova análise = um arquivo |
 | IDs de time | `time_id = nome.lower().replace(" ", "_")`, o inverso de `_formatar_time` | Recupera o slug original do arquivo |
-| Calibração | Copiar `vava/assets/maps/calibration.json` para `reference/map_calibration.json` | O backend não depende da pasta do front. A cópia do `vava` sai quando o front passar a usar `/heatmap` |
+| Calibração | Copiar `apps/web/assets/maps/calibration.json` para `reference/map_calibration.json` | O backend não depende da pasta do front. A cópia do `vava` sai quando o front passar a usar `/heatmap` |
 | Coordenadas | O ETL guarda as coordenadas cruas do jogo; `mapas.normalizar()` converte para `[0,1]` em `dados.preparar()` | Uma única conversão, feita na carga |
 | CORS e proxy | CORS para `localhost:5173` e `server.proxy['/api']` no `vite.config.js` | O front chama `/api/...` sem configurar a URL |
 | Testes | `pytest` com `TestClient(app)` em fixture de sessão (carrega `BASE` uma vez) | Smoke test rápido de todos os endpoints |
@@ -113,14 +113,14 @@ REGISTRO: dict[str, dict]                                       # id → {meta..
 
 ### Fase 0: Esqueleto (≈ 1 h · 1 pessoa · bloqueia as outras)
 
-- `backend/requirements.txt`, estrutura de pastas da spec (seção 4.1) com stubs que levantam `NotImplementedError`.
+- `apps/api/requirements.txt`, estrutura de pastas da spec (seção 4.1) com stubs que levantam `NotImplementedError`.
 - `main.py` com `lifespan`, CORS, todos os routers incluídos sob `/api` e o `/api/saude` funcionando.
 - Proxy no `vite.config.js`. Comando de execução documentado no README.
 - **Pronto quando:** `uvicorn` sobe e o `/docs` lista todas as rotas da spec, mesmo que ainda devolvam 501.
 
 ### Fase 1: Núcleo de dados (≈ 3 h · 1–2 pessoas)
 
-1. **ETL** (`src/valorant_data.py`):
+1. **ETL** (`packages/valorant-data/valorant_data.py`):
    - Colunas novas: `vitima_x`, `vitima_y`, `killer_x`, `killer_y` em `abates`; `plant_x`, `plant_y` e
      `planter` (`bombPlanter`) em `rounds`.
    - Correção (spec, R10): first kill, first death e o crédito de kill do KAST passam a usar só os abates
@@ -224,8 +224,8 @@ Sugestão para D4: 100 rounds. O topo estabiliza e ainda sobram mais da metade d
 podem ser decididos juntos: um rating composto não resolve sozinho o problema de amostra. Foi o que se
 decidiu em 21/10/2026: ACS com corte de 100 rounds.
 
-Como mudar depois da decisão: D4 é a constante `MIN_ROUNDS_PADRAO` em `backend/app/routers/jogadores.py`;
-D5 é `MIN_PARTIDAS_HOME` em `backend/app/routers/geral.py`. O front pode sobrescrever as duas pelos
+Como mudar depois da decisão: D4 é a constante `MIN_ROUNDS_PADRAO` em `apps/api/app/routers/jogadores.py`;
+D5 é `MIN_PARTIDAS_HOME` em `apps/api/app/routers/geral.py`. O front pode sobrescrever as duas pelos
 parâmetros `min_rounds` e `min_partidas`.
 
 ## 8. Fora deste plano

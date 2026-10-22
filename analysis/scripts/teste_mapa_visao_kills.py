@@ -11,7 +11,7 @@ from matplotlib.patches import Wedge
 from pathlib import Path
 
 # Raiz do repositório (este script fica em scripts/).
-RAIZ = Path(__file__).resolve().parents[1]
+RAIZ = Path(__file__).resolve().parents[2]
 
 # ==========================================
 # 1. PARÂMETROS DE ENTRADA E CONFIGURAÇÃO

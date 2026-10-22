@@ -40,15 +40,15 @@ partida; heatmaps (por partida, jogador, time e mapa); um registro de análises 
 ## 4. Arquitetura
 
 ```
-data/*.json ──► src/valorant_data.py ──► backend/app/dados.py ──► BASE (DataFrames em memória)
+data/*.json ──► packages/valorant-data/valorant_data.py ──► apps/api/app/dados.py ──► BASE (DataFrames em memória)
                 (achata os JSONs)         (limpa, enriquece,           │
                                            calcula índices)            ▼
-                                                     routers/*.py  +  analises/*.py  ──►  JSON  ──► vava/ (React)
+                                                     routers/*.py  +  analises/*.py  ──►  JSON  ──► apps/web/ (React)
 ```
 
 - **Stack**: FastAPI + Uvicorn + pandas. Python já é a linguagem do time e o ETL já existe.
 - **Carga na inicialização**: `carregar_tabelas()` leva cerca de 4 s para os 336 arquivos. O backend lê
-  `data/` direto e **não depende** dos CSVs do notebook nem do SQLite do `brainstorming/`.
+  `data/` direto e **não depende** dos CSVs do notebook nem do SQLite do `analysis/brainstorming/`.
 - **Dados em memória**: um objeto global `BASE` com as tabelas. Toda requisição filtra e agrega com pandas.
   Isso basta para esse volume (cerca de 120 mil linhas no total).
 - **JSON bruto sob demanda**: features que precisem de algo que não está nas tabelas (por exemplo, posição
@@ -62,7 +62,7 @@ data/*.json ──► src/valorant_data.py ──► backend/app/dados.py ──
 ### 4.1 Estrutura de pastas
 
 ```
-backend/
+apps/api/
 ├── requirements.txt          # fastapi, uvicorn[standard], pandas, numpy, pytest, httpx2
 ├── app/
 │   ├── main.py               # cria o app, CORS, inclui routers, carrega BASE no startup
@@ -80,7 +80,7 @@ backend/
 │       ├── __init__.py       # decorator @analise + registro + autoimport dos módulos
 │       ├── lado_por_mapa.py
 │       └── ...               # um arquivo por análise
-├── pytest.ini                # torna `app` importável ao rodar `pytest backend/tests` da raiz
+├── pytest.ini                # torna `app` importável ao rodar `pytest apps/api/tests` da raiz
 └── tests/
     ├── conftest.py           # TestClient de sessão (carrega BASE uma vez)
     ├── test_smoke.py         # uma chamada por rota + 404s + números de conferência (§9)
@@ -106,12 +106,12 @@ Regra de organização: **routers só recebem parâmetros e chamam funções**. 
 | `economia` | jogador × round | como hoje, com `arma`/`armadura` traduzidas |
 | `abates` | abate | como hoje + `killer_x`, `killer_y`, `vitima_x`, `vitima_y`, `time_vitima`, `meio` (arma/habilidade traduzida), `agente_killer` |
 | `times` | time | nova: `time_id` (slug), `nome`, `torneios` |
-| `calibracao` | mapa | `reference/map_calibration.json` (cópia de `vava/assets/maps/calibration.json`) |
+| `calibracao` | mapa | `reference/map_calibration.json` (cópia de `apps/web/assets/maps/calibration.json`) |
 
 **Identificadores nas URLs**: jogador = `puuid`; time = `time_id`, o slug do nome do arquivo (ex.:
 `azure_bears_golden`); partida = `match_id`.
 
-**Mudanças necessárias em `src/valorant_data.py`** (pequenas, aditivas, sem quebrar o notebook):
+**Mudanças necessárias em `packages/valorant-data/valorant_data.py`** (pequenas, aditivas, sem quebrar o notebook):
 
 - `abates`: incluir `victimLocation` e a posição do killer tirada de `playerLocations`.
 - `rounds`: incluir `plantLocation` e `bombPlanter` (`planter`).
@@ -145,10 +145,10 @@ Regras que `dados.py` precisa aplicar:
 | R10 | Em `_processar_partida`, o first kill e o first death usam o primeiro registro de `kills` do round, e o KAST credita "kill" a quem aparece como killer, ambos sem excluir os registros do R1. Além disso, o registro de quem morre para a spike ou de queda (killer = vítima) casava consigo mesmo no teste de trade, e o jogador contava como "trocado". | FK, FD, trades e crédito de kill do KAST usam só abates válidos; `n_abates` também. **Corrigido (T1.2):** o KAST caiu em 141 jogador × round (138 pelo auto-trade, 2 por trade com teamkill, 1 pelo crédito de kill); o first kill mudou em 8 rounds (em 4 muda o lado); `n_abates` caiu em 256 rounds. |
 
 Calibração de coordenadas: conferida visualmente nos 10 mapas jogados. Com os multiplicadores oficiais os
-plants caem nos sites. A calibração empírica antiga de `vava/src/constants.js` não trocava x↔y e foi substituída.
+plants caem nos sites. A calibração empírica antiga de `apps/web/src/constants.js` não trocava x↔y e foi substituída.
 
-Já corrigido no repositório: R1 (`abates.valido` em `src/valorant_data.py`; o notebook de preparação salva
-só os abates válidos), R4 no notebook, R1 no heatmap e no grafo do `vava/`, calibração do `vava/` e as
+Já corrigido no repositório: R1 (`abates.valido` em `packages/valorant-data/valorant_data.py`; o notebook de preparação salva
+só os abates válidos), R4 no notebook, R1 no heatmap e no grafo do `apps/web/`, calibração do `apps/web/` e as
 tabelas do README (agentes, armas, armaduras, Red/Blue e consistência).
 
 ## 6. Métricas
@@ -310,7 +310,7 @@ Cada análise é uma função Python registrada com um decorator. A API lista e 
 genérica, e o frontend tem **um componente** que renderiza qualquer uma pelo campo `grafico.tipo`.
 
 ```python
-# backend/app/analises/lado_por_mapa.py
+# apps/api/app/analises/lado_por_mapa.py
 from app.analises import analise
 
 @analise(
@@ -349,7 +349,7 @@ def lado_por_mapa(base, filtros):
 
 **Como criar uma análise nova** (nenhum outro arquivo muda):
 
-1. Criar `backend/app/analises/<nome>.py` com uma função decorada por `@analise(...)`, como no exemplo acima.
+1. Criar `apps/api/app/analises/<nome>.py` com uma função decorada por `@analise(...)`, como no exemplo acima.
 2. Aplicar os filtros com `filtros.aplicar(df)`; na tabela `rounds`, usar `col_time=TIMES_ROUND`.
 3. Retornar `vazio()` quando os filtros não deixarem dados, e `n` (rounds/partidas) em cada linha (R8).
 4. Opcional: `kpi(titulo, valor, descricao)` para virar card; para aparecer na Home, incluir o id em
@@ -387,15 +387,15 @@ o killer em `kills`, a vítima em `mortes` e quem plantou em `plants`. Exemplo: 
 onde os Jetts morreram.
 
 Resposta: `{mapa, tipo, total, pontos: [{x, y}]}`, com `x, y ∈ [0, 1]`. A imagem do minimapa continua
-como asset do frontend (`vava/public/maps/<mapa>.png`).
+como asset do frontend (`apps/web/public/maps/<mapa>.png`).
 
 ## 9. Execução e qualidade
 
 ```sh
-uv pip install --python .venv/bin/python -r backend/requirements.txt
-.venv/bin/uvicorn app.main:app --reload --app-dir backend --port 8000   # da raiz do repositório
+uv pip install --python .venv/bin/python -r apps/api/requirements.txt
+.venv/bin/uvicorn app.main:app --reload --app-dir apps/api --port 8000   # da raiz do repositório
 # docs interativas: http://localhost:8000/docs
-.venv/bin/pytest backend/tests
+.venv/bin/pytest apps/api/tests
 ```
 
 - **Critério de pronto de um endpoint**: responde em menos de 300 ms localmente, aparece no `/docs` e tem
@@ -413,5 +413,5 @@ uv pip install --python .venv/bin/python -r backend/requirements.txt
    e a [spec do front](../frontend/spec.md#12-decisões) (F1 e F2).
 2. ~~**Identidade dos times**~~: resolvido pela validação (R9). O slug identifica o time.
 3. **Futuro**: clutches (1vX), trades, "jogou com" (aba Played With do csstats), comparação de jogadores e
-   o visualizador de visão no abate (`scripts/teste_mapa_visao_kills.py`). Todos cabem no padrão
+   o visualizador de visão no abate (`analysis/scripts/teste_mapa_visao_kills.py`). Todos cabem no padrão
    "nova análise" ou em um endpoint novo no router do domínio.

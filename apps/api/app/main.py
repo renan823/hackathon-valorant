@@ -1,7 +1,7 @@
 """API do dashboard VAVA Stats (docs/backend/spec.md).
 
 Execução, a partir da raiz do repositório:
-    .venv/bin/uvicorn app.main:app --reload --app-dir backend --port 8000
+    .venv/bin/uvicorn app.main:app --reload --app-dir apps/api --port 8000
 """
 
 from contextlib import asynccontextmanager

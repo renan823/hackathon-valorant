@@ -15,7 +15,7 @@ Como o front tem uma pessoa só, as fases são sequenciais e a ordem segue o **v
 termina com o app funcionando e apresentável: se o prazo acabar no meio do caminho, o que já existe se sustenta
 (seção 5).
 
-1. **Fase 0** monta a fundação: limpeza do `vava/`, dependências, tokens, rotas, layout e os três módulos.
+1. **Fase 0** monta a fundação: limpeza do `apps/web/`, dependências, tokens, rotas, layout e os três módulos.
 2. **Fase 1** constrói a primeira página real, Partidas, com os componentes que ela usa. Os demais nascem no
    passo que os usa primeiro (a `Tabela`, por exemplo, nasce com o Placar): nenhum componente é feito no vazio.
 3. **Fase 2** fecha a P0 na ordem do roteiro da demo: Placar → Jogador → Home → Análises → Ranking → Rounds.
@@ -51,7 +51,7 @@ As decisões de produto e de visual estão na spec (F1–F17). Estas são as de 
 | Datas | `formatarData` corta a string `AAAA-MM-DD`; **nunca** `new Date("2026-09-27")` | Essa string é lida como meia-noite UTC: em UTC−3 o dia vira 26/09 |
 | Números | Instâncias de `Intl.NumberFormat("pt-BR")` criadas uma vez por formato | Consistente e barato em tabelas de 400 linhas |
 | Gráficos | `graficos/comum.js` com as props de eixo, grade e tooltip do tema escuro, usadas por todos os tipos | O recharts vem com cores de tema claro; um ajuste vale para todos |
-| CSS | `index.css` com tokens e estilos base (tabela, card, chip, botão, foco); cada componente importa o próprio `.css`. O `App.css` é reescrito para o layout novo | Mantém o padrão atual do `vava/` (BEM, sem CSS Modules). Todo o `App.css` atual é do layout antigo |
+| CSS | `index.css` com tokens e estilos base (tabela, card, chip, botão, foco); cada componente importa o próprio `.css`. O `App.css` é reescrito para o layout novo | Mantém o padrão atual do `apps/web/` (BEM, sem CSS Modules). Todo o `App.css` atual é do layout antigo |
 | Responsividade | Construída junto com cada componente, não no fim: grades com `auto-fit`, tabelas com rolagem própria, controles que empilham (spec 6.6). Cada passo é conferido em 1920, 1366×768 e 1024×768 | Decisão Q2 e F6. Deixar para o fim obrigaria a refazer layouts prontos |
 | Equipe A/B | `equipe(partida, timeId)` → `"a"` ou `"b"`, que escolhe `--time-a`/`--time-b` | Não confundir com `lado` (ataque/defesa), que nunca é colorido na Partida (F12) |
 | Testes | Sem testes automatizados de UI. Cada checkpoint passa a parte do roteiro da spec (§10) que já existe, mais `npm run lint` e `npm run build` | O critério da spec; o tempo vai para as páginas |
@@ -213,7 +213,7 @@ qualquer ordem.
 | 3.5 | Ranking › Times + `Histograma` da distribuição | 7.2 | 1 h |
 | 3.6 | Mapas: grade e página do mapa (explorador de heatmap, análises filtradas, top 10) | 7.8 | 2 h |
 | 3.7 | "Ver dados" na análise em tela cheia + `Dispersao` | 7.7, 8 | 0,5 h |
-| 3.8 | Ícones (F4): `scripts/baixar_icones.py` + `SeloAgente` com imagem | 6.4 | 1 h |
+| 3.8 | Ícones (F4): `apps/web/scripts/baixar_icones.py` + `SeloAgente` com imagem | 6.4 | 1 h |
 
 - **Pronto quando:** o roteiro da spec (§10) passa inteiro. Duelos com 10 jogadores e 25 duelos;
   `/mapas/Ascent` com 1.049 plants; `/ranking/times` com 34 times; o perfil de TORONTO#lulu mostra "fora do
@@ -229,9 +229,9 @@ qualquer ordem.
   server, então o build final é testado com a API real, inclusive abrindo direto uma rota profunda.
 - Docs: status da spec → "implementada"; registrar na spec qualquer decisão ou formato que mudou durante a
   implementação; README com o comando do front.
-- **Envio único** (Q3): com `.venv/bin/pytest backend/tests`, `npm run lint` e `npm run build` passando, a
+- **Envio único** (Q3): com `.venv/bin/pytest apps/api/tests`, `npm run lint` e `npm run build` passando, a
   aplicação inteira (backend, front e docs) sobe de uma vez. O `dist/` e o `node_modules/` já estão no
-  `.gitignore` do `vava/`.
+  `.gitignore` do `apps/web/`.
 
 **✔ Checkpoint 4:** aplicação inteira enviada e pronta para a demo.
 

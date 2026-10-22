@@ -1,15 +1,15 @@
-"""Baixa os ícones de agentes e armas para vava/public/ (decisão F4 da spec do front).
+"""Baixa os ícones de agentes e armas para apps/web/public/ (decisão F4 da spec do front).
 
 Lê reference/valorant_reference.json e busca as imagens no valorant-api.com:
-- agentes: displayicon.png, reduzido para 96 × 96 (o original tem ~570 KB) → vava/public/agentes/<nome>.png;
-- armas fora da categoria Ability: killstreamicon.png, a silhueta do kill feed → vava/public/armas/<nome>.png.
+- agentes: displayicon.png, reduzido para 96 × 96 (o original tem ~570 KB) → apps/web/public/agentes/<nome>.png;
+- armas fora da categoria Ability: killstreamicon.png, a silhueta do kill feed → apps/web/public/armas/<nome>.png.
   A faca se chama "Confronto" no JSON (pt-BR), mas a API do app a devolve como `meio = "Melee"`: o arquivo
   segue a API (melee.png).
 
 O nome do arquivo é o nome em minúsculas, sem acentos nem símbolos (KAY/O → kayo.png); o front monta o mesmo
 nome a partir do nome que vem da API. Arquivo que já existe é pulado: precisa de internet uma vez só.
 
-    .venv/bin/python scripts/baixar_icones.py
+    .venv/bin/python apps/web/scripts/baixar_icones.py
 """
 
 import json
@@ -21,9 +21,9 @@ from pathlib import Path
 import requests
 from PIL import Image
 
-RAIZ = Path(__file__).resolve().parents[1]
+RAIZ = Path(__file__).resolve().parents[3]
 REFERENCIA = RAIZ / "reference" / "valorant_reference.json"
-PUBLICO = RAIZ / "vava" / "public"
+PUBLICO = RAIZ / "apps" / "web" / "public"
 MIDIA = "https://media.valorant-api.com"
 LADO_AGENTE = 96
 

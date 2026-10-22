@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { iconeAgente } from '../formatos'
 import './SeloAgente.css'
 
-// Ícone do agente (vava/public/agentes, F4), com o nome no title. Se a imagem falhar, volta às iniciais num
+// Ícone do agente (apps/web/public/agentes, F4), com o nome no title. Se a imagem falhar, volta às iniciais num
 // selo neutro. Sem cor por função: 4 cores lado a lado não passam no validador de paleta.
 function SeloAgente({ agente }) {
 	const src = iconeAgente(agente)

@@ -8,24 +8,26 @@ Este repositório contém dados de partidas do torneio universitário de Valoran
 
 ```
 hackathon-valorant/
+├── apps/
+│   ├── api/                # API FastAPI do dashboard (dados em memória) — ver docs/backend/
+│   └── web/                # dashboard VAVA Stats (React/Vite), consome a API; scripts/baixar_icones.py gera os ícones
+├── packages/
+│   └── valorant-data/      # valorant_data.py: lê os JSONs e gera as tabelas jogadores, rounds, economia e abates
+├── analysis/
+│   ├── notebooks/          # preparação (gera outputs/processed/), EDA e aula/ (notebooks de aula originais)
+│   ├── scripts/            # visualizações sobre o mapa (teste_mapa*.py)
+│   ├── brainstorming/      # ETL para SQLite + notebook marimo (projeto uv próprio)
+│   └── requirements.txt    # dependências de notebooks/ e scripts/
 ├── data/                   # JSONs brutos das partidas (não editar) — ver "Estrutura de data/"
-├── reference/              # tabelas de referência (UUID -> nome de agentes, armas, armaduras e mapas)
-├── src/
-│   └── valorant_data.py    # lê os JSONs e gera as tabelas jogadores, rounds, economia e abates
-├── notebooks/
-│   ├── valorant-data-preparation.ipynb          # limpeza e transformação (gera outputs/processed/)
-│   ├── valorant-exploratory-data-analysis.ipynb # análise exploratória e do contexto competitivo
-│   └── aula/               # notebooks de aula originais (Iris/Boston), usados como roteiro
-├── scripts/                # visualizações sobre o mapa e baixar_icones.py (ícones do dashboard)
-├── backend/                # API FastAPI do dashboard (dados em memória) — ver docs/backend/
-├── brainstorming/          # ETL para SQLite + notebook marimo (projeto uv próprio)
-├── vava/                   # dashboard VAVA Stats (React/Vite), que consome a API do backend/
-├── docs/                   # spec, plano e tarefas do backend (docs/backend/) e do front (docs/frontend/)
+├── reference/              # tabelas de referência (UUID -> nome de agentes, armas, armaduras e mapas) e calibração dos mapas
 ├── outputs/
 │   ├── figures/            # figuras geradas pelos scripts
 │   └── processed/          # bases tratadas em CSV (geradas, não versionadas)
-└── requirements.txt        # dependências de notebooks/ e scripts/
+└── docs/                   # spec, plano e tarefas do backend (docs/backend/) e do front (docs/frontend/)
 ```
+
+`apps/` são as aplicações que rodam (API e front), `packages/` o código compartilhado entre elas e a análise,
+`analysis/` o trabalho exploratório. `data/`, `reference/` e `outputs/` ficam na raiz porque todos usam.
 
 ## Subir o dashboard (VAVA Stats)
 
@@ -34,15 +36,15 @@ Precisa de Python 3.12 e Node 22.12 ou mais (ou 20.19+), que o Vite 8 exige. Doi
 
 ```sh
 # terminal 1: backend (API em http://localhost:8000/api; lê data/ ao subir)
-python3 -m venv .venv && .venv/bin/pip install -r backend/requirements.txt   # só na primeira vez
-.venv/bin/uvicorn app.main:app --reload --app-dir backend --port 8000
+python3 -m venv .venv && .venv/bin/pip install -r apps/api/requirements.txt   # só na primeira vez
+.venv/bin/uvicorn app.main:app --reload --app-dir apps/api --port 8000
 
 # terminal 2: front (abre em http://localhost:5173)
-cd vava && npm install && npm run dev
+cd apps/web && npm install && npm run dev
 ```
 
 O Vite repassa `/api` para a porta 8000. Com o backend desligado, o app mostra um aviso com o comando acima e
-volta sozinho quando ele sobe. Detalhes do front em [`vava/README.md`](vava/README.md); spec, plano e tarefas
+volta sozinho quando ele sobe. Detalhes do front em [`apps/web/README.md`](apps/web/README.md); spec, plano e tarefas
 em [`docs/frontend/`](docs/frontend/) e [`docs/backend/`](docs/backend/).
 
 ## Como executar
@@ -52,42 +54,42 @@ Todos os comandos abaixo partem da **raiz do repositório**.
 **Notebooks e scripts (pandas)**
 
 ```sh
-uv venv .venv && uv pip install --python .venv/bin/python -r requirements.txt
-# ou: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+uv venv .venv && uv pip install --python .venv/bin/python -r analysis/requirements.txt
+# ou: python3 -m venv .venv && .venv/bin/pip install -r analysis/requirements.txt
 
 # a preparação roda primeiro: grava outputs/processed/, lido pela análise exploratória
-.venv/bin/jupyter nbconvert --to notebook --execute --inplace notebooks/valorant-data-preparation.ipynb
-.venv/bin/jupyter nbconvert --to notebook --execute --inplace notebooks/valorant-exploratory-data-analysis.ipynb
+.venv/bin/jupyter nbconvert --to notebook --execute --inplace analysis/notebooks/valorant-data-preparation.ipynb
+.venv/bin/jupyter nbconvert --to notebook --execute --inplace analysis/notebooks/valorant-exploratory-data-analysis.ipynb
 
-.venv/bin/python scripts/teste_mapa_calor.py
+.venv/bin/python analysis/scripts/teste_mapa_calor.py
 ```
 
-**ETL em SQLite + marimo (`brainstorming/`)** — o loader lê `./data` e grava `./valorant.db` na pasta atual, por isso deve ser executado da raiz:
+**ETL em SQLite + marimo (`analysis/brainstorming/`)** — o loader lê `./data` e grava `./valorant.db` na pasta atual, por isso deve ser executado da raiz:
 
 ```sh
-uv sync --project brainstorming
-uv run --project brainstorming brainstorming/loader.py
-uv run --project brainstorming marimo edit brainstorming/notebook.py
+uv sync --project analysis/brainstorming
+uv run --project analysis/brainstorming analysis/brainstorming/loader.py
+uv run --project analysis/brainstorming marimo edit analysis/brainstorming/notebook.py
 ```
 
-**Backend (`backend/`)**: API do dashboard. Lê `data/` na inicialização e serve tudo em `/api`.
+**Backend (`apps/api/`)**: API do dashboard. Lê `data/` na inicialização e serve tudo em `/api`.
 
 ```sh
-uv pip install --python .venv/bin/python -r backend/requirements.txt
-.venv/bin/uvicorn app.main:app --reload --app-dir backend --port 8000
+uv pip install --python .venv/bin/python -r apps/api/requirements.txt
+.venv/bin/uvicorn app.main:app --reload --app-dir apps/api --port 8000
 # documentação interativa: http://localhost:8000/docs
-.venv/bin/pytest backend/tests
+.venv/bin/pytest apps/api/tests
 ```
 
 São 19 rotas (jogadores, times, partidas, heatmap, busca, resumo da Home e análises plugáveis), documentadas
-na spec. Para criar uma análise nova basta um arquivo em `backend/app/analises/` (passo a passo na spec, §8.5).
+na spec. Para criar uma análise nova basta um arquivo em `apps/api/app/analises/` (passo a passo na spec, §8.5).
 Spec, plano e tarefas em [`docs/backend/`](docs/backend/).
 
-**Dashboard (`vava/`)**: React + Vite, consome só a API. Ver "Subir o dashboard" acima e
-[`vava/README.md`](vava/README.md).
+**Dashboard (`apps/web/`)**: React + Vite, consome só a API. Ver "Subir o dashboard" acima e
+[`apps/web/README.md`](apps/web/README.md).
 
 ```sh
-cd vava && npm install && npm run dev      # http://localhost:5173
+cd apps/web && npm install && npm run dev      # http://localhost:5173
 npm run lint && npm run build              # antes de enviar
 ```
 
@@ -128,7 +130,7 @@ UNIVAVA_C1_002_27-06-26_poli_plague_10_x_13_unicamp_tritons_red_haven.json
 | `unicamp_tritons_red` | time | Nome do time da direita |
 | `haven` | mapa | Mapa jogado |
 
-> **Atenção:** a posição no nome do arquivo **não** indica o lado `Red`/`Blue` do JSON: o time da esquerda é o `Red` em apenas 160 das 336 partidas. Como o JSON não traz o nome dos times, associe cada `teamId` ao nome pelo placar (`teams[].roundsWon` = placar no nome do arquivo), como faz `src/valorant_data.py`. O placar nunca empata, então a associação é sempre única.
+> **Atenção:** a posição no nome do arquivo **não** indica o lado `Red`/`Blue` do JSON: o time da esquerda é o `Red` em apenas 160 das 336 partidas. Como o JSON não traz o nome dos times, associe cada `teamId` ao nome pelo placar (`teams[].roundsWon` = placar no nome do arquivo), como faz `packages/valorant-data/valorant_data.py`. O placar nunca empata, então a associação é sempre única.
 
 ---
 
@@ -551,5 +553,5 @@ Verificado em todos os **336 arquivos**:
 - **KAST**: percorra `roundResults` para identificar rounds onde o jogador fez kill, assist, sobreviveu ou foi tradado.
 - **Dano por round (ADR)**: some `damage[].damage` de cada round em `playerStats` e divida por `roundsPlayed`.
 - **Headshot %**: some `headshots` e divida por `(headshots + bodyshots + legshots)` em `playerStats[].damage`.
-- **Economia**: some `economy.loadoutValue` dos 5 jogadores e classifique a compra do time (critério do vlr.gg, usado em `src/valorant_data.py`): eco (< 5 mil cr), semi-eco (< 10 mil), semi-buy (< 20 mil) e full buy (≥ 20 mil). Os rounds 1 e 13 são pistol.
-- **Posicionamento**: as coordenadas `{x, y}` em `playerLocations`, `victimLocation`, `plantLocation` e `defuseLocation` são comparáveis dentro do mesmo mapa. Para desenhar sobre o minimapa, use a calibração oficial em `vava/assets/maps/calibration.json` (valorant-api), que **troca os eixos**: `u = y · xMultiplier + xScalarToAdd` (horizontal) e `v = x · yMultiplier + yScalarToAdd` (vertical), ambos em [0, 1].
+- **Economia**: some `economy.loadoutValue` dos 5 jogadores e classifique a compra do time (critério do vlr.gg, usado em `packages/valorant-data/valorant_data.py`): eco (< 5 mil cr), semi-eco (< 10 mil), semi-buy (< 20 mil) e full buy (≥ 20 mil). Os rounds 1 e 13 são pistol.
+- **Posicionamento**: as coordenadas `{x, y}` em `playerLocations`, `victimLocation`, `plantLocation` e `defuseLocation` são comparáveis dentro do mesmo mapa. Para desenhar sobre o minimapa, use a calibração oficial em `reference/map_calibration.json` (valorant-api), que **troca os eixos**: `u = y · xMultiplier + xScalarToAdd` (horizontal) e `v = x · yMultiplier + yScalarToAdd` (vertical), ambos em [0, 1].

@@ -1,12 +1,12 @@
 # VAVA Stats (frontend)
 
 Dashboard do circuito universitário de Valorant, no estilo do [csstats.gg](https://csstats.gg/pt-BR). React 19
-+ Vite 8, alimentado só pela API do [`backend/`](../backend/) (`/api`). Spec, plano e tarefas em
-[`docs/frontend/`](../docs/frontend/).
++ Vite 8, alimentado só pela API do [`backend/`](../api/) (`/api`). Spec, plano e tarefas em
+[`docs/frontend/`](../../docs/frontend/).
 
 ## Rodar
 
-Precisa de Node 22.12+ (ou 20.19+) e do backend na porta 8000 (comando no [README da raiz](../README.md)).
+Precisa de Node 22.12+ (ou 20.19+) e do backend na porta 8000 (comando no [README da raiz](../../README.md)).
 
 ```sh
 npm install
@@ -47,14 +47,14 @@ src/
 └── pages/          # uma pasta por página com abas (ranking/, partida/, jogador/, time/)
 public/
 ├── maps/           # minimapas
-├── agentes/, armas/  # ícones, gerados por scripts/baixar_icones.py (na raiz do repositório)
+├── agentes/, armas/  # ícones, gerados por scripts/baixar_icones.py
 ```
 
 ## Estender
 
-- **Análise nova**: um arquivo em `backend/app/analises/` aparece em `/analises` sem mudar o front; o gráfico
+- **Análise nova**: um arquivo em `apps/api/app/analises/` aparece em `/analises` sem mudar o front; o gráfico
   sai pelo `grafico.tipo` (tipo desconhecido vira tabela).
 - **Tipo de gráfico novo**: um arquivo em `src/graficos/` que recebe `{ dados, grafico }` e uma linha no
   objeto `GRAFICOS` de `GraficoAnalise.jsx` (spec, seção 8).
-- **Ícones de um agente ou arma novos**: `.venv/bin/python scripts/baixar_icones.py`, da raiz (pula o que já
+- **Ícones de um agente ou arma novos**: `.venv/bin/python apps/web/scripts/baixar_icones.py`, da raiz do repositório (pula o que já
   existe). Sem ícone, o agente aparece com as iniciais e a arma com o nome.

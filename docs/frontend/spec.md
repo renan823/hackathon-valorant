@@ -7,13 +7,13 @@
 
 ## 1. Objetivo
 
-Trocar o app atual do `vava/` (um explorador que lê JSONs arrastados para a página) por um dashboard com a
+Trocar o app atual do `apps/web/` (um explorador que lê JSONs arrastados para a página) por um dashboard com a
 navegação e o visual do [csstats.gg](https://csstats.gg/pt-BR), alimentado **só pela API** `/api`.
 
 Restrições, as mesmas do backend:
 
 - **Velocidade acima de tudo**: sem TypeScript, sem gerenciador de estado, sem biblioteca de fetch, sem
-  framework de CSS. React + Vite, como já está no `vava/`.
+  framework de CSS. React + Vite, como já está no `apps/web/`.
 - **Arquitetura simples**: a URL é o estado; cada página busca o que precisa; um cache em memória por URL.
 - **Extensível**: uma análise nova no backend aparece no dashboard **sem mudar o front** (seção 8).
 
@@ -76,7 +76,7 @@ URL (rota + query) ──► useFiltros() ──► useApi(caminho, params) ─�
 
 | Tema | Decisão | Motivo |
 |---|---|---|
-| Base | React 19 + Vite 8 + JavaScript + oxlint, o que já existe no `vava/` | Nada a configurar |
+| Base | React 19 + Vite 8 + JavaScript + oxlint, o que já existe no `apps/web/` | Nada a configurar |
 | Rotas | `react-router` 8 (modo biblioteca: `createBrowserRouter` + `RouterProvider` + rotas aninhadas com `<Outlet/>`). Sem *loaders* | Abas como rotas (`/jogadores/:puuid/partidas`), links compartilháveis e o botão voltar funcionando |
 | Estado | **A URL é o estado**: filtros, aba e ordenação ficam na rota e na query string. `useState` só para UI efêmera (hover, round selecionado) | F5, voltar e compartilhar link funcionam sem código extra |
 | Dados | Hook próprio `useApi` (5.1), sem React Query/SWR | Os dados não mudam enquanto o backend roda, então o cache não precisa de invalidação: ~30 linhas resolvem |
@@ -84,17 +84,17 @@ URL (rota + query) ──► useFiltros() ──► useApi(caminho, params) ─�
 | Heatmap | `HeatmapCanvas.jsx` atual, reaproveitado | Já funciona com pontos em `[0,1]`, que é o que a API devolve |
 | Grafo de duelos | `react-force-graph-2d` (já instalado), com `MatchGraph.jsx` adaptado ao `/duelos` | A lógica de contagem saiu do front e foi para o backend |
 | Ícones | `lucide-react` | Ícones de round (caveira, alicate, bomba, relógio), busca, setas |
-| CSS | CSS global com variáveis (`index.css`) e um `.css` por componente, classes no estilo BEM, como o `vava/` já faz | Sem setup novo |
+| CSS | CSS global com variáveis (`index.css`) e um `.css` por componente, classes no estilo BEM, como o `apps/web/` já faz | Sem setup novo |
 | Fonte | Inter servida localmente (`@fontsource-variable/inter`) | Mesmo visual em qualquer máquina, sem internet (F9) |
 
 Dependências novas: `npm install react-router@8 recharts@3 lucide-react@1 @fontsource-variable/inter@5`. Elas
-foram instaladas juntas com o React 19.3.1 do `vava/` numa pasta de teste (F8); o `package-lock.json` fixa as
+foram instaladas juntas com o React 19.3.1 do `apps/web/` numa pasta de teste (F8); o `package-lock.json` fixa as
 versões.
 
 ### 4.1 Estrutura de pastas
 
 ```
-vava/
+apps/web/
 ├── index.html               # lang="pt-BR", título "VAVA Stats"
 ├── vite.config.js           # já tem o proxy /api → :8000
 ├── public/maps/<mapa>.png   # minimapas (já existem), nome do mapa em minúsculas
@@ -120,7 +120,7 @@ Regra de organização: **páginas buscam dados; componentes só recebem props.*
 `BarraFiltros` e `PainelHeatmap`, que existem para encapsular uma chamada sempre igual (`/busca`, `/filtros`,
 `/heatmap`) e recebem só o que muda nela.
 
-### 4.2 O que acontece com o `vava/` atual
+### 4.2 O que acontece com o `apps/web/` atual
 
 | Arquivo | Destino |
 |---|---|
@@ -156,7 +156,7 @@ export function useApi(caminho, params) { … }
 - Resposta com erro **não** fica no cache: tentar de novo funciona.
 - Chamadas em sequência para a mesma URL compartilham a mesma `Promise` (sem requisição duplicada).
 - `App.jsx` chama `/api/saude` uma vez. Se falhar, mostra no topo: *"Backend fora do ar. Rode
-  `.venv/bin/uvicorn app.main:app --reload --app-dir backend --port 8000` na raiz do repositório."* Só esse
+  `.venv/bin/uvicorn app.main:app --reload --app-dir apps/api --port 8000` na raiz do repositório."* Só esse
   aviso usa o `/saude` (F10). Com o backend desligado, o proxy do Vite responde 502 com o corpo vazio.
 
 ### 5.2 Filtros comuns (`filtros.js`)
@@ -577,7 +577,7 @@ O layout busca `GET /api/times/{id}`.
 - **Tela cheia** (`/analises/:id`): o mesmo card em largura total, com "ver dados" (tabela com todas as
   colunas de `dados`) e o `kpi`, se houver.
 - *Aceite:* as 9 análises aparecem nas 5 abas; `?mapa=Ascent` muda os números; um arquivo novo em
-  `backend/app/analises/` aparece na página sem mudança no front.
+  `apps/api/app/analises/` aparece na página sem mudança no front.
 
 ### 7.8 Mapas · `/mapas` e `/mapas/:mapa` · P1
 
@@ -643,7 +643,7 @@ Regras do renderizador:
 
 **Como adicionar um tipo de gráfico novo:**
 
-1. Criar `vava/src/graficos/<Tipo>.jsx`, que recebe `{dados, grafico}`.
+1. Criar `apps/web/src/graficos/<Tipo>.jsx`, que recebe `{dados, grafico}`.
 2. Registrar no objeto `GRAFICOS` de `GraficoAnalise.jsx` (`{barras: Barras, …}`).
 3. Documentar os campos do `grafico` que ele usa na tabela acima e na spec do backend (§8.5).
 
@@ -674,9 +674,9 @@ Regras do renderizador:
 
 ```sh
 # terminal 1, na raiz do repositório
-.venv/bin/uvicorn app.main:app --reload --app-dir backend --port 8000
+.venv/bin/uvicorn app.main:app --reload --app-dir apps/api --port 8000
 # terminal 2
-cd vava && npm install && npm run dev        # http://localhost:5173 (o proxy repassa /api para :8000)
+cd apps/web && npm install && npm run dev        # http://localhost:5173 (o proxy repassa /api para :8000)
 npm run lint && npm run build                # antes de abrir PR
 ```
 
@@ -715,7 +715,7 @@ Nenhum bloqueia o front. O que ficou decidido para cada um (F1 e F11):
 | **Filtros nos perfis**: aceitar `Filtros` em `/jogadores/{puuid}`, `/jogadores/{puuid}/partidas` e `/times/{id}` ("como esse jogador foi na Fase de Grupos?") | Fora da v1: os perfis mostram todos os torneios. Se entrar depois, basta mostrar a `BarraFiltros` nessas páginas |
 | **`grafico.n` em todas as análises**: hoje só a `matriz` diz qual coluna é a amostra | Sem mudança no backend agora. O front lê `grafico.n` quando existir e, senão, usa `partidas`/`partidas_mapa` (6.5) |
 | **Lado nos abates da partida**: `/partidas/{id}/abates` não traz `lado_killer`/`lado_vitima` | O front deriva o lado de `/rounds`, que a aba já busca |
-| **`/resumo` sem `min_rounds`**: o top 5 da Home usava o corte fixo de 50 | **Feito** (F1): `MIN_ROUNDS_PADRAO` passou a 100 em `backend/app/routers/jogadores.py`, e os testes foram ajustados (103 passam) |
+| **`/resumo` sem `min_rounds`**: o top 5 da Home usava o corte fixo de 50 | **Feito** (F1): `MIN_ROUNDS_PADRAO` passou a 100 em `apps/api/app/routers/jogadores.py`, e os testes foram ajustados (103 passam) |
 | **Spec do backend desatualizada em detalhes**: as respostas reais são um superconjunto do documentado. `por_agente` e `por_mapa` do jogador trazem também `vitorias`, `rounds`, `adr` e `kast_pct`; `por_mapa` do time traz `vitorias` e `saldo_rounds`; `pistol` devolve linhas `{pistol, rounds, conversao_pct}` | Pendente: corrigir a seção 8 da spec do backend. Esta spec já usa as respostas reais |
 
 ## 12. Decisões
@@ -730,7 +730,7 @@ seções da coluna "Onde" no mesmo PR.
 | F1 | **Corte de amostra: 100 rounds para jogadores, 8 partidas para times.** O backend passou a usar 100 como padrão (`MIN_ROUNDS_PADRAO`), o que vale para o Ranking, a Home e o "#N no ranking" do perfil. Para times, o corte é 8 na Home (já era) e no Ranking › Times (o front envia `min_partidas=8`, porque o padrão da API é 0). O Ranking tem seletores: 50/100/150/200 rounds e 0/5/8/10 partidas | Com 50 rounds, o 1º lugar tinha 3 partidas (TORONTO#lulu) e a mediana do top 10 era 4,5. Com 100, o 1º é lule#dfnt (12 partidas), a mediana do top 10 sobe para 12 e ficam 222 dos 411 jogadores. Mudar só no front deixaria a Home e o perfil, que o front não controla, com outro corte. Com 8 partidas ficam 34 dos 68 times, o mesmo corte da EDA | 7.1, 7.2, 7.5, 10; D4 e D5 do backend |
 | F2 | **ACS é a métrica principal** (tile de destaque e ordenação padrão). Sem rating composto | É o número que quem joga Valorant reconhece, e ele já vem calculado. Um rating exigiria escolher e justificar pesos, sem tempo para validar. O KAST, a métrica mais ligada à vitória (r ≈ 0,59), aparece em tile e em coluna | 6.3, 7.2, 7.5; D1 do backend |
 | F3 | **Nomes dos times como a API devolve** ("Usp Stars", "Ufmt Turuna") | Os JSONs não têm nome de time (só Red/Blue, e `customGameName` vem vazio): a única fonte é o slug do arquivo, e adivinhar siglas arrisca publicar nome errado. Se alguém do circuito montar a lista oficial, ela entra como um dicionário em `reference/` lido pelo `dados.py`, sem mudança no front | — |
-| F4 | **Ícones: iniciais na P0, imagens baixadas na P1.** O `SeloAgente` mostra as iniciais do agente num selo neutro. Na P1, um script baixa uma vez os ícones de agentes e armas da valorant-api para `vava/public/agentes/` e `vava/public/armas/` (os UUIDs estão no `reference/`), e o selo usa a imagem quando ela existe. Nada é carregado de fora em tempo real e não há cor por função | A demo não pode depender de internet, e as iniciais não bloqueiam nada. Cor por função exigiria 4 cores distinguíveis lado a lado, e o validador de paleta só aprova 3 nesse uso; a função já aparece em texto | 3, 6.4 |
+| F4 | **Ícones: iniciais na P0, imagens baixadas na P1.** O `SeloAgente` mostra as iniciais do agente num selo neutro. Na P1, um script baixa uma vez os ícones de agentes e armas da valorant-api para `apps/web/public/agentes/` e `apps/web/public/armas/` (os UUIDs estão no `reference/`), e o selo usa a imagem quando ela existe. Nada é carregado de fora em tempo real e não há cor por função | A demo não pode depender de internet, e as iniciais não bloqueiam nada. Cor por função exigiria 4 cores distinguíveis lado a lado, e o validador de paleta só aprova 3 nesse uso; a função já aparece em texto | 3, 6.4 |
 | F5 | **Um valor por filtro** na v1; multisseleção na P2 | Select simples é o mais rápido. A URL e a API já aceitam valores repetidos, então a P2 só troca o componente | 5.2 |
 | F6 | **Responsivo desde a P0** (revista em 21/10/2026): funciona bem de 1024 a 2560 px de largura, inclusive em telas baixas, e continua utilizável em 768 e 390 px. A página nunca rola na horizontal; tabelas e blocos largos rolam dentro de si | A aplicação vai rodar em computadores de tamanhos diferentes. A versão anterior (desktop primeiro, mobile na P2) supunha uma única máquina de demo | 6.1, 6.6, 9, 10 |
 | F7 | **O upload de JSONs sai** (`DropZone`, `Sidebar`, `MatchCard`, `utils.js`, `assets/maps/calibration.json`) já na primeira tarefa | O backend lê `data/`; manter dois caminhos de dados dobra a manutenção. O heatmap e o grafo continuam, como abas da Partida | 4.2 |
@@ -739,7 +739,7 @@ seções da coluna "Onde" no mesmo PR.
 
 | # | Decisão | Por quê | Onde |
 |---|---|---|---|
-| F8 | **Versões**: `react-router@8` (8.5.0), `recharts@3` (3.10.1), `lucide-react@1` (1.61.0), `@fontsource-variable/inter@5` (5.3.0) | Foram instaladas juntas com o React 19.3.1 do `vava/` numa pasta de teste. As APIs que a spec usa existem (`createBrowserRouter`, `RouterProvider`, `NavLink`, `useSearchParams`; `BarChart`, `ReferenceLine`…; os ícones `Skull`, `Wrench`, `Bomb`, `Timer`, `Swords`, `Shield`), e o `react-is` fica fixo em 19.3.1 no `package.json`: sem isso, o `vava/` resolve a 16.13.1 trazida pelo `prop-types` do `react-force-graph-2d`, que não reconhece os elementos do React 19. A spec dizia react-router 7, mas a versão atual é a 8, que exige React 19.2.7 ou mais | 4 |
+| F8 | **Versões**: `react-router@8` (8.5.0), `recharts@3` (3.10.1), `lucide-react@1` (1.61.0), `@fontsource-variable/inter@5` (5.3.0) | Foram instaladas juntas com o React 19.3.1 do `apps/web/` numa pasta de teste. As APIs que a spec usa existem (`createBrowserRouter`, `RouterProvider`, `NavLink`, `useSearchParams`; `BarChart`, `ReferenceLine`…; os ícones `Skull`, `Wrench`, `Bomb`, `Timer`, `Swords`, `Shield`), e o `react-is` fica fixo em 19.3.1 no `package.json`: sem isso, o `apps/web/` resolve a 16.13.1 trazida pelo `prop-types` do `react-force-graph-2d`, que não reconhece os elementos do React 19. A spec dizia react-router 7, mas a versão atual é a 8, que exige React 19.2.7 ou mais | 4 |
 | F9 | **Inter servida localmente** (`@fontsource-variable/inter`, importada no `main.jsx`), com `tabular-nums` em tabelas e eixos | O `index.css` já pede a Inter, mas nada a carregava. Assim o visual é o mesmo em qualquer máquina, sem internet | 4, 6.2 |
 | F10 | **Backend fora do ar**: o aviso global depende só de `/api/saude`. Num bloco, 502/503/504 ou falha de rede → "backend fora do ar"; 404 → "não encontrado"; outro status → "erro N" + "tentar de novo" | Testado: com o backend desligado, o proxy do Vite responde **502** com corpo vazio, e não "status 0" como a spec supunha. Um 500 do FastAPI é bug, não queda, por isso não aciona o aviso | 5.1 |
 | F11 | **Os ajustes de backend da seção 11 ficam fora da v1** (filtros nos perfis, `grafico.n` em todas as análises, lado nos abates) | Nenhum é necessário para a P0, e o front contorna cada um com o que a API já tem | 6.5, 8, 11 |
@@ -794,7 +794,7 @@ afeta a regra; aqui fica o resumo, para quem conhece a versão anterior.
   vale a cor 1. A dispersão colore só pelos slots de `CORES_SERIE`; o resto vai para "Outros".
 - 404 (7.9): com a busca, como a spec pedia.
 
-**Ícones (F4)**: `scripts/baixar_icones.py` grava `vava/public/agentes/` (29) e `vava/public/armas/` (21). A
+**Ícones (F4)**: `apps/web/scripts/baixar_icones.py` grava `apps/web/public/agentes/` (29) e `apps/web/public/armas/` (21). A
 faca vem da API como `meio = "Melee"` e o arquivo segue a API (`melee.png`), não o nome do reference
 ("Confronto").
 

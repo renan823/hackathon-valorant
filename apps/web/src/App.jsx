@@ -4,7 +4,7 @@ import { buscar } from './api'
 import Navbar from './components/Navbar'
 import './App.css'
 
-const COMANDO_BACKEND = '.venv/bin/uvicorn app.main:app --reload --app-dir backend --port 8000'
+const COMANDO_BACKEND = '.venv/bin/uvicorn app.main:app --reload --app-dir apps/api --port 8000'
 const NOVA_TENTATIVA_MS = 5000
 
 // "2026-10-21T16:50:44.51" → "21/10/2026 16:50", sem passar por Date (fuso: plano, seção 2).

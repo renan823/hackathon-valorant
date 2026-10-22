@@ -5,7 +5,7 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [react()],
   server: {
-    // Backend FastAPI (backend/): o front chama /api/... sem configurar URL.
+    // Backend FastAPI (apps/api/): o front chama /api/... sem configurar URL.
     proxy: {
       '/api': 'http://localhost:8000',
     },

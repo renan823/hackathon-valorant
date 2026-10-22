@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { iconeArma } from '../formatos'
 import './IconeArma.css'
 
-// Silhueta da arma (vava/public/armas, F4), com o nome no alt e no title. Habilidade (categoria Ability, ex.:
+// Silhueta da arma (apps/web/public/armas, F4), com o nome no alt e no title. Habilidade (categoria Ability, ex.:
 // Headhunter) não tem ícone e sai como texto; arquivo que falhar também. `comNome` escreve o nome ao lado.
 function IconeArma({ meio, categoria, comNome = false }) {
 	const src = iconeArma(meio)

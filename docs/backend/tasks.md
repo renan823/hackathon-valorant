@@ -32,9 +32,9 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
 ## Fase 0: Esqueleto (Pessoa A)
 
 - [x] **T0.1 Dependências** · 10 min · Dono: Claude
-  - *Arquivos:* `backend/requirements.txt` (`fastapi`, `uvicorn[standard]`, `pandas==3.0.6`, `numpy==2.5.4`,
+  - *Arquivos:* `apps/api/requirements.txt` (`fastapi`, `uvicorn[standard]`, `pandas==3.0.6`, `numpy==2.5.4`,
     `pytest`, `httpx2`)
-  - *Aceite:* `uv pip install --python .venv/bin/python -r backend/requirements.txt` funciona e
+  - *Aceite:* `uv pip install --python .venv/bin/python -r apps/api/requirements.txt` funciona e
     `.venv/bin/python -c "import fastapi, uvicorn"` não dá erro.
 
 - [x] **T0.2 Estrutura e stubs** · 30 min · Dono: Claude · *Depende:* T0.1
@@ -44,18 +44,18 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
     `HTTPException(501)`. O `main.py` tem `lifespan` chamando `dados.carregar()`, CORS para
     `localhost:5173` e `include_router(..., prefix="/api")` para os 5 routers.
   - `GET /api/saude` já funciona e devolve `{status, partidas, carregado_em}`.
-  - *Aceite:* `.venv/bin/uvicorn app.main:app --app-dir backend` sobe; o `/docs` lista as 19 rotas da spec;
+  - *Aceite:* `.venv/bin/uvicorn app.main:app --app-dir apps/api` sobe; o `/docs` lista as 19 rotas da spec;
     `/api/saude` responde 200.
 
 - [x] **T0.3 Proxy do Vite e README** · 10 min · Dono: Claude · proxy verificado em 21/10/2026 (Node 22.23.4): `/api/saude`, rotas com dados e 404 passam pela porta 5173 · *Depende:* T0.2
-  - *Arquivos:* `vava/vite.config.js` (`server.proxy: {'/api': 'http://localhost:8000'}`), `README.md`
+  - *Arquivos:* `apps/web/vite.config.js` (`server.proxy: {'/api': 'http://localhost:8000'}`), `README.md`
     (seção "Como executar" → backend).
   - *Aceite:* com backend e `npm run dev` rodando, `fetch('/api/saude')` no navegador devolve 200.
 
 - [x] **T0.4 Base de testes** · 10 min · Dono: Claude · *Depende:* T0.2
-  - *Arquivos:* `backend/tests/conftest.py` (fixture de sessão com `with TestClient(app) as c`),
-    `backend/tests/test_smoke.py` com `test_saude`.
-  - *Aceite:* `.venv/bin/pytest backend/tests` passa.
+  - *Arquivos:* `apps/api/tests/conftest.py` (fixture de sessão com `with TestClient(app) as c`),
+    `apps/api/tests/test_smoke.py` com `test_saude`.
+  - *Aceite:* `.venv/bin/pytest apps/api/tests` passa.
 
 **✔ Checkpoint 0:** merge na `main`. A partir daqui cada pessoa trabalha em arquivos separados.
 
@@ -66,7 +66,7 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
 ### ETL e mapas (Pessoa C)
 
 - [x] **T1.1 Coordenadas e planter no ETL** · 30 min · Dono: Claude · *Depende:* T0.2
-  - *Arquivos:* `src/valorant_data.py`
+  - *Arquivos:* `packages/valorant-data/valorant_data.py`
   - `abates`: novas colunas `vitima_x`, `vitima_y`, `killer_x`, `killer_y`, com coordenadas cruas do jogo e
     `None` quando o killer não está em `playerLocations`.
   - `rounds`: novas colunas `plant_x`, `plant_y` e `planter`, com `None` quando não houve plant.
@@ -74,7 +74,7 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
     `plant_x` preenchido em 4 653 rounds.
 
 - [x] **T1.2 Corrigir FK, FD e KAST (R10)** · 30 min · Dono: Claude · *Depende:* T1.1
-  - *Arquivos:* `src/valorant_data.py` (`_processar_partida`)
+  - *Arquivos:* `packages/valorant-data/valorant_data.py` (`_processar_partida`)
   - First kill e first death passam a usar o primeiro abate **válido** do round; `com_kill` do KAST só conta
     killers de abates válidos. `first_kill_atacante` em `rounds` segue a mesma regra.
   - *Aceite:* `Σ first_kills == Σ first_deaths ==` nº de rounds com pelo menos 1 abate válido.
@@ -83,14 +83,14 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
     contar só abates válidos.
 
 - [x] **T1.3 Reexecutar notebooks** · 20 min · Dono: Claude · só o KAST por função mudou no texto (≈ 68–72%) · *Depende:* T1.2
-  - *Arquivos:* `notebooks/*.ipynb`, `outputs/processed/*.csv`
+  - *Arquivos:* `analysis/notebooks/*.ipynb`, `outputs/processed/*.csv`
   - Rodar os dois notebooks com `nbconvert --execute --inplace`. Conferir e, se mudarem, atualizar nos
     textos da EDA: KAST r ≈ 0,59 (seção 10.7), FK 75% / 32% (seção 10.3) e a tabela "venceu × perdeu" (seção 10.1).
   - *Aceite:* os notebooks rodam sem erro e todo número citado nos textos confere com a saída.
 
 - [x] **T1.4 Normalização de coordenadas** · 30 min · Dono: Claude · *Depende:* T0.2
-  - *Arquivos:* `reference/map_calibration.json` (cópia de `vava/assets/maps/calibration.json`),
-    `backend/app/mapas.py`
+  - *Arquivos:* `reference/map_calibration.json` (cópia de `apps/web/assets/maps/calibration.json`),
+    `apps/api/app/mapas.py`
   - `normalizar(mapa, x, y)` usa `x' = y·xMultiplier + xScalarToAdd`, `y' = x·yMultiplier + yScalarToAdd`, e
     devolve `None` para pontos fora de `[0,1]` (R6) ou entradas nulas. A chave do mapa é o nome em minúsculas.
   - *Aceite:* 100% dos 4 653 plants ficam em `[0,1]`; no máximo 47 pontos de abate são descartados.
@@ -98,7 +98,7 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
 ### Dados (Pessoa A)
 
 - [x] **T1.5a `dados.py`: partidas, times e jogadores** · 1 h · Dono: Claude · *Depende:* T1.1, T1.4, T1.6
-  - *Arquivos:* `backend/app/dados.py`
+  - *Arquivos:* `apps/api/app/dados.py`
   - `carregar()` chama `carregar_tabelas()` e depois `preparar()` e preenche `BASE`.
   - `jogadores`: sem observadores, `nick` mais recente, `time_id`, `adversario_id`.
   - `partidas`: 1 linha por `match_id` com as colunas do plano (seção 3.1), incluindo `serie_id` (código sem a
@@ -117,7 +117,7 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
     as colunas do contrato (plano, seção 3.1) existem.
 
 - [x] **T1.6 `para_json` e `partida_bruta`** · 20 min · Dono: Claude · *Depende:* T0.2
-  - *Arquivos:* `backend/app/dados.py`
+  - *Arquivos:* `apps/api/app/dados.py`
   - *Aceite:* teste unitário em que `para_json` converte DataFrame, Series, dict aninhado, `np.int64`,
     `np.bool`, `NaN`, `pd.Timestamp` e float (arredondado para 2 casas) em tipos JSON. `partida_bruta(id)`
     devolve o JSON do arquivo, com `lru_cache`, e levanta `KeyError` para id inexistente.
@@ -125,7 +125,7 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
 ### Filtros e métricas (Pessoa B)
 
 - [x] **T1.7 `Filtros`** · 30 min · Dono: Claude · *Depende:* T0.2
-  - *Arquivos:* `backend/app/filtros.py`
+  - *Arquivos:* `apps/api/app/filtros.py`
   - *Aceite:* testes unitários com um DataFrame pequeno:
     - aceita múltiplos valores;
     - ignora colunas que o `df` não tem;
@@ -133,7 +133,7 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
     - sem filtros, devolve o `df` inteiro.
 
 - [x] **T1.8 `agregar` e `ranking`** · 45 min · Dono: Claude · *Depende:* T0.2
-  - *Arquivos:* `backend/app/metricas.py`
+  - *Arquivos:* `apps/api/app/metricas.py`
   - Métricas da spec (seção 6) somando antes de dividir. Divisão por zero (ex.: `deaths = 0`) → `None`.
   - `ranking()` aplica `min_rounds`, ordena e adiciona `posicao`.
   - *Aceite:* para 1 jogador escolhido, `acs`, `adr`, `kd` e `kast_pct` iguais à conta feita à mão sobre as
@@ -144,7 +144,7 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
   - *Aceite:* 4 torneios (a Univavá com 5 fases); 10 mapas (sem Bind e Icebox, R8); 68 times; 28 agentes
     com função; 4 funções.
 
-**✔ Checkpoint 1:** `BASE`, `Filtros`, `agregar` e `/filtros` na `main`. Critérios de aceite da fase em `backend/tests/test_nucleo.py`. Os routers da Fase 2 podem ser plugados.
+**✔ Checkpoint 1:** `BASE`, `Filtros`, `agregar` e `/filtros` na `main`. Critérios de aceite da fase em `apps/api/tests/test_nucleo.py`. Os routers da Fase 2 podem ser plugados.
 
 ---
 
@@ -218,19 +218,19 @@ Formatos conforme a spec (seção 8).
   - *Aceite:* contadores 336 partidas / 411 jogadores / 68 times / 6 618 rounds / 46 371 abates válidos;
     8 últimas partidas; top 5 jogadores e top 5 times; `kpis` vindos das análises, sem recalcular.
 
-**✔ Checkpoint 2:** as 17 rotas de domínio respondem 200 com dados reais (as 2 de análises vêm na Fase 3). Critérios de aceite em `backend/tests/test_dominios.py`; todas abaixo de 300 ms (a mais lenta é `/heatmap` sem filtro de jogador, com ~160 ms).
+**✔ Checkpoint 2:** as 17 rotas de domínio respondem 200 com dados reais (as 2 de análises vêm na Fase 3). Critérios de aceite em `apps/api/tests/test_dominios.py`; todas abaixo de 300 ms (a mais lenta é `/heatmap` sem filtro de jogador, com ~160 ms).
 
 ---
 
 ## Fase 3: Análises (Pessoa D)
 
 - [x] **T3.1 Registro e router** · 45 min · Dono: Claude · *Depende:* T1.5a, T1.6, T1.7
-  - *Arquivos:* `backend/app/analises/__init__.py`, `backend/app/routers/analises.py`
+  - *Arquivos:* `apps/api/app/analises/__init__.py`, `apps/api/app/routers/analises.py`
   - Decorator `@analise`, `REGISTRO` e autoimport com `pkgutil.iter_modules`.
   - *Aceite:* criar um arquivo de teste com `@analise` faz a análise aparecer em `/api/analises` sem tocar
     em outro arquivo; id desconhecido → 404; os filtros chegam até a função.
 
-Uma análise por arquivo em `backend/app/analises/`. Cada uma devolve `n` (R8), e o valor de referência
+Uma análise por arquivo em `apps/api/app/analises/`. Cada uma devolve `n` (R8), e o valor de referência
 abaixo é o *Aceite* sem filtros.
 
 - [x] **T3.2 `lado_por_mapa.py`** · 20 min · Dono: Claude · ataque vence 51,8% no geral; Ascent pende para a defesa.
@@ -243,20 +243,20 @@ abaixo é o *Aceite* sem filtros.
 - [x] **T3.9 `metricas_vitoria.py`** · 30 min · Dono: Claude · correlação ponto-bisserial com `venceu`; KAST é a maior (r ≈ 0,59).
 - [x] **T3.10 `plant_sites.py`** · 20 min · Dono: Claude · Haven: C 464 / A 404 / B 148; Lotus: C 546 / A 482 / B 226.
 
-**✔ Checkpoint 3:** `/api/analises` lista 9 análises e todas respondem com os valores de referência. Critérios em `backend/tests/test_analises.py`; cada análise responde em < 50 ms e `/resumo` (com os 4 KPIs) em ~150 ms.
+**✔ Checkpoint 3:** `/api/analises` lista 9 análises e todas respondem com os valores de referência. Critérios em `apps/api/tests/test_analises.py`; cada análise responde em < 50 ms e `/resumo` (com os 4 KPIs) em ~150 ms.
 
 ---
 
 ## Fase 4: Qualidade (Pessoa A)
 
 - [x] **T4.1 Smoke test completo** · 30 min · Dono: Claude · 19 rotas, 9 rotas de 404 e números de conferência; a lista de rotas é checada contra o OpenAPI · *Depende:* Checkpoints 2 e 3
-  - *Arquivos:* `backend/tests/test_smoke.py`
+  - *Arquivos:* `apps/api/tests/test_smoke.py`
   - Uma chamada por rota (status 200 e chaves principais), um 404 por recurso e os números da spec
     (seção 9): 51,8%, 86,5% e `Σ kills`.
   - *Aceite:* `pytest` passa em menos de 30 s.
 
 - [x] **T4.2 Testes de consistência dos dados** · 30 min · Dono: Claude · 3 sabotagens no ETL (R1 e duas do R10) foram detectadas. Limitação: o auto-trade do KAST (R10) não tem teste dedicado; foi validado na T1.2 comparando antes e depois · *Depende:* T1.5b
-  - *Arquivos:* `backend/tests/test_dados.py`
+  - *Arquivos:* `apps/api/tests/test_dados.py`
   - As checagens da validação viram asserts sobre `BASE`: `match_id` único, 5×5 por partida, placar = soma
     dos rounds, lados trocam no round 13, todos os UUIDs mapeados, coordenadas em `[0,1]`, `Σ kills` batendo.
   - *Aceite:* passa; quebrar o ETL de propósito (ex.: remover o filtro `valido`) faz o teste falhar.

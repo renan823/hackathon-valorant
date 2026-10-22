@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pandas as pd
 
-ARQUIVO_CALIBRACAO = Path(__file__).resolve().parents[2] / "reference" / "map_calibration.json"
+ARQUIVO_CALIBRACAO = Path(__file__).resolve().parents[3] / "reference" / "map_calibration.json"
 
 
 @cache
