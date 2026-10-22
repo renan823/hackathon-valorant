@@ -1,4 +1,5 @@
 import { equipe, formatar } from '../formatos'
+import IconeArma from './IconeArma'
 import Nick from './Nick'
 import './EventoAbate.css'
 
@@ -26,7 +27,7 @@ function EventoAbate({ a, partida }) {
 	return (
 		<span className="evento-abate">
 			<Marcador partida={partida} timeId={a.killer.time_id} /><Nick puuid={a.killer.puuid} nick={a.killer.nick} />
-			<span className="evento-abate__meio muted">{a.meio}</span>
+			<span className="evento-abate__meio muted"><IconeArma meio={a.meio} categoria={a.categoria_meio} /></span>
 			{vitima}
 			{a.assistencias > 0 && <span className="muted numero"> +{a.assistencias}</span>}
 		</span>

@@ -9,7 +9,7 @@
 
 .armas__grupo li {
   display: grid;
-  grid-template-columns: minmax(70px, 120px) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(120px, 190px) minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   font-size: 0.875rem;

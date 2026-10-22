@@ -136,6 +136,15 @@ export function dividirNick(nick) {
   return i < 0 ? { nome: texto, tag: '' } : { nome: texto.slice(0, i), tag: texto.slice(i + 1) }
 }
 
+// --- Ícones ---------------------------------------------------------------------------------
+
+// Mesmo nome de arquivo de scripts/baixar_icones.py: minúsculas, sem acentos nem símbolos ("KAY/O" → "kayo.png").
+export function arquivoIcone(nome) {
+  return String(nome ?? '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '') + '.png'
+}
+export const iconeAgente = nome => `/agentes/${arquivoIcone(nome)}`
+export const iconeArma = meio => `/armas/${arquivoIcone(meio)}`
+
 // --- Links e equipes -------------------------------------------------------------------------
 
 export const linkJogador = puuid => `/jogadores/${encodeURIComponent(puuid)}`

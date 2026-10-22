@@ -2,6 +2,7 @@ import { useParams } from 'react-router'
 import { useApi } from '../../api'
 import { contagem, formatar } from '../../formatos'
 import Estado from '../../components/Estado'
+import IconeArma from '../../components/IconeArma'
 import './Armas.css'
 
 // Aba Armas do jogador (spec 7.5): barras horizontais de `pct`, agrupadas por categoria_meio. Barras em HTML:
@@ -30,7 +31,7 @@ function Armas() {
 								<ul>
 									{g.armas.map(a => (
 										<li key={a.meio}>
-											<span className="armas__nome">{a.meio}</span>
+											<span className="armas__nome"><IconeArma meio={a.meio} categoria={a.categoria_meio} comNome /></span>
 											<span className="armas__trilho" aria-hidden="true">
 												<span className="armas__barra" style={{ width: `${(100 * a.pct) / maior}%` }} />
 											</span>

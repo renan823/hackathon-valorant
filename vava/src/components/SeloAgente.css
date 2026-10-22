@@ -13,3 +13,5 @@
   font-weight: 700;
   letter-spacing: 0.02em;
 }
+
+.selo-agente--icone { padding: 0; object-fit: cover; }

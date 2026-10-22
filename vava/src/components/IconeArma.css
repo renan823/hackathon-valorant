@@ -1,0 +1,5 @@
+/* A silhueta é branca sobre transparente (384 × 96): a altura manda, a largura acompanha. */
+.icone-arma { display: inline-block; height: 16px; width: auto; flex-shrink: 0; opacity: 0.85; }
+.icone-arma--texto { height: auto; opacity: 1; }
+.icone-arma__com-nome { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.icone-arma__com-nome .icone-arma { width: 64px; object-fit: contain; object-position: left center; }

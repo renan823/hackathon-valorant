@@ -115,6 +115,7 @@ CATEGORIAS (rótulos das abas de Análises), CORES_SERIE (F13), RAMPA_CALOR (F14
 | `BarraRounds` | `rounds`, `partida`, `compacta?`, `selecionado?`, `onSelecionar?` | |
 | `MapaCalor` | `mapa`, `pontos: [x, y][]`, `total?` | Rampa da F14 |
 | `PainelHeatmap` | `mapas`, `filtro?` (`{jogador}` ou `{time}`), `tipos?` (kills, mortes, plants), `campos?` (filtros comuns) | Chips de mapa (só com 2+), tipo, lado e `BarraFiltros` em volta do `MapaCalor`; abas Heatmap do Jogador e do Time e explorador do Mapa |
+| `IconeArma` | `meio`, `categoria?`, `comNome?` | Silhueta de `/armas/<nome>.png`; habilidade (Ability) ou arquivo que falhar vira texto. `SeloAgente` usa `/agentes/<nome>.png` e volta às iniciais |
 | `BarraLados` | `atk` (% de rounds do ataque) | Barra ataque \| defesa com a marca dos 50% e os dois números escritos; Mapas e Mapa |
 | `GraficoAnalise` | `analise` (resposta de `/api/analises/{id}`), `altura?` | Escolhe o gráfico por `grafico.tipo` (spec 8) |
 | `Histograma` | `faixas` (resposta de `/distribuicao`), `metrica` | |

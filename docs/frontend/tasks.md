@@ -478,7 +478,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ### Passo 3.8: Ícones (1 h)
 
-- [ ] **T3.8a `scripts/baixar_icones.py`** · 35 min · F4 (caminho a partir da raiz do repositório)
+- [x] **T3.8a `scripts/baixar_icones.py`** · 35 min · F4 (caminho a partir da raiz do repositório)
   - *Arquivos:* `scripts/baixar_icones.py`; `vava/public/agentes/` e `vava/public/armas/` (gerados e
     versionados).
   - Lê `reference/valorant_reference.json`. Agentes: `https://media.valorant-api.com/agents/<uuid>/displayicon.png`,
@@ -489,7 +489,7 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
   - *Aceite:* 29 ícones de agente (Miks incluso) e 21 de arma; `vava/public/agentes/` com menos de 1 MB;
     rodar de novo não baixa nada.
 
-- [ ] **T3.8b Ícones na interface** · 25 min · F4
+- [x] **T3.8b Ícones na interface** · 25 min · F4
   - *Arquivos:* `src/components/SeloAgente.jsx`; o kill feed (T2.6b e T3.1b) e a aba Armas (T3.3a).
   - `SeloAgente` usa `/agentes/<nome>.png` e volta às iniciais se a imagem falhar (`onError`). Kill feed e
     Armas usam `/armas/<nome>.png`, com o nome em texto quando não há ícone (habilidades como Headhunter).
