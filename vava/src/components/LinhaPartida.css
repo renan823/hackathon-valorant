@@ -1,0 +1,84 @@
+.linha-partida {
+  position: relative;
+  display: grid;
+  grid-template-columns: 110px minmax(150px, 1fr) minmax(280px, 2fr) minmax(180px, 1.2fr);
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  border-radius: var(--raio);
+}
+.linha-partida:hover { border-color: var(--text-muted); }
+.linha-partida--vitoria { border-left-color: var(--bom); }
+.linha-partida--derrota { border-left-color: var(--ruim); }
+
+/* A linha inteira abre a partida; os links internos ficam por cima. */
+.linha-partida__link::after { content: ''; position: absolute; inset: 0; border-radius: inherit; }
+.linha-partida .nick,
+.linha-partida .nome-time { position: relative; z-index: 1; }
+
+.linha-partida__mapa {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-weight: 600;
+}
+.linha-partida__mapa img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  flex-shrink: 0;
+  background: var(--surface2);
+  border-radius: 4px;
+}
+
+.linha-partida__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 0.8125rem;
+}
+.linha-partida__info .muted { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.linha-partida__link { font-weight: 600; font-size: 0.875rem; }
+
+.linha-partida__placar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.linha-partida__time { min-width: 0; color: var(--text-muted); }
+.linha-partida__time--a { justify-self: end; }
+.linha-partida__time--b { justify-self: start; }
+.linha-partida__time--vencedor { color: var(--text); font-weight: 600; }
+.linha-partida__time--destaque { text-decoration: underline; text-underline-offset: 3px; }
+.linha-partida__numeros { font-size: 1.1rem; font-weight: 700; white-space: nowrap; }
+
+.linha-partida__extra {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: 0;
+  font-size: 0.8125rem;
+}
+.linha-partida__mvp { display: inline-flex; align-items: baseline; gap: 4px; min-width: 0; white-space: nowrap; }
+.linha-partida__resultado { font-weight: 700; }
+
+/* Notebook estreito: detalhes vão para uma segunda linha. */
+@media (max-width: 1279px) {
+  .linha-partida { grid-template-columns: 110px minmax(0, 1fr) minmax(0, 2fr); }
+  .linha-partida__extra { grid-column: 2 / -1; justify-content: flex-start; }
+}
+
+/* Celular e tablet: mapa e data em cima, placar no meio, detalhes embaixo. */
+@media (max-width: 767px) {
+  .linha-partida { grid-template-columns: 104px minmax(0, 1fr); gap: 8px 12px; }
+  .linha-partida__placar,
+  .linha-partida__extra { grid-column: 1 / -1; }
+  .linha-partida__extra { flex-wrap: wrap; }
+}

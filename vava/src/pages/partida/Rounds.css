@@ -1,0 +1,28 @@
+.rounds { display: flex; flex-direction: column; gap: var(--espaco); }
+
+/* Detalhe e kill feed lado a lado a partir de 1024 px. */
+.rounds__detalhe { display: grid; grid-template-columns: 1fr; gap: var(--espaco); }
+@media (min-width: 1024px) {
+  .rounds__detalhe { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+}
+
+.rounds__card { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.rounds__card h2 { font-size: 1rem; }
+
+.rounds__vencedor { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 0.875rem; }
+.rounds__selo {
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.rounds__dados { display: flex; flex-direction: column; gap: 8px; font-size: 0.875rem; }
+.rounds__dados > div { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.rounds__dados dt { display: inline-flex; align-items: center; gap: 4px; color: var(--text-muted); font-size: 0.8125rem; }
+.rounds__dados dd { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; }
+
+
+.rounds__feed { list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 0.875rem; }
+.rounds__feed li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 8px; align-items: baseline; }

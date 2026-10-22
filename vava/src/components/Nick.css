@@ -1,0 +1,28 @@
+/* Nick e NomeTime: uma linha só, com reticências quando não cabem. */
+.nick,
+.nome-time {
+  display: inline-flex;
+  align-items: baseline;
+  max-width: 100%;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.nick__nome,
+.nome-time__texto {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nick__nome { font-weight: 600; }
+.nick__tag { color: var(--text-muted); flex-shrink: 0; }
+
+.nome-time { align-items: center; gap: 6px; }
+
+.nome-time__marcador {
+  flex-shrink: 0;
+  width: 4px;
+  height: 1em;
+  border-radius: 2px;
+}
+.nome-time__marcador--a { background: var(--time-a); }
+.nome-time__marcador--b { background: var(--time-b); }

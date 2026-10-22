@@ -100,6 +100,18 @@ def _papeis_no_round(rnd, times):
     return {t: (papel if t == vencedor else outro) for t in times}
 
 
+def _abate_valido(kill, time_do):
+    """Spike, queda (killer = vítima) e teamkill aparecem em `kills`, mas não contam em stats.kills."""
+    return kill["killer"] != kill["victim"] and time_do.get(kill["killer"]) != time_do.get(kill["victim"])
+
+
+def _posicao(local):
+    """Coordenadas cruas do jogo; (None, None) quando ausentes ({0, 0} na API)."""
+    if not local or (local.get("x", 0), local.get("y", 0)) == (0, 0):
+        return None, None
+    return local["x"], local["y"]
+
+
 def _classificar_compra(loadout_time, pistol):
     """Classificação de compra por valor total do time (critério usado pelo vlr.gg)."""
     if pistol:
@@ -161,18 +173,21 @@ def _processar_partida(caminho, pasta, ref):
             key=lambda k: k["timeSinceRoundStartMillis"],
         )
 
-        # First kill / first death.
-        if abates:
-            acum[abates[0]["killer"]]["first_kills"] += 1
-            acum[abates[0]["victim"]]["first_deaths"] += 1
+        validos = [k for k in abates if _abate_valido(k, time_do)]
 
-        # KAST: kill, assist, survived ou traded.
+        # First kill / first death.
+        if validos:
+            acum[validos[0]["killer"]]["first_kills"] += 1
+            acum[validos[0]["victim"]]["first_deaths"] += 1
+
+        # KAST: kill, assist, survived ou traded. Morrer para a spike ou de queda tira o
+        # "survived", mas não conta como kill nem pode ser trocado.
         mortos = {k["victim"]: k for k in abates}
-        com_kill = {k["killer"] for k in abates}
+        com_kill = {k["killer"] for k in validos}
         com_assist = {a for k in abates for a in k["assistants"]}
         trocados = set()
-        for k in abates:
-            for k2 in abates:
+        for k in validos:
+            for k2 in validos:
                 if (k2["victim"] == k["killer"]
                         and 0 <= k2["timeSinceRoundStartMillis"] - k["timeSinceRoundStartMillis"] <= JANELA_TROCA_MS
                         and time_do.get(k2["killer"]) == time_do.get(k["victim"])):
@@ -224,6 +239,7 @@ def _processar_partida(caminho, pasta, ref):
         atk = next(t for t in times if papeis[t] == "Attacker")
         dfn = next(t for t in times if papeis[t] == "Defender")
         pistol = n in (0, 12)
+        plant_x, plant_y = _posicao(rnd.get("plantLocation")) if rnd.get("plantSite") else (None, None)
         linhas_rounds.append({
             **{k: base[k] for k in ("arquivo", "torneio", "fase", "match_id", "mapa")},
             "round": n + 1,
@@ -238,8 +254,10 @@ def _processar_partida(caminho, pasta, ref):
             "plant_site": rnd["plantSite"],
             "plant_tempo_s": rnd["plantRoundTime"] / 1000,
             "defuse_tempo_s": rnd["defuseRoundTime"] / 1000,
-            "n_abates": len(abates),
-            "first_kill_atacante": bool(abates) and time_do[abates[0]["killer"]] == atk,
+            "planter": rnd.get("bombPlanter"),
+            "plant_x": plant_x, "plant_y": plant_y,
+            "n_abates": len(validos),
+            "first_kill_atacante": bool(validos) and time_do[validos[0]["killer"]] == atk,
             "loadout_atk": economia_time[atk]["loadout"],
             "loadout_def": economia_time[dfn]["loadout"],
             "gasto_atk": economia_time[atk]["gasto"],
@@ -252,15 +270,22 @@ def _processar_partida(caminho, pasta, ref):
 
         for k in abates:
             fd = k["finishingDamage"]
+            vitima_x, vitima_y = _posicao(k.get("victimLocation"))
+            pos_killer = next((pl["location"] for pl in k.get("playerLocations") or []
+                               if pl["puuid"] == k["killer"]), None)
+            killer_x, killer_y = _posicao(pos_killer)
             linhas_abates.append({
                 "match_id": mi["matchId"], "torneio": info["torneio"], "mapa": base["mapa"],
                 "round": n + 1, "tempo_round_s": k["timeSinceRoundStartMillis"] / 1000,
                 "killer": k["killer"], "vitima": k["victim"],
+                "valido": _abate_valido(k, time_do),
                 "time_killer": nomes.get(time_do.get(k["killer"])),
                 "lado_killer": papeis.get(time_do.get(k["killer"])),
                 "n_assistencias": len(k["assistants"]),
                 "tipo_dano": fd["damageType"], "item_dano": fd["damageItem"],
                 "tiro_secundario": fd["isSecondaryFireMode"],
+                "vitima_x": vitima_x, "vitima_y": vitima_y,
+                "killer_x": killer_x, "killer_y": killer_y,
             })
 
     linhas_jogadores = []

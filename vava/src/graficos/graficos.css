@@ -1,0 +1,53 @@
+/* Contêiner com a altura da faixa (spec 6.6): 280 px; 220 px abaixo de 768 px. */
+.grafico { width: 100%; height: 280px; min-width: 0; }
+
+@media (max-width: 767px) {
+  .grafico { height: 220px; }
+}
+
+/* Tooltip dos gráficos: texto nas cores de texto, nunca na cor da série. */
+.grafico-tooltip {
+  padding: 8px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--raio);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+.grafico-tooltip strong { font-size: 0.9375rem; }
+
+/* --- Gráficos de análise (spec 8) ----------------------------------------------------------- */
+
+.grafico-analise { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.grafico-analise__eixo { font-size: 0.75rem; }
+.grafico-analise__eixo--x { text-align: center; }
+
+.grafico-analise__seletor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+}
+.grafico-analise__seletor .barra-filtros__select { width: auto; min-width: 140px; }
+
+.grafico-analise__legenda {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.75rem;
+  color: var(--text);
+}
+.grafico-analise__legenda li { display: inline-flex; align-items: center; gap: 6px; }
+.grafico-analise__cor { width: 10px; height: 10px; border-radius: 2px; }
+
+.grafico-kpis__card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--raio);
+  background: var(--surface2);
+}
+.grafico-kpis__valor { font-size: 1.75rem; font-weight: 800; line-height: 1.1; }

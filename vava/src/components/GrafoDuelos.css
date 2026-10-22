@@ -1,0 +1,19 @@
+.grafo-duelos {
+  width: 100%;
+  min-width: 0;
+  min-height: 320px;
+  border-radius: var(--raio);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+/* Tooltip do force-graph (nodeLabel). */
+.grafo-duelos .graph-tooltip {
+  padding: 4px 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--raio);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.8125rem;
+}

@@ -1,0 +1,52 @@
+/* Banner com o minimapa esmaecido ao fundo, à direita. */
+.partida__cabecalho {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.partida__cabecalho::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--imagem-mapa) right -40px center / auto 160% no-repeat;
+  opacity: 0.12;
+  pointer-events: none;
+}
+.partida__cabecalho .conteudo { position: relative; padding-top: 20px; padding-bottom: 20px; }
+
+.partida__meta { font-size: 0.8125rem; margin-bottom: 12px; }
+
+.partida__placar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+}
+
+.partida__time { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.partida__time--a { align-items: flex-end; text-align: right; }
+.partida__time--b { align-items: flex-start; }
+
+.partida__nome { font-size: 1.25rem; font-weight: 600; color: var(--text-muted); max-width: 100%; }
+.partida__time--vencedor .partida__nome { color: var(--text); font-weight: 700; }
+.partida__lados { font-size: 0.8125rem; }
+
+.partida__numeros {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.partida__corpo { display: flex; flex-direction: column; gap: var(--espaco); }
+
+/* Abaixo de 768 px, um time embaixo do outro (spec 7.4). */
+@media (max-width: 767px) {
+  .partida__placar { grid-template-columns: 1fr; gap: 10px; }
+  .partida__time--a,
+  .partida__time--b { align-items: flex-start; text-align: left; }
+  .partida__numeros { order: -1; font-size: 2rem; }
+}

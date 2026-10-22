@@ -1,0 +1,6 @@
+/* Mais baixo que os gráficos de análise: fica acima da tabela do ranking e não deve empurrá-la para longe. */
+.histograma .grafico { height: 180px; }
+
+@media (max-width: 767px) {
+  .histograma .grafico { height: 150px; }
+}

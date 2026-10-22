@@ -4,3 +4,4 @@ __pycache__/
 __marimo__/
 *.db
 outputs/processed/
+.pytest_cache/

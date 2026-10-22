@@ -1,0 +1,34 @@
+.placar { display: flex; flex-direction: column; gap: 24px; }
+
+.placar__time { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+.placar__cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+.placar__cabecalho h2 { font-size: 1.1rem; min-width: 0; }
+.placar__resultado { font-size: 0.8125rem; font-weight: 600; }
+.placar__resumo { font-size: 0.8125rem; }
+
+.placar__jogador {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.placar__mvp {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  color: var(--accent);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.placar__rounds { padding: 10px 12px; }

@@ -1,0 +1,11 @@
+.painel-heatmap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* Cabeçalho do jogador ou do time + tiles + abas + controles ficam acima do mapa. */
+  --mapa-desconto: 300px;
+}
+
+.painel-heatmap__controles { display: flex; flex-direction: column; gap: 10px; }
+.painel-heatmap__chips { display: flex; gap: 6px; }
+.painel-heatmap__chips .chip { flex-shrink: 0; }

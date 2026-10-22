@@ -1,0 +1,39 @@
+.estado { padding: var(--espaco) 0; }
+
+.estado--erro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  color: var(--text);
+}
+.estado--erro p { flex: 1 1 240px; }
+
+.estado--vazio { text-align: center; padding: 32px 0; }
+
+/* Esqueletos: só a forma do conteúdo (as rotas respondem em < 150 ms; nada elaborado). */
+.esqueleto { display: flex; flex-direction: column; gap: 10px; }
+
+.esqueleto__linha,
+.esqueleto__area {
+  background: var(--surface2);
+  border-radius: 4px;
+  animation: esqueleto-pulso 1.2s ease-in-out infinite;
+}
+.esqueleto__linha { height: 14px; }
+.esqueleto__linha--curta { width: 60%; }
+.esqueleto__area { height: 280px; }
+
+.esqueleto--tabela .esqueleto__linha { height: 28px; }
+
+@keyframes esqueleto-pulso {
+  50% { opacity: 0.5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .esqueleto__linha, .esqueleto__area { animation: none; }
+}
+
+@media (max-width: 767px) {
+  .esqueleto__area { height: 220px; }
+}

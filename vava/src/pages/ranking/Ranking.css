@@ -1,0 +1,28 @@
+.ranking,
+.ranking__aba { display: flex; flex-direction: column; gap: var(--espaco); }
+
+/* Chips de mapa, como as abas de mapa do Leaderboards; rolam na horizontal em tela estreita. */
+.ranking__mapas { display: flex; gap: 6px; padding-bottom: 4px; }
+.ranking__mapas .chip { flex-shrink: 0; }
+
+.ranking__controles { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 12px; }
+.ranking__controles .barra-filtros { flex: 1 1 600px; }
+.ranking__corte { flex: 0 0 150px; }
+/* Times têm só dois filtros: a barra não cresce, e o corte fica ao lado deles. */
+.ranking__controles--curtos .barra-filtros { flex: 0 1 500px; }
+
+.ranking__jogador { display: inline-flex; align-items: center; gap: 10px; min-width: 0; max-width: 100%; }
+.ranking__posicao { flex-shrink: 0; min-width: 2.2em; color: var(--text-muted); text-align: right; }
+
+.ranking__rodape { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 0.8125rem; }
+
+.ranking__distribuicao { display: flex; flex-direction: column; gap: 8px; }
+.ranking__distribuicao-cabecalho { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; }
+.ranking__distribuicao-cabecalho h2 { font-size: 0.9375rem; }
+.ranking__distribuicao-cabecalho span { font-size: 0.8125rem; }
+/* O esqueleto com a altura do histograma, para a tabela não pular quando ele carrega. */
+.ranking__distribuicao .esqueleto__area { height: 180px; }
+
+@media (max-width: 767px) {
+  .ranking__distribuicao .esqueleto__area { height: 150px; }
+}

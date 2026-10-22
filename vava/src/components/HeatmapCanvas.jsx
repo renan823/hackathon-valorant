@@ -1,94 +1,111 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
+import { RAMPA_CALOR } from '../constants'
 
-const RADIUS_RATIO = 0.028 // blob radius as fraction of canvas width
+const GRADE = 512           // resolução da grade de densidade, independente do tamanho na tela
+const RAIO = 0.028          // raio de cada ponto, em fração da largura do mapa
+const DPR_MAX = 2           // telas de alta densidade: até 2× (spec 9)
 
+// Kernel gaussiano pré-calculado: o "carimbo" somado em cada ponto (spec 9). Somar números com casas
+// decimais numa grade, em vez de acumular o alfa de 8 bits do canvas, não satura com milhares de pontos.
+const raio = Math.round(GRADE * RAIO)
+const KERNEL = (() => {
+	const lado = raio * 2 + 1
+	const k = new Float32Array(lado * lado)
+	const sigma = raio / 2
+	for (let dy = -raio; dy <= raio; dy++) {
+		for (let dx = -raio; dx <= raio; dx++) {
+			const d2 = dx * dx + dy * dy
+			if (d2 <= raio * raio) k[(dy + raio) * lado + dx + raio] = Math.exp(-d2 / (2 * sigma * sigma))
+		}
+	}
+	return k
+})()
+
+const PARADAS = RAMPA_CALOR.map(h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)))
+
+// t ∈ [0,1] → cor da rampa de um tom (F14), interpolando entre as paradas.
 function heatColor(t) {
-	// maps [0,1] → blue → cyan → green → yellow → red
-	if (t < 0.25) return [0, Math.round(t * 4 * 255), 255]
-	if (t < 0.5) return [0, 255, Math.round((1 - (t - 0.25) * 4) * 255)]
-	if (t < 0.75) return [Math.round((t - 0.5) * 4 * 255), 255, 0]
-	return [255, Math.round((1 - (t - 0.75) * 4) * 255), 0]
+	const pos = Math.min(Math.max(t, 0), 1) * (PARADAS.length - 1)
+	const i = Math.min(Math.floor(pos), PARADAS.length - 2)
+	const f = pos - i
+	return PARADAS[i].map((c, k) => Math.round(c + (PARADAS[i + 1][k] - c) * f))
 }
 
-function renderHeatmap(canvas, points) {
-	const { width, height } = canvas;
-
-	if (width <= 0 || height <= 0) return;
-	const ctx = canvas.getContext('2d')
-	ctx.clearRect(0, 0, width, height)
-
-	if (!points.length) return
-
-	const r = Math.round(width * RADIUS_RATIO)
-
-	// 1. Draw density blobs on a shadow canvas (grayscale alpha accumulation)
-	const shadow = document.createElement('canvas')
-	shadow.width = width
-	shadow.height = height
-	const sctx = shadow.getContext('2d')
-	sctx.globalCompositeOperation = 'lighter'
-
-	for (const [nx, ny] of points) {
-		const x = nx * width
-		const y = ny * height
-		const g = sctx.createRadialGradient(x, y, 0, x, y, r)
-		g.addColorStop(0, 'rgba(255,255,255,0.25)')
-		g.addColorStop(1, 'rgba(255,255,255,0)')
-		sctx.fillStyle = g
-		sctx.beginPath()
-		sctx.arc(x, y, r, 0, Math.PI * 2)
-		sctx.fill()
+// Densidade → imagem GRADE×GRADE (offscreen). Só roda quando os pontos mudam.
+function montarImagem(pontos) {
+	if (import.meta.env.DEV) performance.mark('mapa-calor-inicio')
+	const densidade = new Float32Array(GRADE * GRADE)
+	const lado = raio * 2 + 1
+	for (const p of pontos) {
+		const nx = Array.isArray(p) ? p[0] : p.x, ny = Array.isArray(p) ? p[1] : p.y
+		const cx = Math.round(nx * (GRADE - 1)), cy = Math.round(ny * (GRADE - 1))
+		for (let dy = -raio; dy <= raio; dy++) {
+			const y = cy + dy
+			if (y < 0 || y >= GRADE) continue
+			const linha = y * GRADE, base = (dy + raio) * lado + raio
+			for (let dx = -raio; dx <= raio; dx++) {
+				const x = cx + dx
+				if (x >= 0 && x < GRADE) densidade[linha + x] += KERNEL[base + dx]
+			}
+		}
 	}
 
-	// 2. Read pixel data and map alpha → color
-	const src = sctx.getImageData(0, 0, width, height)
-	const dst = ctx.createImageData(width, height)
-	const sd = src.data
-	const dd = dst.data
+	let max = 0
+	for (let i = 0; i < densidade.length; i++) if (densidade[i] > max) max = densidade[i]
 
-	// find max intensity for normalization
-	let maxAlpha = 0
-	for (let i = 3; i < sd.length; i += 4) {
-		if (sd[i] > maxAlpha) maxAlpha = sd[i]
+	const imagem = new ImageData(GRADE, GRADE)
+	if (max > 0) {
+		const px = imagem.data
+		for (let i = 0; i < densidade.length; i++) {
+			if (densidade[i] <= 0.01) continue
+			// Raiz: com milhares de pontos, o maior foco não apaga o resto do mapa.
+			const t = Math.sqrt(densidade[i] / max)
+			const [r, g, b] = heatColor(t)
+			px[i * 4] = r; px[i * 4 + 1] = g; px[i * 4 + 2] = b
+			px[i * 4 + 3] = Math.round((0.15 + 0.75 * t) * 255) // mais claro e mais opaco = mais eventos
+		}
 	}
-	if (maxAlpha === 0) return
+	const tela = document.createElement('canvas')
+	tela.width = tela.height = GRADE
+	tela.getContext('2d').putImageData(imagem, 0, 0)
 
-	for (let i = 0; i < sd.length; i += 4) {
-		const alpha = sd[i + 3]
-		if (alpha === 0) continue
-		const t = alpha / maxAlpha
-		const [r, g, b] = heatColor(t)
-		dd[i] = r
-		dd[i + 1] = g
-		dd[i + 2] = b
-		dd[i + 3] = Math.round(t * 210 + 20)
-	}
-
-	ctx.putImageData(dst, 0, 0)
+	if (import.meta.env.DEV) performance.measure('mapa-calor', 'mapa-calor-inicio')
+	return tela
 }
 
-function HeatmapCanvas({ points, containerRef }) {
+// Canvas do calor sobre o minimapa. `pontos`: [x, y] ou { x, y } (formato da API) em [0,1] (x → direita,
+// y → baixo). A densidade só é recalculada quando a lista muda: passe uma lista estável (a do cache ou um
+// useMemo). Ocupa o pai inteiro; ao redimensionar, só redesenha a imagem pronta, no máximo uma vez por quadro.
+function HeatmapCanvas({ pontos }) {
 	const canvasRef = useRef(null)
+	const imagem = useMemo(() => montarImagem(pontos), [pontos])
 
 	useEffect(() => {
 		const canvas = canvasRef.current
-		const container = containerRef?.current
-		if (!canvas || !container) return
+		if (!canvas) return
+		let quadro = 0
 
-		const resize = () => {
-			const { width, height } = container.getBoundingClientRect()
-			canvas.width = Math.round(width)
-			canvas.height = Math.round(height)
-			renderHeatmap(canvas, points)
+		const desenhar = () => {
+			quadro = 0
+			const { width, height } = canvas.getBoundingClientRect()
+			const dpr = Math.min(window.devicePixelRatio || 1, DPR_MAX)
+			canvas.width = Math.max(1, Math.round(width * dpr))
+			canvas.height = Math.max(1, Math.round(height * dpr))
+			const ctx = canvas.getContext('2d')
+			ctx.clearRect(0, 0, canvas.width, canvas.height)
+			ctx.imageSmoothingEnabled = true
+			ctx.imageSmoothingQuality = 'high'
+			ctx.drawImage(imagem, 0, 0, canvas.width, canvas.height)
 		}
+		const agendar = () => { if (!quadro) quadro = requestAnimationFrame(desenhar) }
 
-		resize()
-		const ro = new ResizeObserver(resize)
-		ro.observe(container)
-		return () => ro.disconnect()
-	}, [points, containerRef])
+		desenhar()
+		const ro = new ResizeObserver(agendar)
+		ro.observe(canvas)
+		return () => { ro.disconnect(); cancelAnimationFrame(quadro) }
+	}, [imagem])
 
-	return <canvas ref={canvasRef} className="heatmap-canvas" />
+	return <canvas ref={canvasRef} className="mapa-calor__canvas" aria-hidden="true" />
 }
 
 export default HeatmapCanvas

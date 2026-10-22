@@ -1,0 +1,2 @@
+.partidas-time { display: flex; flex-direction: column; gap: 12px; }
+.partidas-time__lista { list-style: none; display: flex; flex-direction: column; gap: 8px; }
