@@ -502,24 +502,24 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
 
 ## Fase 4: Fechamento e envio (≈ 2,5 h)
 
-- [ ] **T4.1 Roteiro numa sessão limpa** · 45 min · spec 10
+- [x] **T4.1 Roteiro numa sessão limpa** · 45 min · spec 10
   - Backend reiniciado e janela anônima (cache vazio). Passar todas as linhas do roteiro da spec, anotar e
     corrigir o que divergir.
   - *Aceite:* todas as linhas conferem.
 
-- [ ] **T4.2 Passada de responsividade** · 50 min · spec 6.6
+- [x] **T4.2 Passada de responsividade** · 50 min · spec 6.6
   - No modo responsivo do DevTools, em 2560, 1280×720, 768 e 390: Home, Ranking, as 4 abas da Partida,
     Jogador, Time, Análises e Mapa.
   - *Aceite:* nada vaza da tela; tabelas, barra de rounds, matriz e chips rolam dentro do próprio bloco; o
     menu da navbar funciona em 768 e 390; o heatmap cabe na tela em 1280×720.
 
-- [ ] **T4.3 Documentação** · 20 min
+- [x] **T4.3 Documentação** · 20 min
   - *Arquivos:* `docs/frontend/spec.md` (status "implementada" e o que mudou durante a implementação),
     `docs/frontend/plan.md` (status), `README.md` da raiz (comando do front, link para a spec) e o `README.md`
     do `vava/`.
   - *Aceite:* quem ler só o README da raiz consegue subir backend e front.
 
-- [ ] **T4.4 Envio único** · 35 min · plano Q3
+- [x] **T4.4 Envio único** · 35 min · plano Q3
   - `.venv/bin/pytest backend/tests` (103 testes), `npm run lint` e `npm run build` passam; `npm run preview`
     (porta 4173) abre direto `/partidas/<Partida A>/rounds` com dados da API.
   - *Aceite:* `git status` não lista `dist/` nem `node_modules/`; a aplicação inteira (backend, front, docs e

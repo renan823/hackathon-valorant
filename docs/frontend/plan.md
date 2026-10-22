@@ -1,7 +1,8 @@
 # Plano — Frontend do dashboard (VAVA Stats)
 
 > Implementa a [spec.md](spec.md), incluindo as decisões F1–F17 (seção 12). Tarefas em [tasks.md](tasks.md).
-> **Status: não iniciado** (21/10/2026). Uma pessoa, fases em sequência.
+> **Status: concluído** (fases 0–4, 22/10/2026; corte D: P1 completa). Uma pessoa, fases em sequência. O que
+> mudou durante a implementação está na seção 13 da spec.
 > Ambiente: Node 22.23.4 (via nvm) · npm 10.9.9 · React 19.3.1 · Vite 8.3.4 · backend na porta 8000 · Vite na 5173.
 
 ## 1. Estratégia

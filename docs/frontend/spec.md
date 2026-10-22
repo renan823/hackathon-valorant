@@ -1,8 +1,9 @@
 # Spec — Frontend do dashboard (VAVA Stats)
 
-> Status: **proposta, com as decisões tomadas** (21/10/2026) · Consome a API da [spec do backend](../backend/spec.md), já implementada.
+> Status: **implementada** (P0 e P1, fases 0–4 concluídas em 22/10/2026) · Consome a API da [spec do backend](../backend/spec.md).
 > Plano em [plan.md](plan.md) e tarefas em [tasks.md](tasks.md).
-> Decisões F1–F17 na seção 12, cada uma com o motivo e as seções que ela afeta.
+> Decisões F1–F17 na seção 12, cada uma com o motivo e as seções que ela afeta. O que mudou durante a
+> implementação está na seção 13.
 
 ## 1. Objetivo
 
@@ -756,3 +757,46 @@ As cores foram validadas com o `validate_palette.js` da skill de dataviz sobre a
 | F15 | **Matriz divergente**: defesa (azul) ← neutro `#383835` → ataque (vermelho), com no máximo 50% do polo | Usa o mesmo par de lados da F12. Com o polo puro, o texto da célula cairia para 2,7–3,0:1; com o teto, fica em 5,0:1 ou mais | 8 |
 | F16 | **Limiares de cor recalculados** sobre os 222 jogadores do ranking (100+ rounds) e usados também no placar de uma partida | Acompanham a F1. Numa partida os valores oscilam mais, mas a cor é só uma pista: o número está sempre escrito | 6.3 |
 | F17 | **Rótulos de coluna**: dicionário `ROTULOS` completo, com todas as colunas que a API devolve hoje | Uma fonte única para tabelas, eixos e "ver dados"; coluna nova sem rótulo ainda aparece legível | 5.4 |
+
+## 13. O que mudou durante a implementação
+
+O que a implementação ajustou em relação às seções acima. As seções 4–9 já foram atualizadas onde a mudança
+afeta a regra; aqui fica o resumo, para quem conhece a versão anterior.
+
+**Estrutura e componentes**
+
+- O Ranking virou uma pasta (`pages/ranking/`: `Ranking.jsx` com título e abas, `Jogadores.jsx`, `Times.jsx`
+  e `ChipsMapa.jsx`), como Partida, Jogador e Time. O stub "Em construção" foi removido quando a última rota
+  ganhou página.
+- Componentes novos: `PainelHeatmap` (explorador de heatmap do Jogador, do Time e do Mapa), `BarraLados`
+  (barra ataque | defesa de Mapas e Mapa), `IconeArma` (kill feed e aba Armas), `Histograma` e `Dispersao`.
+  `Busca`, `BarraFiltros` e `PainelHeatmap` são as exceções à regra "componentes só recebem props" (4.1).
+- Linha clicável da `Tabela`: link de verdade na célula principal e uma cópia fora do Tab nas outras. Um link
+  estendido por CSS não passava da primeira coluna, que é sticky.
+- "Limpar filtros" limpa só os campos da própria `BarraFiltros`: o `mapa` escolhido no heatmap fica.
+- `AvisoAmostra` tem uma forma curta (`n`) para dentro do card do item, além da lista (`itens`).
+
+**Páginas**
+
+- Heatmap (9): densidade por "carimbo" de um kernel gaussiano numa grade de 512 × 512 (110–140 ms com 11.621
+  pontos), no lugar de um gradiente por ponto.
+- Ranking: o histograma tem 180 px de altura e o rótulo do eixo no meio da faixa (a faixa exata fica no
+  tooltip). Na aba Times, ordenar outra coluna não muda a posição (#) da API.
+- Time › Visão geral: as barras de economia são neutras, porque o azul da série 1 é o mesmo da defesa, que
+  aparece ao lado. Na tabela por mapa, ataque e defesa ficam em barras com a cor do lado, e os números ficam
+  sem a cor de qualidade. As composições da aba Mapas são 5 ícones de agente.
+- Mapa: o `lado-por-mapa` virou a barra ataque | defesa do cabeçalho (filtrado num mapa, o gráfico seria uma
+  barra só). Os filtros do explorador ficam dentro do card do heatmap e só valem para ele. O top 10 mostra
+  Jogador, Time, Partidas, ACS e K/D, para caber na coluna sem rolar.
+- Análises: o link "abrir" leva os filtros com que o card foi buscado. "Ver dados" fica na URL (`?ver=dados`)
+  e mostra todas as colunas de `dados`.
+- Gráficos (8): numa série de barras com um valor só e sem cor fixa (ex.: `plant-sites` filtrado por um mapa),
+  vale a cor 1. A dispersão colore só pelos slots de `CORES_SERIE`; o resto vai para "Outros".
+- 404 (7.9): com a busca, como a spec pedia.
+
+**Ícones (F4)**: `scripts/baixar_icones.py` grava `vava/public/agentes/` (29) e `vava/public/armas/` (21). A
+faca vem da API como `meio = "Melee"` e o arquivo segue a API (`melee.png`), não o nome do reference
+("Confronto").
+
+**Pendências conhecidas**: o bundle principal tem ~810 KB (238 KB com gzip) e o Vite avisa acima de 500 KB; o
+grafo de duelos já é carregado sob demanda. O menu da navbar não fecha ao clicar fora.

@@ -16,16 +16,34 @@ hackathon-valorant/
 │   ├── valorant-data-preparation.ipynb          # limpeza e transformação (gera outputs/processed/)
 │   ├── valorant-exploratory-data-analysis.ipynb # análise exploratória e do contexto competitivo
 │   └── aula/               # notebooks de aula originais (Iris/Boston), usados como roteiro
-├── scripts/                # scripts de visualização sobre o mapa (plants, heatmap, visão dos abates)
+├── scripts/                # visualizações sobre o mapa e baixar_icones.py (ícones do dashboard)
 ├── backend/                # API FastAPI do dashboard (dados em memória) — ver docs/backend/
 ├── brainstorming/          # ETL para SQLite + notebook marimo (projeto uv próprio)
-├── vava/                   # app React/Vite: mapa de calor e grafo de embates por partida
-├── docs/                   # specs (ex.: docs/backend/spec.md — backend do dashboard)
+├── vava/                   # dashboard VAVA Stats (React/Vite), que consome a API do backend/
+├── docs/                   # spec, plano e tarefas do backend (docs/backend/) e do front (docs/frontend/)
 ├── outputs/
 │   ├── figures/            # figuras geradas pelos scripts
 │   └── processed/          # bases tratadas em CSV (geradas, não versionadas)
 └── requirements.txt        # dependências de notebooks/ e scripts/
 ```
+
+## Subir o dashboard (VAVA Stats)
+
+Precisa de Python 3.12 e Node 22.12 ou mais (ou 20.19+), que o Vite 8 exige. Dois terminais, ambos a partir da
+**raiz do repositório**:
+
+```sh
+# terminal 1: backend (API em http://localhost:8000/api; lê data/ ao subir)
+python3 -m venv .venv && .venv/bin/pip install -r backend/requirements.txt   # só na primeira vez
+.venv/bin/uvicorn app.main:app --reload --app-dir backend --port 8000
+
+# terminal 2: front (abre em http://localhost:5173)
+cd vava && npm install && npm run dev
+```
+
+O Vite repassa `/api` para a porta 8000. Com o backend desligado, o app mostra um aviso com o comando acima e
+volta sozinho quando ele sobe. Detalhes do front em [`vava/README.md`](vava/README.md); spec, plano e tarefas
+em [`docs/frontend/`](docs/frontend/) e [`docs/backend/`](docs/backend/).
 
 ## Como executar
 
@@ -65,11 +83,12 @@ São 19 rotas (jogadores, times, partidas, heatmap, busca, resumo da Home e aná
 na spec. Para criar uma análise nova basta um arquivo em `backend/app/analises/` (passo a passo na spec, §8.5).
 Spec, plano e tarefas em [`docs/backend/`](docs/backend/).
 
-**App web (`vava/`)**: o dev server do Vite repassa `/api` para o backend na porta 8000. A spec do novo
-dashboard, com as decisões de front, está em [`docs/frontend/spec.md`](docs/frontend/spec.md).
+**Dashboard (`vava/`)**: React + Vite, consome só a API. Ver "Subir o dashboard" acima e
+[`vava/README.md`](vava/README.md).
 
 ```sh
-cd vava && npm install && npm run dev
+cd vava && npm install && npm run dev      # http://localhost:5173
+npm run lint && npm run build              # antes de enviar
 ```
 
 ## Estrutura de `data/`

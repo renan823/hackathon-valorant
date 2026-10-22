@@ -6,12 +6,13 @@ import { contagem, corQualidade, formatar, linkTime } from '../../formatos'
 import { LIMITE_AMOSTRA } from '../../graficos/comum'
 import AvisoAmostra from '../../components/AvisoAmostra'
 import Estado from '../../components/Estado'
+import SeloAgente from '../../components/SeloAgente'
 import './Mapas.css'
 
 const METRICAS = ['win_pct', 'saldo_rounds', 'atk_win_pct', 'def_win_pct']
 
-// Aba Mapas do time (spec 7.6): um card por mapa (`por_mapa`) com as composições usadas nele. Aqui os
-// lados são texto (ATK/DEF), sem cor: as métricas já usam a cor de qualidade.
+// Aba Mapas do time (spec 7.6): um card por mapa (`por_mapa`) com as composições usadas nele (5 ícones, o nome
+// no title de cada um). Aqui os lados são texto (ATK/DEF), sem cor: as métricas já usam a cor de qualidade.
 function Mapas() {
 	const { id } = useParams()
 	const resposta = useApi(`times/${id}`)
@@ -57,7 +58,9 @@ function CartaoMapa({ id, mapa: m, composicoes }) {
 			<ul className="mapas-time__composicoes">
 				{composicoes.map(c => (
 					<li key={c.agentes.join()}>
-						<span className="mapas-time__agentes">{c.agentes.join(' · ')}</span>
+						<span className="mapas-time__agentes" aria-label={c.agentes.join(', ')}>
+							{c.agentes.map(a => <SeloAgente key={a} agente={a} />)}
+						</span>
 						<span className="mapas-time__resultado numero">
 							<span className="muted">{c.vitorias}–{c.partidas - c.vitorias}</span>{' '}
 							<span className={corQualidade('win_pct', c.win_pct) ?? ''}>{formatar('win_pct', c.win_pct)}</span>

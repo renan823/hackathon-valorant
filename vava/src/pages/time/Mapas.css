@@ -51,8 +51,9 @@
 .mapas-time__composicoes li {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 12px;
 }
-.mapas-time__agentes { min-width: 0; }
+.mapas-time__agentes { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
+.mapas-time__agentes .selo-agente { width: 30px; height: 30px; }
 .mapas-time__resultado { flex-shrink: 0; font-weight: 600; }

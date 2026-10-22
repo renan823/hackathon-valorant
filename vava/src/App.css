@@ -23,3 +23,4 @@
 .pagina-aviso { padding-top: 48px; padding-bottom: 48px; }
 .pagina-aviso h1 { margin-bottom: 8px; }
 .pagina-aviso p + p { margin-top: 16px; }
+.pagina-aviso__busca { max-width: 420px; margin-top: 16px; }
