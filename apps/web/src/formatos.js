@@ -29,10 +29,9 @@ export const ROTULOS = {
   media_vitoria: "Média na vitória", media_derrota: "Média na derrota", inicio: "De", fim: "Até",
   jogadores: "Jogadores", pct_acumulado: "% acumulado", total: "Total",
   // habilidades
-  situacao_habilidade: "Situação do abate por habilidade", fase_impacto: "Fase do abate por habilidade",
+  situacao_habilidade: "Situação do abate por habilidade",
   team_rounds: "Rounds da equipe", team_matches: "Partidas-equipe",
   jogador_partidas: "Jogador-partidas (n)", jogadores_considerados: "Jogadores considerados",
-  faixa_casts: "Casts por round",
   faixa_atividade: "Faixa de casts",
   casts_total: "Casts totais", casts_por_round: "Casts / jogador-round",
   casts_por_equipe_round: "Casts por equipe-round", grenade_casts: "Granadas",

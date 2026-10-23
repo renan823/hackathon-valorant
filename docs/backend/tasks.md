@@ -263,6 +263,11 @@ abaixo é o *Aceite* sem filtros.
 
 **✔ Checkpoint 3:** `/api/analises` lista 14 análises e todas respondem. Os critérios de registro, filtros, denominadores e valores de referência ficam em `apps/api/tests/test_analises.py`; `/resumo` mantém os 4 KPIs existentes.
 
+**Decisão posterior de escopo:** as análises `impacto-habilidades`, `atividade-economia-habilidades` e
+`equipe-partida-habilidades` foram removidas por serem irrelevantes e não adicionarem informação útil. A
+lista e os testes atuais passam a considerar 11 análises; o checkpoint acima registra o estado original
+quando a Fase 3 foi concluída.
+
 ---
 
 ## Fase 4: Qualidade (Pessoa A)

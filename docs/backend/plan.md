@@ -162,15 +162,16 @@ endpoint assim que ele estiver pronto.
    da seção 10 da EDA, com `filtros.aplicar()` e `n` (R8).
 3. Os KPIs da Home (`/resumo`) chamam as funções de `pistol`, `first-kill`, `lado-por-mapa` e `meta-armas`,
    sem duplicar a lógica.
-4. `impacto-habilidades` usa os timestamps dos abates por habilidade e o horário do plant como proxy de
-   impacto. Os JSONs não registram horário de cast; portanto, essa análise não conclui quando gastar
-   habilidades nem demonstra causalidade (spec, seção 8.5).
-5. As análises incrementais usam contagens de casts por jogador-partida e exposição em rounds para comparar
-   conversão de abates por habilidade, loadout médio, desempenho jogador-partida e faixas de atividade por
-   equipe-partida; os cortes são relativos ao recorte e os filtros de agente/função limitam o elenco observado.
-6. O frontend usa os cards e gráficos plugáveis existentes: barras para conversão e atividade por mapa,
-   histograma interativo com alternância entre frequência, win rate e equipamento médio para atividade/economia,
-   e tabela para as agregações jogador-partida, com os denominadores visíveis.
+4. A análise mantida de `conversao-habilidades` classifica observações equipe-round pelo primeiro abate
+   (habilidade, outra fonte ou nenhum); casts não têm timestamp e a relação com vitória não demonstra
+   causalidade (spec, seção 8.5).
+5. `jogador-partida-habilidades` agrega atividade e desempenho por agente/função/mapa, ponderados pelos
+   rounds jogados.
+6. Não implementar `impacto-habilidades` (win rate por fase do abate por habilidade),
+   `atividade-economia-habilidades` (distribuição de casts por round) nem
+   `equipe-partida-habilidades` (atividade de habilidade e vitória da equipe): foram considerados
+   irrelevantes e sem informação adicional. O frontend não deve exibir essas análises; as análises restantes
+   usam os gráficos plugáveis existentes e mantêm os denominadores visíveis.
 
 ### Fase 4: Qualidade (≈ 1 h · 1 pessoa)
 

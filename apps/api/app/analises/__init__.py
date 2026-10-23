@@ -46,12 +46,6 @@ def vazio():
     return {"dados": [], "insight": "Sem dados para os filtros escolhidos."}
 
 
-def tercis(valores):
-    """Classifica observações em faixas baixa, média e alta dentro do recorte atual."""
-    percentil = valores.rank(method="average", pct=True)
-    return percentil.map(lambda p: "Baixa" if p <= 1 / 3 else "Média" if p <= 2 / 3 else "Alta")
-
-
 # Colunas de time da tabela rounds: o filtro `time` vale para quem atacou OU defendeu.
 TIMES_ROUND = ("time_atacante_id", "time_defensor_id")
 # Abaixo disso, a amostra por mapa é pequena demais para comparar (R8).

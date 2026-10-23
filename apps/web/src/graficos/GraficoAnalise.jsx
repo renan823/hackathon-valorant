@@ -1,5 +1,4 @@
 import Tabela from '../components/Tabela'
-import AtividadeEconomia from './AtividadeEconomia'
 import Barras from './Barras'
 import Dispersao from './Dispersao'
 import Kpis from './Kpis'
@@ -24,7 +23,6 @@ export function TabelaAnalise({ dados, grafico }) {
 // Um componente por grafico.tipo (spec 8). Tipo novo = um arquivo em graficos/ + uma linha aqui.
 const GRAFICOS = {
 	barras: Barras,
-	'atividade-economia': AtividadeEconomia,
 	dispersao: Dispersao,
 	linha: Linha,
 	kpi: Kpis,

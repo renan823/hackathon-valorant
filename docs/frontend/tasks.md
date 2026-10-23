@@ -299,6 +299,9 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
       "Outros";
     - `metricas-vitoria`: "KAST" em 1º (r 0,59); `plant-sites`: seletor de mapa;
     - `?mapa=Ascent` muda os números, e `lado-por-mapa` fica com uma barra.
+  - **Decisão posterior de escopo:** removidas as análises de win rate por fase do abate por habilidade,
+    distribuição de casts por round e atividade de habilidade versus vitória da equipe. O aceite de 14
+    análises acima descreve a implementação original; a lista atual contém 11.
 
 - [x] **T2.4d Análise em tela cheia** · 25 min · spec 7.7
   - *Arquivos:* `src/pages/Analise.jsx`.

@@ -2,12 +2,11 @@
 
 import pkgutil
 
-import pandas as pd
 import pytest
 
 from app import dados
 from app import analises
-from app.analises import MIN_PARTIDAS_MAPA, REGISTRO, analise, tercis
+from app.analises import REGISTRO, analise
 
 
 def executar(cliente, analise_id, **params):
@@ -24,7 +23,7 @@ def linha(dados, **chave):
 
 def test_autoimport_registra_um_analise_por_arquivo(cliente):
     modulos = {m.name for m in pkgutil.iter_modules(analises.__path__)}
-    assert len(modulos) == len(REGISTRO) == 14
+    assert len(modulos) == len(REGISTRO) == 11
     lista = cliente.get("/api/analises").json()
     assert {a["id"] for a in lista} == set(REGISTRO)
     assert all("funcao" not in a and {"titulo", "categoria", "grafico"} <= set(a) for a in lista)
@@ -45,6 +44,17 @@ def test_nova_analise_aparece_sem_mexer_em_rotas(cliente):
 
 def test_analise_desconhecida_404(cliente):
     assert cliente.get("/api/analises/nao-existe").status_code == 404
+
+
+@pytest.mark.parametrize("analise_id", [
+    "impacto-habilidades",
+    "atividade-economia-habilidades",
+    "equipe-partida-habilidades",
+])
+def test_analises_removidas_nao_aparecem_nem_respondem(cliente, analise_id):
+    ids = {analise["id"] for analise in cliente.get("/api/analises").json()}
+    assert analise_id not in ids
+    assert cliente.get(f"/api/analises/{analise_id}").status_code == 404
 
 
 @pytest.mark.parametrize("analise_id", sorted(REGISTRO))
@@ -109,30 +119,6 @@ def test_plant_sites(cliente):
     assert [linha(d, mapa="Lotus", plant_site=s)["plants"] for s in "CAB"] == [546, 482, 226]
 
 
-def test_impacto_habilidades_compara_abates_por_fase_sem_chamar_de_casts(cliente):
-    r = executar(cliente, "impacto-habilidades")
-    assert "Cada barra mostra a porcentagem de rounds plantados vencidos" in r["insight"]
-    assert "linha tracejada marca 50%" in r["insight"]
-    assert "não quando a habilidade foi usada" in r["insight"]
-    assert r["grafico"]["n"] == "rounds"
-    assert r["grafico"]["indicadores"] == ["vitorias", "abates_habilidade"]
-    assert r["grafico"]["referencia"] == 50
-    assert "linha tracejada = 50%" in r["grafico"]["rotulo_y"]
-    assert r["grafico"]["rotulo_valor"] is True
-    assert {"fase_impacto", "lado", "rounds", "vitorias", "abates_habilidade", "win_pct"} <= set(r["dados"][0])
-    assert {d["fase_impacto"] for d in r["dados"]} == {
-        "Abate por habilidade pré-plant", "Abate por habilidade pós-plant",
-        "Abates por habilidade pré e pós-plant", "Sem abate por habilidade"
-    }
-    assert sum(d["rounds"] for d in r["dados"]) == 2 * int(
-        dados.base().rounds["houve_plant"].sum()
-    )
-    filtrado = executar(cliente, "impacto-habilidades", mapa="Ascent")
-    rounds_ascent = dados.base().rounds
-    rounds_ascent = rounds_ascent[rounds_ascent["mapa"].eq("Ascent") & rounds_ascent["houve_plant"]]
-    assert sum(d["rounds"] for d in filtrado["dados"]) == 2 * len(rounds_ascent)
-
-
 def test_conversao_habilidades_compara_resultados_por_primeiro_abate_e_lado(cliente):
     r = executar(cliente, "conversao-habilidades")
     assert r["grafico"]["n"] == "team_rounds"
@@ -156,33 +142,6 @@ def test_conversao_habilidades_compara_resultados_por_primeiro_abate_e_lado(clie
     assert "golpe final do abate, não o momento de uso" in r["insight"]
 
 
-def test_atividade_economia_preserva_grao_jogador_partida_e_exposicao(cliente):
-    base = dados.base()
-    jogadores = base.jogadores[base.jogadores["rounds_jogados"].gt(0)]
-    r = executar(cliente, "atividade-economia-habilidades")
-    assert {"faixa_casts", "jogador_partidas", "loadout_medio", "win_pct"} <= set(r["dados"][0])
-    assert 1 < len(r["dados"]) <= 12
-    assert sum(d["jogador_partidas"] for d in r["dados"]) == len(jogadores)
-    assert all(d["rounds_jogados"] > 0 and d["loadout_medio"] >= 0 for d in r["dados"])
-    assert [d["faixa_casts"] for d in r["dados"]] == sorted(
-        [d["faixa_casts"] for d in r["dados"]],
-        key=lambda faixa: float(faixa.split("–")[0].replace(",", ".")),
-    )
-    assert r["grafico"]["tipo"] == "atividade-economia"
-    assert r["grafico"]["n"] == "jogador_partidas"
-    assert r["grafico"]["metricas"] == ["jogador_partidas", "win_pct"]
-    assert {"faixa_atividade", "mapa", "agente", "funcao", "faixa_loadout", "acs", "adr", "kast_pct"}.isdisjoint(
-        r["dados"][0]
-    )
-    assert "0,5 casts por round" in r["insight"]
-    assert "barras mostram a frequência" in r["insight"]
-    assert "tooltip" in r["insight"]
-    ascent = executar(cliente, "atividade-economia-habilidades", mapa="Ascent")
-    assert sum(d["jogador_partidas"] for d in ascent["dados"]) == len(
-        jogadores[jogadores["mapa"].eq("Ascent")]
-    )
-
-
 def test_jogador_partida_agrega_taxas_por_agente_funcao_e_mapa(cliente):
     base = dados.base()
     jogadores = base.jogadores[base.jogadores["rounds_jogados"].gt(0)]
@@ -193,37 +152,6 @@ def test_jogador_partida_agrega_taxas_por_agente_funcao_e_mapa(cliente):
     assert sum(d["rounds"] for d in r["dados"]) == jogadores["rounds_jogados"].sum()
     jett = executar(cliente, "jogador-partida-habilidades", agente="Jett")
     assert {d["agente"] for d in jett["dados"]} == {"Jett"}
-
-
-def test_equipe_partida_compara_faixas_por_mapa_e_exposicao_de_equipe(cliente):
-    base = dados.base()
-    r = executar(cliente, "equipe-partida-habilidades")
-    expected = base.jogadores[["match_id", "time_id"]].drop_duplicates().shape[0]
-    assert {"mapa", "faixa_atividade", "team_matches", "casts_por_equipe_round",
-            "win_pct"} <= set(r["dados"][0])
-    assert sum(d["team_matches"] for d in r["dados"]) == expected
-    assert {d["faixa_atividade"] for d in r["dados"]} == {"Baixa", "Média", "Alta"}
-    assert all(
-        d["win_pct"] is None
-        for d in r["dados"]
-        if d["team_matches"] < MIN_PARTIDAS_MAPA
-    )
-    assert all(
-        d["win_pct"] is not None
-        for d in r["dados"]
-        if d["team_matches"] >= MIN_PARTIDAS_MAPA
-    )
-    assert f"abaixo de {MIN_PARTIDAS_MAPA} partidas-equipe" in r["insight"]
-    jett = executar(cliente, "equipe-partida-habilidades", agente="Jett")
-    assert sum(d["team_matches"] for d in jett["dados"]) <= expected
-    assert "equipe inteira" in r["insight"]
-
-
-def test_tercis_mantem_valores_empatados_na_mesma_faixa():
-    valores = pd.Series([10, 10, 10, 10, 20, 30])
-    faixas = tercis(valores)
-    assert faixas.iloc[:4].nunique() == 1
-    assert list(faixas) == ["Média", "Média", "Média", "Média", "Alta", "Alta"]
 
 
 # --- KPIs da Home (T2.15) --------------------------------------------------------------

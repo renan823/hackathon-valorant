@@ -587,8 +587,12 @@ O layout busca `GET /api/times/{id}`.
 - Card: título, `insight` em destaque, `GraficoAnalise`, descrição recolhível e link "abrir".
 - **Tela cheia** (`/analises/:id`): o mesmo card em largura total, com "ver dados" (tabela com todas as
   colunas de `dados`) e o `kpi`, se houver.
-- *Aceite:* as 14 análises atuais aparecem nas 5 abas; `?mapa=Ascent` muda os números; um arquivo novo em
+- *Aceite:* as 11 análises atuais aparecem nas 5 abas; `?mapa=Ascent` muda os números; um arquivo novo em
   `apps/api/app/analises/` aparece na página sem mudança no front.
+
+As análises de win rate por fase do abate por habilidade, distribuição de casts por round e atividade de
+habilidade versus vitória da equipe foram removidas por não adicionarem informação útil. Elas não devem
+aparecer na lista nem nas abas; a análise de conversão pelo primeiro abate permanece.
 
 ### 7.8 Mapas · `/mapas` e `/mapas/:mapa` · P1
 
@@ -622,9 +626,8 @@ componente, `GraficoAnalise`, que escolhe o desenho pelo `grafico.tipo`:
 | `linha` | `graficos/Linha.jsx` | `x` e `y` numéricos, `referencia` | vantagem-economica |
 | `dispersao` | `graficos/Dispersao.jsx` | `x`, `y`, `serie` | — (já suportado pela API) |
 | `matriz` | `graficos/Matriz.jsx` (grid CSS) | `x` colunas, `y` linhas, `valor` cor, `n` amostra, `ordem` das categorias nos dois eixos, `min_n`: abaixo dele a célula fica cinza com "n < 30" | compras |
-| `tabela` | `Tabela` | `colunas` na ordem; ordenação no cliente | meta-agentes |
+| `tabela` | `Tabela` | `colunas` na ordem; ordenação no cliente | meta-agentes, jogador-partida-habilidades |
 | `kpi` | `graficos/Kpis.jsx` | um card por linha: `x` rótulo, `y` valor | pistol |
-| `atividade-economia` | `graficos/AtividadeEconomia.jsx` | histograma por `x`, frequência `n` padrão e métricas alternáveis indicadas em `metricas` | atividade-economia-habilidades |
 
 Regras do renderizador:
 
@@ -635,14 +638,9 @@ Regras do renderizador:
 - **`tipo` desconhecido → cai na `Tabela` com todas as colunas.** Um tipo novo no backend nunca quebra a página.
 - Aviso de amostra pequena (6.5) por linha, pela coluna de `grafico.n` ou, na falta dela, por `partidas` ou
   `partidas_mapa` (F11).
-- Nas análises de habilidades da aba Momentos, o texto do eixo esclarece que a linha tracejada representa 50%
-  de win rate; as barras agrupadas exibem o percentual diretamente, e o tooltip detalha tamanho da amostra,
-  vitórias e abates por habilidade. As categorias distinguem quando a habilidade fez o primeiro abate, outro
-  abate ou nenhum, e se os abates ocorreram antes ou depois do plant. O insight informa a unidade de observação
-  e que casts não têm timestamp.
-- O histograma de atividade mostra jogador-partidas por faixa como padrão; o controle alterna para win rate.
-  Equipamento médio aparece apenas no tooltip, pois os valores entre as faixas mais representadas são próximos.
-  Win rates em faixas com menos de 30 jogador-partidas devem ser interpretados com cautela.
+- A análise mantida na aba Momentos compara a vitória por lado conforme o primeiro abate do round foi feito
+  por habilidade, por outra fonte ou não ocorreu; o insight informa a unidade de observação e que casts não
+  têm timestamp.
 
 **Cores** (F13 e F15):
 
