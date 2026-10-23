@@ -528,7 +528,7 @@ O layout busca `GET /api/jogadores/{puuid}`; as abas Agentes, Mapas e Armas reap
 ├────────┬────────┬────────┬────────┬────────┬────────┬────────┬────────────────┤
 │ ACS 287│ K/D 1,68│ ADR 188│KAST 81,0%│HS 30,7%│Win 91,7%│FK/R 0,23│ +/− +91       │
 ├────────┴────────┴────────┴────────┴────────┴────────┴────────┴────────────────┤
-│ [Resumo] [Partidas] [Agentes] [Mapas] [Armas] [Heatmap]                        │
+│ [Resumo] [Partidas] [Agentes] [Mapas] [Armas] [Heatmap]                         │
 ```
 
 - Cabeçalho: `nick`, `nicks_anteriores` ("antes: …"), `times` (links, com o nº de partidas por time: um
@@ -542,9 +542,20 @@ O layout busca `GET /api/jogadores/{puuid}`; as abas Agentes, Mapas e Armas reap
   placar, V/D, agente, K, D, A, +/−, ACS, ADR, KAST, HS%, FK, MK. A linha abre a partida.
 - **Agentes**: `por_agente` (partidas, win%, ACS, K/D, ADR, KAST).
 - **Mapas**: `por_mapa` como cards com a imagem do mapa ao fundo (partidas, win%, ACS, K/D).
-- **Armas**: `armas` como barras horizontais (`pct`), agrupadas por `categoria_meio`.
+- **Armas**: `armas` como barras horizontais (`pct`), agrupadas por `categoria_meio`, seguidas pela seção
+  **Abates por alvo** (`GET /api/jogadores/{puuid}/alvos?por=funcao|agente`). O seletor alterna o agrupamento;
+  tabela ordenável compara abates por arma e habilidade, participação percentual e total considerado, com barra
+  empilhada para visualizar a divisão. O percentual usa apenas armas + habilidades como denominador; a nota
+  exclui queda/esmagamento e explica que `Ability` não identifica sempre a habilidade. A antiga URL `/alvos`
+  redireciona para `/armas`.
 - **Heatmap**: `GET /heatmap?mapa=<m>&jogador=<puuid>&tipo=kills|mortes`, com o mapa escolhido entre os de
   `por_mapa` (padrão: o mais jogado) e filtros de lado, torneio e fase.
+- No explorador de heatmap, os tipos **Abates por habilidade** e **Abates por habilidade pós-plant** mostram
+  densidade das posições do killer; **Vítimas de abates por habilidade** e **Vítimas de abates por habilidade
+  pós-plant** mostram as posições das vítimas. Todos contam abates válidos finalizados por `Ability`; os tipos
+  pós-plant exigem horário do abate igual ou posterior ao plant. Os filtros de pessoa referem-se ao killer ou
+  à vítima conforme o tipo. A legenda mostra eventos e partidas, alerta para menos de 5 partidas e esclarece
+  que o mapa não representa posição de cast ou impacto do utilitário.
 - *Aceite:* lule#dfnt mostra "#1 no ranking", 12 partidas, ACS 287 e dois times (Macklogic Red, 7 partidas;
   Macklogic Rainbow, 5); TORONTO#lulu (56 rounds) mostra "fora do ranking".
 
@@ -576,7 +587,7 @@ O layout busca `GET /api/times/{id}`.
 - Card: título, `insight` em destaque, `GraficoAnalise`, descrição recolhível e link "abrir".
 - **Tela cheia** (`/analises/:id`): o mesmo card em largura total, com "ver dados" (tabela com todas as
   colunas de `dados`) e o `kpi`, se houver.
-- *Aceite:* as 9 análises aparecem nas 5 abas; `?mapa=Ascent` muda os números; um arquivo novo em
+- *Aceite:* as 14 análises atuais aparecem nas 5 abas; `?mapa=Ascent` muda os números; um arquivo novo em
   `apps/api/app/analises/` aparece na página sem mudança no front.
 
 ### 7.8 Mapas · `/mapas` e `/mapas/:mapa` · P1
@@ -613,6 +624,7 @@ componente, `GraficoAnalise`, que escolhe o desenho pelo `grafico.tipo`:
 | `matriz` | `graficos/Matriz.jsx` (grid CSS) | `x` colunas, `y` linhas, `valor` cor, `n` amostra, `ordem` das categorias nos dois eixos, `min_n`: abaixo dele a célula fica cinza com "n < 30" | compras |
 | `tabela` | `Tabela` | `colunas` na ordem; ordenação no cliente | meta-agentes |
 | `kpi` | `graficos/Kpis.jsx` | um card por linha: `x` rótulo, `y` valor | pistol |
+| `atividade-economia` | `graficos/AtividadeEconomia.jsx` | histograma por `x`, frequência `n` padrão e métricas alternáveis indicadas em `metricas` | atividade-economia-habilidades |
 
 Regras do renderizador:
 
@@ -623,6 +635,14 @@ Regras do renderizador:
 - **`tipo` desconhecido → cai na `Tabela` com todas as colunas.** Um tipo novo no backend nunca quebra a página.
 - Aviso de amostra pequena (6.5) por linha, pela coluna de `grafico.n` ou, na falta dela, por `partidas` ou
   `partidas_mapa` (F11).
+- Nas análises de habilidades da aba Momentos, o texto do eixo esclarece que a linha tracejada representa 50%
+  de win rate; as barras agrupadas exibem o percentual diretamente, e o tooltip detalha tamanho da amostra,
+  vitórias e abates por habilidade. As categorias distinguem quando a habilidade fez o primeiro abate, outro
+  abate ou nenhum, e se os abates ocorreram antes ou depois do plant. O insight informa a unidade de observação
+  e que casts não têm timestamp.
+- O histograma de atividade mostra jogador-partidas por faixa como padrão; o controle alterna para win rate.
+  Equipamento médio aparece apenas no tooltip, pois os valores entre as faixas mais representadas são próximos.
+  Win rates em faixas com menos de 30 jogador-partidas devem ser interpretados com cautela.
 
 **Cores** (F13 e F15):
 

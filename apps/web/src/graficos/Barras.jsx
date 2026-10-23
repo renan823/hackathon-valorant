@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bar, BarChart, CartesianGrid, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { CORES_SERIE } from '../constants'
 import { formatar, rotulo } from '../formatos'
 import AvisoAmostra from '../components/AvisoAmostra'
@@ -8,6 +8,29 @@ import Dica from './Dica'
 
 const MAX_AGRUPADAS = 4  // barras lado a lado; acima disso, seletor no card (F13)
 const MAX_VERTICAIS = 8  // acima disso, barras horizontais (spec 6.6)
+const MAX_CARACTERES_LABEL_EIXO = 18
+
+function TickAgrupado({ x, y, payload }) {
+	const linhas = String(payload.value).split(' ').reduce((linhas, palavra) => {
+		const ultima = linhas.at(-1)
+		if (ultima && `${ultima} ${palavra}`.length <= MAX_CARACTERES_LABEL_EIXO) {
+			linhas[linhas.length - 1] = `${ultima} ${palavra}`
+		} else {
+			linhas.push(palavra)
+		}
+		return linhas
+	}, [])
+
+	return (
+		<g>
+			<text x={x} y={y} textAnchor="middle" fill={cor('--text-muted')} fontSize={12}>
+				{linhas.map((linha, indice) => (
+					<tspan key={indice} x={x} dy={indice === 0 ? 0 : 14}>{linha}</tspan>
+				))}
+			</text>
+		</g>
+	)
+}
 
 // Barras de uma análise (spec 8). `serie` tem dois usos:
 // - cada barra tem a sua categoria (x único por linha, ex.: meta-armas por categoria_meio): cor da categoria,
@@ -58,7 +81,10 @@ function Barras({ dados, grafico }) {
 								<YAxis {...eixo()} width={52} tickFormatter={fmtY} />
 							</>
 						)}
-						<Tooltip cursor={cursor()} content={<Dica grafico={grafico} campos={[x, serie, y, 'partidas', 'partidas_mapa', 'rounds', 'kills', 'plants']} />} />
+						<Tooltip cursor={cursor()} content={<Dica grafico={grafico} campos={[
+							x, serie, y, grafico.n, 'partidas', 'partidas_mapa', 'team_matches',
+							'jogador_partidas', 'rounds', 'kills', 'plants', 'abates_habilidade',
+						]} />} />
 						{referencia !== undefined && (horizontal
 							? <ReferenceLine x={referencia} stroke={cor('--text-muted')} strokeDasharray="4 4" />
 							: <ReferenceLine y={referencia} stroke={cor('--text-muted')} strokeDasharray="4 4" />)}
@@ -100,15 +126,58 @@ function BarrasAgrupadas({ dados, grafico, series }) {
 				<ResponsiveContainer width="100%" height="100%">
 					<BarChart data={[...porX.values()]} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
 						<CartesianGrid {...grade()} />
-						<XAxis dataKey={x} {...eixo()} tickFormatter={v => formatar(x, v)} />
+						<XAxis
+							dataKey={x}
+							{...eixo()}
+							interval={0}
+							height={58}
+							tick={<TickAgrupado />}
+							tickFormatter={v => formatar(x, v)}
+						/>
 						<YAxis {...eixo()} width={52} tickFormatter={v => formatar(y, v)} />
-						<Tooltip cursor={cursor()} formatter={v => formatar(y, v)} contentStyle={{ background: cor('--surface2'), border: `1px solid ${cor('--border')}` }} labelStyle={{ color: cor('--text') }} itemStyle={{ color: cor('--text') }} />
+						<Tooltip cursor={cursor()} content={props => (
+							<DicaAgrupada {...props} dados={dados} grafico={grafico} campoX={x} campoSerie={serie} campoY={y} />
+						)} />
 						{referencia !== undefined && <ReferenceLine y={referencia} stroke={cor('--text-muted')} strokeDasharray="4 4" />}
-						{series.map(s => <Bar key={s} dataKey={s} fill={corDe(s)} radius={[4, 4, 0, 0]} isAnimationActive={false} />)}
+						{series.map(s => (
+							<Bar key={s} dataKey={s} fill={corDe(s)} radius={[4, 4, 0, 0]} isAnimationActive={false}>
+								{grafico.rotulo_valor && (
+									<LabelList
+										dataKey={s}
+										position="top"
+										formatter={valor => valor == null ? '' : formatar(y, valor)}
+										className="grafico-barras__rotulo"
+									/>
+								)}
+							</Bar>
+						))}
 					</BarChart>
 				</ResponsiveContainer>
 			</div>
 			<Legenda itens={series.map(s => ({ rotulo: formatar(serie, s), cor: corDe(s) }))} campo={serie} />
+		</div>
+	)
+}
+
+function DicaAgrupada({ active, payload, dados, grafico, campoX, campoSerie, campoY }) {
+	if (!active || !payload?.length) return null
+	const valorX = payload[0].payload[campoX]
+	const linhas = dados.filter(linha => linha[campoX] === valorX)
+	return (
+		<div className="grafico-tooltip">
+			<strong>{formatar(campoX, valorX)}</strong>
+			{linhas.map(linha => (
+				<div key={linha[campoSerie]}>
+					<strong>{formatar(campoSerie, linha[campoSerie])}</strong>: {rotulo(campoY)}{' '}
+					<strong>{formatar(campoY, linha[campoY])}</strong>
+					{grafico.n && linha[grafico.n] !== undefined && (
+						<> · {rotulo(grafico.n)}: <strong>{formatar(grafico.n, linha[grafico.n])}</strong></>
+					)}
+					{(grafico.indicadores ?? []).map(campo => linha[campo] === undefined ? null : (
+						<span key={campo}> · {rotulo(campo)}: <strong>{formatar(campo, linha[campo])}</strong></span>
+					))}
+				</div>
+			))}
 		</div>
 	)
 }

@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { createBrowserRouter, RouterProvider } from 'react-router'
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router'
 import '@fontsource-variable/inter'
 import './index.css'
 import App from './App.jsx'
@@ -71,6 +71,7 @@ const router = createBrowserRouter([
 					{ path: 'agentes', element: <AgentesDoJogador /> },
 					{ path: 'mapas', element: <MapasDoJogador /> },
 					{ path: 'armas', element: <ArmasDoJogador /> },
+					{ path: 'alvos', element: <Navigate to="../armas" replace relative="path" /> },
 					{ path: 'heatmap', element: <HeatmapDoJogador /> },
 				],
 			},

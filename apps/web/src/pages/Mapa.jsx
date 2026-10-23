@@ -54,7 +54,10 @@ function PaginaMapa({ mapa }) {
 					<h2>Explorador de heatmap</h2>
 					<PainelHeatmap
 						mapas={[mapa]}
-						tipos={['kills', 'mortes', 'plants']}
+						tipos={[
+							'kills', 'mortes', 'plants', 'ability_kills', 'ability_deaths',
+							'postplant_ability_kills', 'postplant_ability_deaths',
+						]}
 						campos={['torneio', 'fase', 'time', 'agente', 'funcao']}
 					/>
 				</section>

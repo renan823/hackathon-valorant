@@ -9,3 +9,4 @@
 .painel-heatmap__controles { display: flex; flex-direction: column; gap: 10px; }
 .painel-heatmap__chips { display: flex; gap: 6px; }
 .painel-heatmap__chips .chip { flex-shrink: 0; }
+.painel-heatmap__chips[aria-label="Tipo"] { flex-wrap: wrap; }

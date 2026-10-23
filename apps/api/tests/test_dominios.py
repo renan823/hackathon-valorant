@@ -70,6 +70,37 @@ def test_historico_jogador(cliente, base):
     assert sum(x["kills"] for x in h) == linhas["kills"].sum()
 
 
+@pytest.mark.parametrize("por,coluna", [("funcao", "funcao_vitima"), ("agente", "agente_vitima")])
+def test_abates_por_alvo_jogador(cliente, base, por, coluna):
+    puuid = base.abates.loc[base.abates["valido"], "killer"].value_counts().index[0]
+    resposta = ok(cliente, f"/api/jogadores/{puuid}/alvos", por=por)
+    armas = {"Rifle", "Sidearm", "Sniper", "SMG", "Heavy", "Shotgun", "Melee"}
+    esperados = base.abates[
+        base.abates["valido"]
+        & base.abates["killer"].eq(puuid)
+        & (base.abates["categoria_meio"].eq("Ability") | base.abates["categoria_meio"].isin(armas))
+    ]
+    assert sum(l["kills_consideradas"] for l in resposta) == len(esperados)
+    assert {l["alvo"] for l in resposta} == set(esperados[coluna].dropna())
+    for linha in resposta:
+        alvo = esperados[esperados[coluna].eq(linha["alvo"])]
+        n_habilidade = int(alvo["categoria_meio"].eq("Ability").sum())
+        n_arma = int(alvo["categoria_meio"].isin(armas).sum())
+        assert linha["kills_habilidade"] == n_habilidade
+        assert linha["kills_arma"] == n_arma
+        assert linha["kills_consideradas"] == n_habilidade + n_arma
+        assert linha["pct_habilidade"] == pytest.approx(
+            100 * n_habilidade / (n_habilidade + n_arma), abs=0.01
+        )
+        assert linha["pct_habilidade"] + linha["pct_arma"] == pytest.approx(100)
+
+
+def test_abates_por_alvo_jogador_valida_parametros(cliente):
+    puuid = dados.base().jogadores["puuid"].iloc[0]
+    assert cliente.get(f"/api/jogadores/{puuid}/alvos", params={"por": "mapa"}).status_code == 422
+    assert cliente.get("/api/jogadores/nao-existe/alvos").status_code == 404
+
+
 # --- partidas (T2.5–T2.9) --------------------------------------------------------------
 
 def test_lista_partidas(cliente):
@@ -158,8 +189,59 @@ def test_heatmap(cliente, base):
     kills = ok(cliente, "/api/heatmap", mapa="Ascent", tipo="kills")
     assert kills["total"] == ((a["mapa"] == "Ascent") & a["valido"] & a["killer_x"].notna()).sum()
     assert all(0 <= p["x"] <= 1 and 0 <= p["y"] <= 1 for p in kills["pontos"])
+    habilidades = ok(cliente, "/api/heatmap", mapa="Lotus", tipo="ability_kills")
+    ability = a[(a["mapa"] == "Lotus") & a["valido"] & a["categoria_meio"].eq("Ability")]
+    assert habilidades["total"] == ability["killer_x"].notna().sum()
+    assert habilidades["partidas"] == ability.loc[ability["killer_x"].notna(), "match_id"].nunique()
+    assert habilidades["total"] == len(habilidades["pontos"])
+
+    mortes_habilidade = ok(cliente, "/api/heatmap", mapa="Lotus", tipo="ability_deaths")
+    assert mortes_habilidade["total"] == ability["vitima_x"].notna().sum()
+    assert mortes_habilidade["partidas"] == ability.loc[ability["vitima_x"].notna(), "match_id"].nunique()
+    vitimas = ability.dropna(subset=["vitima_x", "vitima_y"])
+    assert mortes_habilidade["pontos"] == [
+        {"x": round(x, 4), "y": round(y, 4)} for x, y in vitimas[["vitima_x", "vitima_y"]].itertuples(index=False)
+    ]
+    filtrado_vitima = ok(
+        cliente, "/api/heatmap", mapa="Lotus", tipo="ability_deaths", agente="Jett"
+    )
+    assert filtrado_vitima["total"] == ability[
+        ability["agente_vitima"].eq("Jett")
+    ]["vitima_x"].notna().sum()
+
+    pos_plant = ok(cliente, "/api/heatmap", mapa="Lotus", tipo="postplant_ability_kills")
+    pos_plantos = ability.merge(
+        base.rounds[["match_id", "round", "plant_tempo_s"]],
+        on=["match_id", "round"], how="inner",
+    )
+    pos_plantos = pos_plantos[
+        pos_plantos["plant_tempo_s"].notna()
+        & (pos_plantos["tempo_round_s"] >= pos_plantos["plant_tempo_s"])
+    ]
+    pos_plantos = pos_plantos.dropna(subset=["killer_x", "killer_y"])
+    assert pos_plant["total"] == len(pos_plantos) == 190
+    assert pos_plant["partidas"] == pos_plantos["match_id"].nunique()
+    assert pos_plant["total"] == len(pos_plant["pontos"])
+    assert ok(cliente, "/api/heatmap", mapa="Lotus", tipo="ability_kills", funcao="Duelista")["total"] < habilidades["total"]
+
+    pos_plant_mortes = ok(cliente, "/api/heatmap", mapa="Lotus", tipo="postplant_ability_deaths")
+    pos_plantos_vitimas = ability.merge(
+        base.rounds[["match_id", "round", "plant_tempo_s"]],
+        on=["match_id", "round"], how="inner",
+    )
+    pos_plantos_vitimas = pos_plantos_vitimas[
+        pos_plantos_vitimas["plant_tempo_s"].notna()
+        & (pos_plantos_vitimas["tempo_round_s"] >= pos_plantos_vitimas["plant_tempo_s"])
+    ].dropna(subset=["vitima_x", "vitima_y"])
+    assert pos_plant_mortes["total"] == len(pos_plantos_vitimas)
+    assert pos_plant_mortes["partidas"] == pos_plantos_vitimas["match_id"].nunique()
+    assert pos_plant_mortes["pontos"] == [
+        {"x": round(x, 4), "y": round(y, 4)}
+        for x, y in pos_plantos_vitimas[["vitima_x", "vitima_y"]].itertuples(index=False)
+    ]
     assert cliente.get("/api/heatmap").status_code == 422
     assert cliente.get("/api/heatmap", params={"mapa": ["Ascent", "Haven"]}).status_code == 422
+    assert cliente.get("/api/heatmap", params={"mapa": "Lotus", "tipo": "ability_casts"}).status_code == 422
 
 
 def test_resumo(cliente):

@@ -31,6 +31,7 @@
   font-size: 0.8125rem;
   color: var(--text-muted);
 }
+.mapa-calor__descricao { max-width: 680px; font-size: 0.8125rem; text-align: center; }
 .mapa-calor__poucos { display: inline-flex; align-items: center; gap: 4px; }
 
 .mapa-calor__escala { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; }

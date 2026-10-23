@@ -6,14 +6,36 @@ import Estado from './Estado'
 import MapaCalor from './MapaCalor'
 import './PainelHeatmap.css'
 
-const TIPOS = { kills: 'Kills', mortes: 'Mortes', plants: 'Plants' }
+const TIPOS = {
+	kills: 'Kills',
+	mortes: 'Mortes',
+	plants: 'Plants',
+	ability_kills: 'Abates por habilidade',
+	postplant_ability_kills: 'Abates por habilidade pós-plant',
+	ability_deaths: 'Vítimas de abates por habilidade',
+	postplant_ability_deaths: 'Vítimas de abates por habilidade pós-plant',
+}
+const DESCRICOES = {
+	ability_kills: 'Posições dos killers quando finalizaram um abate válido por habilidade; não representa o local de uso do utilitário.',
+	postplant_ability_kills: 'Posições dos killers em abates válidos por habilidade ocorridos após o plant; não representa o local de uso do utilitário.',
+	ability_deaths: 'Posições das vítimas em abates válidos finalizados por habilidade; não representa o local de uso do utilitário.',
+	postplant_ability_deaths: 'Posições das vítimas em abates válidos por habilidade ocorridos após o plant; não representa o local de uso do utilitário.',
+}
 
 // Explorador de heatmap (spec 7.5, 7.6 e 7.8) em volta do /api/heatmap:
 // - `mapas`: os mapas que dá para escolher (padrão: o primeiro). Com um só, os chips somem;
 // - `filtro`: parâmetros fixos, de quem são as ações ({ jogador: puuid }, { time: id } ou nada);
-// - `tipos`: subconjunto de kills, mortes e plants; `campos`: os filtros comuns da BarraFiltros.
+// - `tipos`: subconjunto de kills, mortes, plants e abates por habilidade; `campos`: filtros comuns.
 // Tudo fica na URL. Os filtros valem para quem age: onde matou (Kills), onde morreu (Mortes) ou onde plantou.
-function PainelHeatmap({ mapas, filtro = {}, tipos = ['kills', 'mortes'], campos = ['torneio', 'fase'] }) {
+function PainelHeatmap({
+	mapas,
+	filtro = {},
+	tipos = [
+		'kills', 'mortes', 'ability_kills', 'ability_deaths',
+		'postplant_ability_kills', 'postplant_ability_deaths',
+	],
+	campos = ['torneio', 'fase'],
+}) {
 	const { filtros } = useFiltros()
 	const [f, setF] = useParametros({ mapa: mapas[0], tipo: tipos[0], lado: '' })
 	const mapa = mapas.includes(f.mapa) ? f.mapa : mapas[0]
@@ -49,7 +71,15 @@ function PainelHeatmap({ mapas, filtro = {}, tipos = ['kills', 'mortes'], campos
 				</BarraFiltros>
 			</div>
 			<Estado resposta={resposta} vazio={() => false} esqueleto="grafico">
-				{h => <MapaCalor mapa={h.mapa} pontos={h.pontos} total={h.total} />}
+				{h => (
+					<MapaCalor
+						mapa={h.mapa}
+						pontos={h.pontos}
+						total={h.total}
+						partidas={h.partidas}
+						descricao={DESCRICOES[tipo]}
+					/>
+				)}
 			</Estado>
 		</div>
 	)

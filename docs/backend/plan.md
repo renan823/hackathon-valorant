@@ -158,10 +158,19 @@ endpoint assim que ele estiver pronto.
 ### Fase 3: Análises (≈ 3 h · 1–2 pessoas, em paralelo à Fase 2)
 
 1. `analises/__init__.py` (registro + autoimport) e `routers/analises.py`.
-2. Portar as 9 análises da spec (seção 8.5), uma por arquivo. Cada uma reaproveita o código da seção 10 da
-   EDA, já com `filtros.aplicar()` e devolvendo `n` (R8).
+2. Implementar as análises da spec (seção 8.5), uma por arquivo. As análises portadas reaproveitam o código
+   da seção 10 da EDA, com `filtros.aplicar()` e `n` (R8).
 3. Os KPIs da Home (`/resumo`) chamam as funções de `pistol`, `first-kill`, `lado-por-mapa` e `meta-armas`,
    sem duplicar a lógica.
+4. `impacto-habilidades` usa os timestamps dos abates por habilidade e o horário do plant como proxy de
+   impacto. Os JSONs não registram horário de cast; portanto, essa análise não conclui quando gastar
+   habilidades nem demonstra causalidade (spec, seção 8.5).
+5. As análises incrementais usam contagens de casts por jogador-partida e exposição em rounds para comparar
+   conversão de abates por habilidade, loadout médio, desempenho jogador-partida e faixas de atividade por
+   equipe-partida; os cortes são relativos ao recorte e os filtros de agente/função limitam o elenco observado.
+6. O frontend usa os cards e gráficos plugáveis existentes: barras para conversão e atividade por mapa,
+   histograma interativo com alternância entre frequência, win rate e equipamento médio para atividade/economia,
+   e tabela para as agregações jogador-partida, com os denominadores visíveis.
 
 ### Fase 4: Qualidade (≈ 1 h · 1 pessoa)
 
