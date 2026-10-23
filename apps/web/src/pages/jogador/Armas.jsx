@@ -80,8 +80,6 @@ function StatsHabilidade({ arma }) {
 	return (<>
 		<Stat rotulo="Rounds c/ kill" valor={formatar('rounds_com_kill', arma.rounds_com_kill)}
 			title="Rounds distintos em que essa habilidade matou alguém" />
-		<Stat rotulo="Partidas" valor={formatar('partidas_com_kill', arma.partidas_com_kill)}
-			title="Partidas em que essa habilidade registrou ao menos 1 kill" />
 		{arma.casts != null && (
 			<Stat rotulo="Casts" valor={formatar('casts', arma.casts)}
 				title="Total de vezes que a habilidade foi usada nas partidas registradas" />
@@ -95,7 +93,7 @@ function StatsHabilidade({ arma }) {
 
 function Stat({ rotulo, valor, title }) {
 	return (
-		<span className="arsenal__stat" title={title}>
+		<span className="arsenal__stat" data-tooltip={title}>
 			<span className="arsenal__stat-rot">{rotulo}</span>
 			<span className="arsenal__stat-val numero">{valor}</span>
 		</span>
