@@ -69,5 +69,5 @@ export const MIN_ROUNDS_PADRAO = 100
 // Corte padrão do ranking de times, o mesmo da Home e da EDA. O padrão da API é 0, então o front envia (F1).
 export const MIN_PARTIDAS_PADRAO = 8
 
-// Heatmap: rampa de um tom (laranja), do menos para o mais denso (F14).
-export const RAMPA_CALOR = ['#a93900', '#d1521d', '#f57242', '#ffa383', '#fed3c4']
+// Heatmap: frio→quente (azul→amarelo→vermelho), do menos para o mais denso (F14).
+export const RAMPA_CALOR = ['#1a6fad', '#35b5c1', '#f5e642', '#f48020', '#c0160c']

@@ -11,7 +11,7 @@ function Heatmap() {
 
 	return (
 		<Estado resposta={perfil} vazio={p => p.por_mapa.length === 0} textoVazio="Nenhuma partida.">
-			{p => <PainelHeatmap mapas={p.por_mapa.map(m => m.mapa)} filtro={{ time: id }} />}
+			{p => <PainelHeatmap mapas={p.por_mapa.map(m => m.mapa)} filtro={{ time: id }} jogadores={p.elenco} />}
 		</Estado>
 	)
 }

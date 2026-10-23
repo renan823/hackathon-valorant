@@ -148,7 +148,7 @@ def _preparar_abates(bruto, partidas, jogadores, rounds, ref):
     a = _com_partida(bruto.copy(), partidas)
     a = a.join(_info_jogador(jogadores, "killer"), on=["match_id", "killer"])
     a = a.join(_info_jogador(jogadores, "vitima"), on=["match_id", "vitima"])
-    atacante = rounds.set_index(["match_id", "round"])["time_atacante_id"]
+    atacante = rounds.drop_duplicates(["match_id", "round"]).set_index(["match_id", "round"])["time_atacante_id"]
     a["lado_vitima"] = np.where(a.join(atacante, on=["match_id", "round"])["time_atacante_id"] == a["vitima_time_id"],
                                 "Attacker", "Defender")
 
