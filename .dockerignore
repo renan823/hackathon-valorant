@@ -1,0 +1,16 @@
+.git
+.venv
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+**/node_modules
+**/dist
+**/.DS_Store
+.env
+.env.*
+analysis
+outputs
+notebooks
+*.ipynb
+apps/api/tests
+apps/web
