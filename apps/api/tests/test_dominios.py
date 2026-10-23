@@ -210,7 +210,7 @@ def test_heatmap(cliente, base):
     ]["vitima_x"].notna().sum()
 
     pos_plant = ok(cliente, "/api/heatmap", mapa="Lotus", tipo="postplant_ability_kills")
-    pos_plantos = ability.merge(
+    pos_plantos = a[(a["mapa"] == "Lotus") & a["valido"]].merge(
         base.rounds[["match_id", "round", "plant_tempo_s"]],
         on=["match_id", "round"], how="inner",
     )
@@ -219,13 +219,16 @@ def test_heatmap(cliente, base):
         & (pos_plantos["tempo_round_s"] >= pos_plantos["plant_tempo_s"])
     ]
     pos_plantos = pos_plantos.dropna(subset=["killer_x", "killer_y"])
-    assert pos_plant["total"] == len(pos_plantos) == 190
+    assert pos_plant["total"] == len(pos_plantos)
     assert pos_plant["partidas"] == pos_plantos["match_id"].nunique()
     assert pos_plant["total"] == len(pos_plant["pontos"])
+    assert pos_plant["total"] > len(
+        pos_plantos[pos_plantos["categoria_meio"].eq("Ability")].dropna(subset=["killer_x", "killer_y"])
+    )
     assert ok(cliente, "/api/heatmap", mapa="Lotus", tipo="ability_kills", funcao="Duelista")["total"] < habilidades["total"]
 
     pos_plant_mortes = ok(cliente, "/api/heatmap", mapa="Lotus", tipo="postplant_ability_deaths")
-    pos_plantos_vitimas = ability.merge(
+    pos_plantos_vitimas = a[(a["mapa"] == "Lotus") & a["valido"]].merge(
         base.rounds[["match_id", "round", "plant_tempo_s"]],
         on=["match_id", "round"], how="inner",
     )

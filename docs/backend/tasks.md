@@ -175,8 +175,9 @@ Formatos conforme a spec (seção 8).
 - [x] **Heatmap de abates/vítimas por habilidade e pós-plant** · Dono: Copilot
   - *Arquivos:* `routers/geral.py`, `tests/test_dominios.py`, `tests/test_smoke.py`.
   - *Aceite:* `tipo=ability_kills` usa posição de killer em abate válido por Ability;
-    `tipo=postplant_ability_kills` restringe ao tempo após o plant; mapa/lado e filtros comuns são aplicados;
-    `ability_deaths` e `postplant_ability_deaths` aplicam os mesmos recortes à posição e filtros da vítima;
+    `tipo=postplant_ability_kills` usa todos os abates válidos após o plant, inclusive por arma;
+    mapa/lado e filtros comuns são aplicados; `ability_deaths` e `postplant_ability_deaths`
+    aplicam os mesmos recortes à posição e filtros da vítima;
     posição ausente é descartada e a resposta informa eventos plotados e partidas.
 
 - [x] **T2.4 `GET /api/jogadores/{puuid}/partidas`** · 20 min · Dono: Claude

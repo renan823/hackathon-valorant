@@ -101,17 +101,21 @@ def _visao_heatmap(b, tipo):
         return r[base].assign(puuid=r["planter"], time_id=r["time_atacante_id"], agente=r["agente_planter"],
                               funcao=r["funcao_planter"], lado="Attacker", x=r["plant_x"], y=r["plant_y"])
     a = b.abates
-    if tipo in {
-        "ability_kills", "postplant_ability_kills",
-        "ability_deaths", "postplant_ability_deaths",
-    }:
+    if tipo in {"ability_kills", "ability_deaths"}:
         a = a[a["valido"] & a["categoria_meio"].eq("Ability")].copy()
-        if tipo in {"postplant_ability_kills", "postplant_ability_deaths"}:
-            plants = b.rounds.loc[
-                b.rounds["houve_plant"], ["match_id", "round", "plant_tempo_s"]
-            ]
-            a = a.merge(plants, on=["match_id", "round"], how="inner")
-            a = a[a["tempo_round_s"] >= a["plant_tempo_s"]]
+        pessoa = "killer" if tipo.endswith("kills") else "vitima"
+        return a[base].assign(
+            puuid=a[pessoa], time_id=a[f"{pessoa}_time_id"], agente=a[f"agente_{pessoa}"],
+            funcao=a[f"funcao_{pessoa}"], lado=a[f"lado_{pessoa}"],
+            x=a[f"{pessoa}_x"], y=a[f"{pessoa}_y"],
+        )
+    if tipo in {"postplant_ability_kills", "postplant_ability_deaths"}:
+        a = a[a["valido"]].copy()
+        plants = b.rounds.loc[
+            b.rounds["houve_plant"], ["match_id", "round", "plant_tempo_s"]
+        ]
+        a = a.merge(plants, on=["match_id", "round"], how="inner")
+        a = a[a["tempo_round_s"] >= a["plant_tempo_s"]]
         pessoa = "killer" if tipo.endswith("kills") else "vitima"
         return a[base].assign(
             puuid=a[pessoa], time_id=a[f"{pessoa}_time_id"], agente=a[f"agente_{pessoa}"],

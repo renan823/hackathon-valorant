@@ -11,22 +11,23 @@ const TIPOS = {
 	mortes: 'Mortes',
 	plants: 'Plants',
 	ability_kills: 'Abates por habilidade',
-	postplant_ability_kills: 'Abates por habilidade pós-plant',
+	postplant_ability_kills: 'Abates pós-plant',
 	ability_deaths: 'Vítimas de abates por habilidade',
-	postplant_ability_deaths: 'Vítimas de abates por habilidade pós-plant',
+	postplant_ability_deaths: 'Mortes pós-plant',
 }
 const DESCRICOES = {
 	ability_kills: 'Posições dos killers quando finalizaram um abate válido por habilidade; não representa o local de uso do utilitário.',
-	postplant_ability_kills: 'Posições dos killers em abates válidos por habilidade ocorridos após o plant; não representa o local de uso do utilitário.',
+	postplant_ability_kills: 'Posições dos killers em todos os abates válidos ocorridos após o plant.',
 	ability_deaths: 'Posições das vítimas em abates válidos finalizados por habilidade; não representa o local de uso do utilitário.',
-	postplant_ability_deaths: 'Posições das vítimas em abates válidos por habilidade ocorridos após o plant; não representa o local de uso do utilitário.',
+	postplant_ability_deaths: 'Posições das vítimas em todos os abates válidos ocorridos após o plant.',
 }
 
 // Explorador de heatmap (spec 7.5, 7.6 e 7.8) em volta do /api/heatmap:
 // - `mapas`: os mapas que dá para escolher (padrão: o primeiro). Com um só, os chips somem;
 // - `filtro`: parâmetros fixos, de quem são as ações ({ jogador: puuid }, { time: id } ou nada);
 // - `jogadores`: lista opcional de { puuid, nick } para habilitar filtro por jogador;
-// - `tipos`: subconjunto de kills, mortes, plants e abates por habilidade; `campos`: os filtros comuns da BarraFiltros.
+// - `tipos`: subconjunto de kills, mortes, plants, abates por habilidade e abates pós-plant;
+//   `campos`: os filtros comuns da BarraFiltros.
 // Tudo fica na URL. Os filtros valem para quem age: onde matou (Kills), onde morreu (Mortes) ou onde plantou.
 function PainelHeatmap({
 	mapas,

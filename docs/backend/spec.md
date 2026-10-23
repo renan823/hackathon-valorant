@@ -408,7 +408,7 @@ de conversão com vitória é descritiva e não demonstra causalidade.
 | Parâmetro | Valores |
 |---|---|
 | `mapa` | obrigatório e único: é o filtro comum `mapa`, que aqui precisa de exatamente um valor (as coordenadas só são comparáveis dentro do mesmo mapa) |
-| `tipo` | `kills` (posição do killer), `mortes` (posição da vítima), `plants`, `ability_kills`/`postplant_ability_kills` (posição do killer em abates válidos finalizados por habilidade, geral/pós-plant), `ability_deaths`/`postplant_ability_deaths` (posição da vítima nesses abates, geral/pós-plant) |
+| `tipo` | `kills` (posição do killer), `mortes` (posição da vítima), `plants`, `ability_kills`/`ability_deaths` (posição do killer/vítima em abates válidos finalizados por habilidade), `postplant_ability_kills`/`postplant_ability_deaths` (posição do killer/vítima em todos os abates válidos pós-plant; os nomes antigos são mantidos por compatibilidade) |
 | `jogador` | `puuid` (opcional) |
 | `lado` | `Attacker`/`Defender` (opcional) |
 | + filtros comuns | `torneio`, `fase`, `mapa`, `time`, `agente`, `funcao` |
@@ -418,7 +418,8 @@ o killer em `kills` e nos tipos `ability_*_kills`, a vítima em `mortes` e nos t
 plantou em `plants`. Exemplo: `tipo=mortes&agente=Jett` mostra onde os Jetts morreram.
 
 Os tipos `ability_*` selecionam apenas abates válidos com `categoria_meio = "Ability"`. Os tipos
-`postplant_ability_*` exigem também plant no round e `tempo_round_s >= plant_tempo_s`. Os pontos são as
+`postplant_ability_*` selecionam todos os abates válidos no round com plant e `tempo_round_s >= plant_tempo_s`,
+independentemente de arma ou habilidade. Os pontos são as
 coordenadas do killer (`*_kills`) ou da vítima (`*_deaths`) no abate final, não a posição de lançamento/impacto
 da habilidade; os casts não têm coordenada nem timestamp.
 Resposta: `{mapa, tipo, total, partidas, pontos: [{x, y}]}`, com `x, y ∈ [0, 1]`; `total` e `partidas`

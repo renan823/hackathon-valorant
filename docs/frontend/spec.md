@@ -550,11 +550,12 @@ O layout busca `GET /api/jogadores/{puuid}`; as abas Agentes, Mapas e Armas reap
   redireciona para `/armas`.
 - **Heatmap**: `GET /heatmap?mapa=<m>&jogador=<puuid>&tipo=kills|mortes`, com o mapa escolhido entre os de
   `por_mapa` (padrão: o mais jogado) e filtros de lado, torneio e fase.
-- No explorador de heatmap, os tipos **Abates por habilidade** e **Abates por habilidade pós-plant** mostram
-  densidade das posições do killer; **Vítimas de abates por habilidade** e **Vítimas de abates por habilidade
-  pós-plant** mostram as posições das vítimas. Todos contam abates válidos finalizados por `Ability`; os tipos
-  pós-plant exigem horário do abate igual ou posterior ao plant. Os filtros de pessoa referem-se ao killer ou
-  à vítima conforme o tipo. A legenda mostra eventos e partidas, alerta para menos de 5 partidas e esclarece
+- No explorador de heatmap, **Abates por habilidade** mostra a densidade das posições dos killers em abates
+  válidos finalizados por `Ability`, enquanto **Abates pós-plant** inclui todos os abates válidos após o plant,
+  por arma ou habilidade. **Vítimas de abates por habilidade** mostra as posições das vítimas em abates por
+  `Ability`; **Mortes pós-plant** inclui as vítimas de todos os abates válidos ocorridos após o plant.
+  Os filtros de pessoa referem-se ao killer ou à vítima conforme o tipo. A legenda mostra eventos e partidas,
+  alerta para menos de 5 partidas e esclarece
   que o mapa não representa posição de cast ou impacto do utilitário.
 - *Aceite:* lule#dfnt mostra "#1 no ranking", 12 partidas, ACS 287 e dois times (Macklogic Red, 7 partidas;
   Macklogic Rainbow, 5); TORONTO#lulu (56 rounds) mostra "fora do ranking".
