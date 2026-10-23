@@ -16,7 +16,7 @@ ps:
 	docker compose ps
 
 restart:
-	docker compose restart
+	docker compose down && docker compose up --build -d
 
 clean:
 	docker compose down --volumes --rmi local
