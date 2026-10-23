@@ -11,7 +11,7 @@ const ALTURA_MAX = 600
 // Nó: tamanho por kills, cor da equipe. Aresta: dividida na proporção dos abates de cada lado, cada parte na
 // cor da equipe que fez aqueles abates (na Partida, cor é sempre time, F12), com o placar do duelo no meio.
 // A mesma informação está na matriz, que é a visão acessível; o grafo é complementar.
-function GrafoDuelos({ duelos, partida }) {
+function GrafoDuelos({ duelos, partida, onArestaClick }) {
 	const fgRef = useRef()
 	const caixaRef = useRef(null)
 	const [tamanho, setTamanho] = useState({ largura: 0, altura: 0 })
@@ -132,6 +132,7 @@ function GrafoDuelos({ duelos, partida }) {
 					linkCanvasObject={desenharAresta}
 					cooldownTicks={120}
 					onEngineStop={enquadrar}
+					onLinkClick={onArestaClick}
 				/>
 			)}
 		</div>
