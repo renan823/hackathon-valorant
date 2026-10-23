@@ -35,6 +35,7 @@ class Base:
     rounds: pd.DataFrame
     economia: pd.DataFrame
     abates: pd.DataFrame     # todos os registros, com coluna `valido` (R1)
+    dano_round: pd.DataFrame  # dano a inimigos por jogador por round
     times: pd.DataFrame
     carregado_em: datetime
 
@@ -73,6 +74,7 @@ def preparar(tabelas, ref):
         rounds=rounds,
         economia=_preparar_economia(tabelas["economia"], partidas, ref),
         abates=_preparar_abates(tabelas["abates"], partidas, jogadores, rounds, ref),
+        dano_round=tabelas["dano_round"],
         times=_preparar_times(jogadores),
         carregado_em=datetime.now(),
     )
@@ -159,6 +161,13 @@ def _preparar_abates(bruto, partidas, jogadores, rounds, ref):
     a["categoria_meio"] = np.where(arma, item.map(lambda u: ref["weapons"].get(u, {}).get("categoria")),
                                    a["tipo_dano"])
     a.loc[arma & a["item_dano"].eq(""), ["meio", "categoria_meio"]] = ["Chamber (habilidade)", "Ability"]  # R4
+
+    # Para habilidades genéricas, diferenciar pelo slot usando item_dano antes de descartá-lo.
+    _SLOTS = {"ultimate": "Ultimate", "ability1": "Habilidade Q",
+              "ability2": "Habilidade E", "grenade": "Habilidade C"}
+    hab = ~arma & (a["tipo_dano"] == "Ability")
+    a.loc[hab, "meio"] = item[hab].map(lambda i: _SLOTS.get(i, "Habilidade"))
+    a.loc[hab, "categoria_meio"] = "Ability"
 
     _normalizar(a, "killer_x", "killer_y")
     _normalizar(a, "vitima_x", "vitima_y")

@@ -163,7 +163,7 @@ def _processar_partida(caminho, pasta, ref):
         for puuid in jogadores
     }
 
-    linhas_rounds, linhas_economia, linhas_abates = [], [], []
+    linhas_rounds, linhas_economia, linhas_abates, linhas_dano_round = [], [], [], []
 
     for rnd in partida["roundResults"]:
         n = rnd["roundNum"]
@@ -207,6 +207,13 @@ def _processar_partida(caminho, pasta, ref):
                 a["legshots"] += dmg["legshots"]
                 if dmg["receiver"] in acum:
                     acum[dmg["receiver"]]["dano_recebido"] += dmg["damage"]
+            linhas_dano_round.append({
+                "match_id": mi["matchId"],
+                "round": n + 1,
+                "puuid": puuid,
+                "dano": sum(d["damage"] for d in ps["damage"]
+                            if time_do.get(d["receiver"]) != time_do[puuid]),
+            })
             kills_validos = [k for k in ps["kills"] if time_do.get(k["victim"]) != time_do[puuid]]
             if len(kills_validos) >= 3:
                 a["multikills"] += 1
@@ -326,25 +333,27 @@ def _processar_partida(caminho, pasta, ref):
             linha.update(acum[p["puuid"]])
         linhas_jogadores.append(linha)
 
-    return linhas_jogadores, linhas_rounds, linhas_economia, linhas_abates
+    return linhas_jogadores, linhas_rounds, linhas_economia, linhas_abates, linhas_dano_round
 
 
 def carregar_tabelas(pasta=PASTA_DADOS):
     """Lê todos os JSONs em `pasta` e devolve um dicionário de DataFrames brutos."""
     pasta = Path(pasta)
     ref = carregar_referencia()
-    jog, rnd, eco, ab = [], [], [], []
+    jog, rnd, eco, ab, dr = [], [], [], [], []
     for caminho in listar_arquivos(pasta):
-        j, r, e, a = _processar_partida(caminho, pasta, ref)
+        j, r, e, a, d = _processar_partida(caminho, pasta, ref)
         jog += j
         rnd += r
         eco += e
         ab += a
+        dr += d
     return {
         "jogadores": pd.DataFrame(jog),
         "rounds": pd.DataFrame(rnd),
         "economia": pd.DataFrame(eco),
         "abates": pd.DataFrame(ab),
+        "dano_round": pd.DataFrame(dr),
     }
 
 
