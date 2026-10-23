@@ -3,6 +3,7 @@
 from typing import Literal
 
 import numpy as np
+import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app import dados
@@ -16,6 +17,7 @@ COLUNAS_RANKING = ["posicao", "puuid", "nick", "time_id", "time", "partidas", "v
                    "kpr", "apr", "fk_round", "fd_round", "multikills", "agente_principal", "funcao_principal"]
 # Decisão D4 (plano do backend, §7): com 50 rounds o 1º lugar tinha só 3 partidas; com 100 o topo estabiliza.
 MIN_ROUNDS_PADRAO = 100
+CATEGORIAS_ARMAS = {"Rifle", "Sidearm", "Sniper", "SMG", "Heavy", "Shotgun", "Melee"}
 
 
 def mais_frequente(df, chave, coluna):
@@ -126,3 +128,43 @@ def historico(puuid: str):
         "match_id", "data", "torneio", "fase", "mapa", "time_id", "time", "adversario_id", "adversario",
         "placar_time", "placar_adversario", "venceu", "agente", "kills", "deaths", "assists", "mais_menos",
         "acs", "adr", "kast_pct", "hs_pct", "first_kills", "multikills"]])
+
+
+@router.get("/{puuid}/alvos")
+def abates_por_alvo(puuid: str, por: Literal["funcao", "agente"] = Query("funcao")):
+    """Participação de habilidades e armas nos abates válidos do jogador contra cada alvo."""
+    _jogador(puuid)
+    abates = dados.base().abates
+    considerados = abates[
+        abates["valido"]
+        & (abates["killer"] == puuid)
+        & (abates["categoria_meio"].eq("Ability") | abates["categoria_meio"].isin(CATEGORIAS_ARMAS))
+    ]
+
+    if por == "funcao":
+        grupos = ["funcao_vitima"]
+    else:
+        grupos = ["agente_vitima", "funcao_vitima"]
+
+    habilidades = considerados[considerados["categoria_meio"].eq("Ability")]
+    armas = considerados[considerados["categoria_meio"].isin(CATEGORIAS_ARMAS)]
+    resultado = pd.concat(
+        [
+            habilidades.groupby(grupos).size().rename("kills_habilidade"),
+            armas.groupby(grupos).size().rename("kills_arma"),
+            considerados.groupby(grupos).size().rename("kills_consideradas"),
+        ],
+        axis=1,
+    ).fillna(0).reset_index()
+
+    resultado = resultado.rename(columns={
+        "funcao_vitima": "alvo" if por == "funcao" else "funcao",
+        "agente_vitima": "alvo",
+    })
+    resultado[["kills_habilidade", "kills_arma", "kills_consideradas"]] = (
+        resultado[["kills_habilidade", "kills_arma", "kills_consideradas"]].astype(int)
+    )
+    resultado["pct_habilidade"] = 100 * resultado["kills_habilidade"] / resultado["kills_consideradas"]
+    resultado["pct_arma"] = 100 * resultado["kills_arma"] / resultado["kills_consideradas"]
+    resultado = resultado.sort_values(["kills_consideradas", "alvo"], ascending=[False, True])
+    return dados.para_json(resultado)

@@ -4,6 +4,7 @@ import pkgutil
 
 import pytest
 
+from app import dados
 from app import analises
 from app.analises import REGISTRO, analise
 
@@ -22,7 +23,7 @@ def linha(dados, **chave):
 
 def test_autoimport_registra_um_analise_por_arquivo(cliente):
     modulos = {m.name for m in pkgutil.iter_modules(analises.__path__)}
-    assert len(modulos) == len(REGISTRO) == 9
+    assert len(modulos) == len(REGISTRO) == 11
     lista = cliente.get("/api/analises").json()
     assert {a["id"] for a in lista} == set(REGISTRO)
     assert all("funcao" not in a and {"titulo", "categoria", "grafico"} <= set(a) for a in lista)
@@ -43,6 +44,17 @@ def test_nova_analise_aparece_sem_mexer_em_rotas(cliente):
 
 def test_analise_desconhecida_404(cliente):
     assert cliente.get("/api/analises/nao-existe").status_code == 404
+
+
+@pytest.mark.parametrize("analise_id", [
+    "impacto-habilidades",
+    "atividade-economia-habilidades",
+    "equipe-partida-habilidades",
+])
+def test_analises_removidas_nao_aparecem_nem_respondem(cliente, analise_id):
+    ids = {analise["id"] for analise in cliente.get("/api/analises").json()}
+    assert analise_id not in ids
+    assert cliente.get(f"/api/analises/{analise_id}").status_code == 404
 
 
 @pytest.mark.parametrize("analise_id", sorted(REGISTRO))
@@ -105,6 +117,41 @@ def test_plant_sites(cliente):
     d = executar(cliente, "plant-sites")["dados"]
     assert [linha(d, mapa="Haven", plant_site=s)["plants"] for s in "CAB"] == [464, 404, 148]
     assert [linha(d, mapa="Lotus", plant_site=s)["plants"] for s in "CAB"] == [546, 482, 226]
+
+
+def test_conversao_habilidades_compara_resultados_por_primeiro_abate_e_lado(cliente):
+    r = executar(cliente, "conversao-habilidades")
+    assert r["grafico"]["n"] == "team_rounds"
+    assert r["grafico"]["indicadores"] == ["vitorias", "abates_habilidade"]
+    assert r["grafico"]["referencia"] == 50
+    assert "linha tracejada = 50%" in r["grafico"]["rotulo_y"]
+    assert r["grafico"]["rotulo_valor"] is True
+    assert {"situacao_habilidade", "lado", "team_rounds", "vitorias",
+            "abates_habilidade", "win_pct"} <= set(r["dados"][0])
+    assert {d["situacao_habilidade"] for d in r["dados"]} == {
+        "Habilidade fez o primeiro abate",
+        "Habilidade fez outro abate",
+        "Nenhum abate por habilidade",
+    }
+    assert sum(d["team_rounds"] for d in r["dados"]) == 2 * len(dados.base().rounds)
+    ascent = executar(cliente, "conversao-habilidades", mapa="Ascent")
+    assert sum(d["team_rounds"] for d in ascent["dados"]) == 2 * len(
+        dados.base().rounds[dados.base().rounds["mapa"].eq("Ascent")]
+    )
+    assert "Cada barra mostra a porcentagem de rounds vencidos" in r["insight"]
+    assert "golpe final do abate, não o momento de uso" in r["insight"]
+
+
+def test_jogador_partida_agrega_taxas_por_agente_funcao_e_mapa(cliente):
+    base = dados.base()
+    jogadores = base.jogadores[base.jogadores["rounds_jogados"].gt(0)]
+    r = executar(cliente, "jogador-partida-habilidades")
+    assert {"mapa", "agente", "funcao", "jogador_partidas", "rounds",
+            "casts_por_round", "acs", "adr", "kast_pct", "win_pct"} <= set(r["dados"][0])
+    assert sum(d["jogador_partidas"] for d in r["dados"]) == len(jogadores)
+    assert sum(d["rounds"] for d in r["dados"]) == jogadores["rounds_jogados"].sum()
+    jett = executar(cliente, "jogador-partida-habilidades", agente="Jett")
+    assert {d["agente"] for d in jett["dados"]} == {"Jett"}
 
 
 # --- KPIs da Home (T2.15) --------------------------------------------------------------

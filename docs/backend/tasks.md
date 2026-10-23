@@ -15,7 +15,7 @@ antes · *Aceite* = como provar que terminou. Estimativas em horas de uma pessoa
 | 0. Esqueleto | T0.1–T0.4 | ~1 h | já |
 | 1. Núcleo | T1.1–T1.9 | ~4 h | T0.2 |
 | 2. Domínios | T2.1–T2.15 | ~5 h | T1.5–T1.8 (cada router lista as suas dependências) |
-| 3. Análises | T3.1–T3.10 | ~3 h | T1.5, T1.7 e T3.1 |
+| 3. Análises | T3.1–T3.14 | ~4 h | T1.5, T1.7 e T3.1 |
 | 4. Qualidade | T4.1–T4.4 | ~1,5 h | fim das fases 2 e 3 |
 
 ```
@@ -24,7 +24,7 @@ T0.1 → T0.2 ─┬─ T0.3, T0.4
              ├─ T1.4 ─┐
              ├─ T1.6  ├─ T1.5a/T1.5b ─┬─ T1.9 ─┬─ Fase 2 (routers em paralelo) ─┬─ T2.15 ─┐
              ├─ T1.7 ─┘               │        │                                │         ├─ Fase 4
-             └─ T1.8 ─────────────────┘        └─ T3.1 → T3.2…T3.10 ────────────┘─────────┘
+             └─ T1.8 ─────────────────┘        └─ T3.1 → T3.2…T3.14 ───────────┘─────────┘
 ```
 
 ---
@@ -167,6 +167,18 @@ Formatos conforme a spec (seção 8).
   - *Aceite:* para um jogador com 2 nicks, `nicks_anteriores` tem 1 item; jogador em 2 times (R9) lista os
     dois; `Σ armas.kills` = kills válidos dele; `posicao_ranking` é `null` se ele tiver menos de 50 rounds (100 desde a D4).
 
+- [x] **T2.3b `GET /api/jogadores/{puuid}/alvos`** · Dono: Copilot · Perfil: abates por função/agente da vítima
+  - *Aceite:* categorias de arma e `Ability` reconciliam com as baixas válidas do jogador; cada percentual usa
+    como denominador apenas os abates por arma e habilidade daquele alvo; queda/esmagamento são excluídos;
+    agrupamento inválido → 422 e jogador inexistente → 404.
+
+- [x] **Heatmap de abates/vítimas por habilidade e pós-plant** · Dono: Copilot
+  - *Arquivos:* `routers/geral.py`, `tests/test_dominios.py`, `tests/test_smoke.py`.
+  - *Aceite:* `tipo=ability_kills` usa posição de killer em abate válido por Ability;
+    `tipo=postplant_ability_kills` restringe ao tempo após o plant; mapa/lado e filtros comuns são aplicados;
+    `ability_deaths` e `postplant_ability_deaths` aplicam os mesmos recortes à posição e filtros da vítima;
+    posição ausente é descartada e a resposta informa eventos plotados e partidas.
+
 - [x] **T2.4 `GET /api/jogadores/{puuid}/partidas`** · 20 min · Dono: Claude
   - *Aceite:* nº de linhas = partidas do jogador; ordem por data decrescente; `kills` = `stats.kills`.
 
@@ -242,8 +254,19 @@ abaixo é o *Aceite* sem filtros.
 - [x] **T3.8 `meta_agentes.py`** · 30 min · Dono: Claude · pick rate e win rate por agente × mapa; Omen é o mais escolhido (588).
 - [x] **T3.9 `metricas_vitoria.py`** · 30 min · Dono: Claude · correlação ponto-bisserial com `venceu`; KAST é a maior (r ≈ 0,59).
 - [x] **T3.10 `plant_sites.py`** · 20 min · Dono: Claude · Haven: C 464 / A 404 / B 148; Lotus: C 546 / A 482 / B 226.
+- [x] **T3.11 `impacto_habilidades.py`** · compara abates válidos por habilidade pré/pós-plant e taxa de vitória por lado; documenta que casts não têm timestamp e que o resultado é um proxy observacional.
+- [x] **T3.12 `conversao_habilidades.py`** · compara o win rate em observações equipe-round por primeiro abate de habilidade, outro abate de habilidade ou ausência de abate por habilidade, separado por lado.
+- [x] **T3.13 `atividade_economia_habilidades.py` e `jogador_partida_habilidades.py`** · apresenta casts por round, loadout médio e métricas de desempenho agregadas por agente/função/mapa; explicita tercis relativos ao recorte e ponderação por rounds.
+- [x] **T3.14 `equipe_partida_habilidades.py` e interface plugável** · compara win rate por tercis de casts por equipe-round dentro de cada mapa; filtros de agente/função limitam o elenco usado na soma e tooltips mostram tamanho de amostra.
+- [x] **T3.15 visualização de atividade × economia** · versão inicial do gráfico interativo, posteriormente simplificada no T3.16: histograma de frequência como padrão e alternância somente para win rate; equipamento médio permanece no tooltip.
+- [x] **T3.16 histograma de casts por round** · troca tercis relativos por intervalos de 0,5 casts/jogador-round; a frequência de jogador-partidas é a visualização padrão, com alternância para win rate; equipamento médio fica disponível no tooltip. Win rate em faixas abaixo de 30 observações é sinalizado para leitura cautelosa.
 
-**✔ Checkpoint 3:** `/api/analises` lista 9 análises e todas respondem com os valores de referência. Critérios em `apps/api/tests/test_analises.py`; cada análise responde em < 50 ms e `/resumo` (com os 4 KPIs) em ~150 ms.
+**✔ Checkpoint 3:** `/api/analises` lista 14 análises e todas respondem. Os critérios de registro, filtros, denominadores e valores de referência ficam em `apps/api/tests/test_analises.py`; `/resumo` mantém os 4 KPIs existentes.
+
+**Decisão posterior de escopo:** as análises `impacto-habilidades`, `atividade-economia-habilidades` e
+`equipe-partida-habilidades` foram removidas por serem irrelevantes e não adicionarem informação útil. A
+lista e os testes atuais passam a considerar 11 análises; o checkpoint acima registra o estado original
+quando a Fase 3 foi concluída.
 
 ---
 

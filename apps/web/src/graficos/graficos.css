@@ -21,6 +21,7 @@
 .grafico-analise { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .grafico-analise__eixo { font-size: 0.75rem; }
 .grafico-analise__eixo--x { text-align: center; }
+.grafico-barras__rotulo { fill: var(--text); font-size: 0.7rem; font-weight: 600; }
 
 .grafico-analise__seletor {
   display: flex;

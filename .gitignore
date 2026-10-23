@@ -5,3 +5,5 @@ __marimo__/
 *.db
 outputs/processed/
 .pytest_cache/
+vava/
+node_modules/

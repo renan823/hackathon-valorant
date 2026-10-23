@@ -47,6 +47,20 @@ O Vite repassa `/api` para a porta 8000. Com o backend desligado, o app mostra u
 volta sozinho quando ele sobe. Detalhes do front em [`apps/web/README.md`](apps/web/README.md); spec, plano e tarefas
 em [`docs/frontend/`](docs/frontend/) e [`docs/backend/`](docs/backend/).
 
+### Executar com Docker
+
+Com Docker Engine e o plugin Docker Compose instalados, rode na raiz do repositório:
+
+```sh
+docker compose up --build
+```
+
+O dashboard ficará disponível em <http://localhost:8080>; a API é acessada pelo proxy do frontend e também
+pode ser conferida em <http://localhost:8080/api/saude>. A primeira compilação inclui os JSONs de `data/`
+na imagem da API (cerca de 194 MB no conjunto atual) e pode demorar mais; os dados são carregados em memória
+quando a API inicia. Para parar os containers, use `Ctrl+C` e `docker compose down`. A porta do frontend pode
+ser alterada, por exemplo, com `WEB_PORT=8081 docker compose up --build`.
+
 ## Como executar
 
 Todos os comandos abaixo partem da **raiz do repositório**.

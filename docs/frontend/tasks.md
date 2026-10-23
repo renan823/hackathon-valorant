@@ -292,13 +292,16 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
     com os 6 filtros; card com título, insight, gráfico, descrição recolhível e link "abrir". Linhas com menos
     de 5 partidas ficam esmaecidas, com o `AvisoAmostra`.
   - *Aceite:*
-    - 5 abas (Mapas, Momentos decisivos, Economia, Meta e Jogadores) e 9 análises;
+    - 5 abas (Mapas, Momentos decisivos, Economia, Meta e Jogadores) e 14 análises atuais;
     - `lado-por-mapa`: 10 barras com linha em 50%, Ascent em 47,3%, e Pearl (3) e Fracture (2) com aviso;
     - `first-kill`: Ataque 75,5% e Defesa 67,8%; `pistol`: cards de 89,3%, 83,5% e 86,5%;
     - `meta-armas`: 28 barras horizontais, Rifle, Sidearm e Sniper coloridas e as outras 7 categorias em
       "Outros";
     - `metricas-vitoria`: "KAST" em 1º (r 0,59); `plant-sites`: seletor de mapa;
     - `?mapa=Ascent` muda os números, e `lado-por-mapa` fica com uma barra.
+  - **Decisão posterior de escopo:** removidas as análises de win rate por fase do abate por habilidade,
+    distribuição de casts por round e atividade de habilidade versus vitória da equipe. O aceite de 14
+    análises acima descreve a implementação original; a lista atual contém 11.
 
 - [x] **T2.4d Análise em tela cheia** · 25 min · spec 7.7
   - *Arquivos:* `src/pages/Analise.jsx`.
@@ -410,6 +413,22 @@ Fase 4   T4.1 → T4.2 → T4.3 → T4.4, depois de qualquer corte
   - `MapaCalor` com `/api/heatmap?mapa=<m>&jogador=<puuid>&tipo=kills|mortes`; o mapa vem de `por_mapa`
     (padrão: o mais jogado); filtros de lado, torneio e fase.
   - *Aceite:* lule#dfnt abre em Ascent com 80 kills; Haven + Kills → 78.
+
+- [x] **Heatmap › Abates e vítimas de habilidade** · Exploração espacial de abates finalizados por Ability
+  - *Arquivos:* `components/PainelHeatmap.jsx`, `MapaCalor.jsx` (+ `.css`) e `pages/Mapa.jsx`.
+  - Adiciona tipos com posições do killer e da vítima, mantém filtros existentes, informa contagem de
+    eventos/partidas, alerta para amostras com menos de 5 partidas e explica que não são coordenadas do cast.
+  - *Aceite:* mapa e filtros alteram os pontos e referem-se ao participante correto; pós-plant exige timestamp
+    de abate ≥ timestamp do plant.
+
+- [x] **T3.3c Jogador › Armas: abates por alvo** · Perfil individual: participação das habilidades nas baixas
+  - *Arquivos:* `src/pages/jogador/Armas.jsx`, `Alvos.jsx` (+ `.css`).
+  - A comparação por função ou agente da vítima fica na mesma página das estatísticas de armas e habilidades;
+    a antiga rota `/alvos` redireciona para `/armas`.
+  - Seletor interativo alterna o alvo; tabela ordenável exibe contagens por arma/habilidade, total do denominador
+    e percentual de habilidade com barra comparativa.
+  - *Aceite:* os percentuais correspondem a habilidade / (habilidade + arma), e a interface esclarece limites
+    da categoria genérica `Ability` e a exclusão de causas ambientais.
 
 ### Passo 3.4: Time (2,5 h)
 

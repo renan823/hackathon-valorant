@@ -101,6 +101,23 @@ def _visao_heatmap(b, tipo):
         return r[base].assign(puuid=r["planter"], time_id=r["time_atacante_id"], agente=r["agente_planter"],
                               funcao=r["funcao_planter"], lado="Attacker", x=r["plant_x"], y=r["plant_y"])
     a = b.abates
+    if tipo in {
+        "ability_kills", "postplant_ability_kills",
+        "ability_deaths", "postplant_ability_deaths",
+    }:
+        a = a[a["valido"] & a["categoria_meio"].eq("Ability")].copy()
+        if tipo in {"postplant_ability_kills", "postplant_ability_deaths"}:
+            plants = b.rounds.loc[
+                b.rounds["houve_plant"], ["match_id", "round", "plant_tempo_s"]
+            ]
+            a = a.merge(plants, on=["match_id", "round"], how="inner")
+            a = a[a["tempo_round_s"] >= a["plant_tempo_s"]]
+        pessoa = "killer" if tipo.endswith("kills") else "vitima"
+        return a[base].assign(
+            puuid=a[pessoa], time_id=a[f"{pessoa}_time_id"], agente=a[f"agente_{pessoa}"],
+            funcao=a[f"funcao_{pessoa}"], lado=a[f"lado_{pessoa}"],
+            x=a[f"{pessoa}_x"], y=a[f"{pessoa}_y"],
+        )
     if tipo == "kills":
         a = a[a["valido"]]  # spike/queda/teamkill não são kills (R1)
         quem, pos = "killer", "killer"
@@ -112,7 +129,10 @@ def _visao_heatmap(b, tipo):
 
 @router.get("/heatmap")
 def heatmap(
-    tipo: Literal["kills", "mortes", "plants"] = "kills",
+    tipo: Literal[
+        "kills", "mortes", "plants", "ability_kills", "postplant_ability_kills",
+        "ability_deaths", "postplant_ability_deaths",
+    ] = "kills",
     jogador: str | None = Query(None, description="puuid de quem faz a ação do tipo"),
     lado: Literal["Attacker", "Defender"] | None = None,
     filtros: Filtros = Depends(),
@@ -127,5 +147,7 @@ def heatmap(
     if lado:
         v = v[v["lado"] == lado]
     v = v.dropna(subset=["x", "y"])  # sem posição (R5) ou fora do mapa (R6)
-    return dados.para_json({"mapa": filtros.mapa[0], "tipo": tipo, "total": len(v), "pontos": v[["x", "y"]]},
-                           casas=4)
+    return dados.para_json({
+        "mapa": filtros.mapa[0], "tipo": tipo, "total": len(v),
+        "partidas": int(v["match_id"].nunique()), "pontos": v[["x", "y"]],
+    }, casas=4)

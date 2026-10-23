@@ -11,12 +11,14 @@ ROTAS = [
     ("/api/filtros", "", {"torneios", "mapas", "times", "agentes", "funcoes"}),
     ("/api/resumo", "", {"contadores", "kpis", "ultimas_partidas", "top_jogadores", "top_times"}),
     ("/api/busca", "q=azure", [{"tipo", "id", "nome", "detalhe"}]),
-    ("/api/heatmap", "mapa=Ascent", {"mapa", "tipo", "total", "pontos"}),
+    ("/api/heatmap", "mapa=Ascent", {"mapa", "tipo", "total", "partidas", "pontos"}),
     ("/api/jogadores", "", [{"posicao", "puuid", "nick", "acs", "kd", "kast_pct", "agente_principal"}]),
     ("/api/jogadores/distribuicao", "", [{"inicio", "fim", "jogadores", "pct", "pct_acumulado"}]),
     ("/api/jogadores/{puuid}", "", {"puuid", "nick", "nicks_anteriores", "times", "resumo", "por_agente",
                                     "por_mapa", "armas", "evolucao"}),
     ("/api/jogadores/{puuid}/partidas", "", [{"match_id", "data", "mapa", "venceu", "agente", "acs"}]),
+    ("/api/jogadores/{puuid}/alvos", "", [{"alvo", "kills_arma", "kills_habilidade", "kills_consideradas",
+                                            "pct_arma", "pct_habilidade"}]),
     ("/api/times", "", [{"posicao", "time_id", "nome", "partidas", "win_pct", "saldo_rounds", "atk_win_pct"}]),
     ("/api/times/{time_id}", "", {"time_id", "nome", "torneios", "resumo", "elenco", "por_mapa", "composicoes",
                                   "confrontos", "economia"}),
@@ -30,7 +32,8 @@ ROTAS = [
     ("/api/analises/{analise_id}", "", {"id", "titulo", "grafico", "dados", "insight", "kpi"}),
 ]
 
-ROTAS_404 = ["/api/jogadores/{x}", "/api/jogadores/{x}/partidas", "/api/times/{x}", "/api/times/{x}/partidas",
+ROTAS_404 = ["/api/jogadores/{x}", "/api/jogadores/{x}/partidas", "/api/jogadores/{x}/alvos",
+             "/api/times/{x}", "/api/times/{x}/partidas",
              "/api/partidas/{x}", "/api/partidas/{x}/rounds", "/api/partidas/{x}/abates", "/api/partidas/{x}/duelos",
              "/api/analises/{x}"]
 

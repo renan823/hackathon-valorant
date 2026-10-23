@@ -25,7 +25,7 @@ O frontend vai copiar a navegação e as páginas do csstats. Cada página defin
 | **Leaderboards**: abas por mapa, distribuição do rating, tabela ranqueada | **Ranking**: abas por mapa/torneio, distribuição de ACS, tabela de jogadores e de times | `/jogadores`, `/jogadores/distribuicao`, `/times` |
 | **All Matches**: tabela de partidas | **Partidas**: tabela com filtros (torneio, fase, mapa, time) | `/partidas` |
 | **Match**: scoreboard, round a round, kill feed | **Partida**: Placar · Rounds · Heatmap · Duelos | `/partidas/{id}`, `/partidas/{id}/rounds`, `/partidas/{id}/abates`, `/partidas/{id}/duelos` |
-| **Player**: resumo, gráficos de evolução, mapas, armas, histórico | **Jogador**: Resumo · Partidas · Agentes · Mapas · Armas · Heatmap | `/jogadores/{puuid}`, `/jogadores/{puuid}/partidas`, `/heatmap` |
+| **Player**: resumo, gráficos de evolução, mapas, armas, histórico | **Jogador**: Resumo · Partidas · Agentes · Mapas · Armas · Alvos · Heatmap | `/jogadores/{puuid}`, `/jogadores/{puuid}/partidas`, `/jogadores/{puuid}/alvos`, `/heatmap` |
 | — | **Time** (novo): campanha, elenco, mapas, confrontos | `/times/{id}`, `/times/{id}/partidas` |
 | Ban Stats / Tools | **Análises**: meta, economia, lados, momentos decisivos | `/analises`, `/analises/{id}` |
 
@@ -253,6 +253,14 @@ csstats. Formato: `[{inicio, fim, jogadores, pct, pct_acumulado}]`.
 `match_id, data, torneio, fase, mapa, time, adversario, placar_time, placar_adversario, venceu, agente,
 kills, deaths, assists, mais_menos, acs, adr, kast_pct, hs_pct, first_kills, multikills`.
 
+**`GET /api/jogadores/{puuid}/alvos?por=funcao|agente`**: abates válidos do jogador agrupados pela função
+(padrão) ou agente da vítima. Retorna `alvo`, `funcao` (no agrupamento por agente), `kills_arma`,
+`kills_habilidade`, `kills_consideradas`, `pct_arma` e `pct_habilidade`. O denominador é
+`kills_arma + kills_habilidade`; categorias de arma incluem Rifle, Sidearm, Sniper, SMG, Heavy, Shotgun e
+Melee. Queda e esmagamento não entram. `Ability` é a categoria que a fonte atribui ao golpe final e pode não
+identificar a habilidade específica. A porcentagem representa a participação nos golpes finais contra o alvo,
+não a eficácia por cast ou a causalidade.
+
 ### 8.3 Times
 
 **`GET /api/times`**: ranking de times. Filtros comuns + `min_partidas` (padrão 0) e `limite`.
@@ -356,7 +364,7 @@ def lado_por_mapa(base, filtros):
    `KPIS_HOME` (`routers/geral.py`).
 5. Adicionar o valor de referência em `tests/test_analises.py`.
 
-Análises iniciais, portadas da seção 10 da EDA:
+Análises portadas da seção 10 da EDA e análises incrementais:
 
 | id | Pergunta | Gráfico |
 |---|---|---|
@@ -369,6 +377,29 @@ Análises iniciais, portadas da seção 10 da EDA:
 | `meta-agentes` | Pick rate e win rate por agente e mapa | tabela |
 | `metricas-vitoria` | Qual métrica individual mais se associa à vitória? | barras |
 | `plant-sites` | Onde a spike é plantada em cada mapa? | barras |
+| `conversao-habilidades` | Como varia o win rate se o abate por habilidade abre o round, acontece depois ou não ocorre? | barras agrupadas por lado, rótulos de win rate e referência em 50% |
+| `jogador-partida-habilidades` | Quais taxas de atividade e desempenho aparecem por agente, função e mapa? | tabela |
+
+#### Decisões de escopo: análises de habilidades
+
+As análises `impacto-habilidades` (win rate por fase do abate por habilidade),
+`atividade-economia-habilidades` (distribuição de casts por round) e
+`equipe-partida-habilidades` (atividade de habilidade e vitória da equipe) foram removidas do produto:
+foram consideradas irrelevantes e sem informação adicional útil para a leitura das partidas. Elas não
+devem aparecer no registro da API nem no dashboard. A decisão não remove os dados subjacentes nem a tabela
+`jogador-partida-habilidades`; também não remove `conversao-habilidades`, que responde a uma pergunta
+diferente sobre a relação entre o primeiro abate do round e a vitória.
+
+#### Limites dos dados de habilidades mantidos
+
+`stats.abilityCasts` fornece contagens agregadas por jogador e partida, sem round nem horário do cast.
+`roundResults.playerStats` não traz eventos de cast; os horários disponíveis em `abates.tempo_round_s`
+marcam apenas abates. `conversao-habilidades` classifica observações equipe-round
+por abate válido: primeiro abate por habilidade, abate por habilidade que não abriu o round, ou nenhum.
+O primeiro abate é comparado com todos os abates válidos do round, mesmo quando agente/função filtram quais
+abates por habilidade entram na categoria. `jogador-partida-habilidades` agrega taxas por mapa/agente/função,
+ponderadas pelos rounds jogados; os slots de habilidade 1 e 2 não são equivalentes entre agentes. A relação
+de conversão com vitória é descritiva e não demonstra causalidade.
 
 ### 8.6 Heatmap
 
@@ -377,17 +408,22 @@ Análises iniciais, portadas da seção 10 da EDA:
 | Parâmetro | Valores |
 |---|---|
 | `mapa` | obrigatório e único: é o filtro comum `mapa`, que aqui precisa de exatamente um valor (as coordenadas só são comparáveis dentro do mesmo mapa) |
-| `tipo` | `kills` (posição do killer), `mortes` (posição da vítima), `plants` |
+| `tipo` | `kills` (posição do killer), `mortes` (posição da vítima), `plants`, `ability_kills`/`postplant_ability_kills` (posição do killer em abates válidos finalizados por habilidade, geral/pós-plant), `ability_deaths`/`postplant_ability_deaths` (posição da vítima nesses abates, geral/pós-plant) |
 | `jogador` | `puuid` (opcional) |
 | `lado` | `Attacker`/`Defender` (opcional) |
 | + filtros comuns | `torneio`, `fase`, `mapa`, `time`, `agente`, `funcao` |
 
 Os filtros de pessoa (`jogador`, `time`, `agente`, `funcao`, `lado`) se referem a quem **faz** a ação do `tipo`:
-o killer em `kills`, a vítima em `mortes` e quem plantou em `plants`. Exemplo: `tipo=mortes&agente=Jett` mostra
-onde os Jetts morreram.
+o killer em `kills` e nos tipos `ability_*_kills`, a vítima em `mortes` e nos tipos `ability_*_deaths`, e quem
+plantou em `plants`. Exemplo: `tipo=mortes&agente=Jett` mostra onde os Jetts morreram.
 
-Resposta: `{mapa, tipo, total, pontos: [{x, y}]}`, com `x, y ∈ [0, 1]`. A imagem do minimapa continua
-como asset do frontend (`apps/web/public/maps/<mapa>.png`).
+Os tipos `ability_*` selecionam apenas abates válidos com `categoria_meio = "Ability"`. Os tipos
+`postplant_ability_*` exigem também plant no round e `tempo_round_s >= plant_tempo_s`. Os pontos são as
+coordenadas do killer (`*_kills`) ou da vítima (`*_deaths`) no abate final, não a posição de lançamento/impacto
+da habilidade; os casts não têm coordenada nem timestamp.
+Resposta: `{mapa, tipo, total, partidas, pontos: [{x, y}]}`, com `x, y ∈ [0, 1]`; `total` e `partidas`
+consideram apenas registros que têm posição plotável. A imagem do minimapa continua como asset do frontend
+(`apps/web/public/maps/<mapa>.png`).
 
 ## 9. Execução e qualidade
 

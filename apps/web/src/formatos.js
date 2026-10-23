@@ -28,6 +28,17 @@ export const ROTULOS = {
   quem_abriu: "Quem abriu", win_pct_quem_abriu: "Win% de quem abriu", metrica: "Métrica", r: "Correlação (r)",
   media_vitoria: "Média na vitória", media_derrota: "Média na derrota", inicio: "De", fim: "Até",
   jogadores: "Jogadores", pct_acumulado: "% acumulado", total: "Total",
+  // habilidades
+  situacao_habilidade: "Situação do abate por habilidade",
+  team_rounds: "Rounds da equipe", team_matches: "Partidas-equipe",
+  jogador_partidas: "Jogador-partidas (n)", jogadores_considerados: "Jogadores considerados",
+  faixa_atividade: "Faixa de casts",
+  casts_total: "Casts totais", casts_por_round: "Casts / jogador-round",
+  casts_por_equipe_round: "Casts por equipe-round", grenade_casts: "Granadas",
+  grenade_casts_round: "Granadas por round", ability1_casts_round: "Habilidade 1 por round",
+  ability2_casts_round: "Habilidade 2 por round", ultimate_casts_round: "Ultimates por round",
+  loadout_medio: "Equipamento médio (créditos/round)", abates_habilidade: "Abates por habilidade",
+  rounds_equipe: "Rounds da equipe",
 }
 
 // Coluna sem rótulo vira texto legível: "nova_coluna" → "Nova coluna".

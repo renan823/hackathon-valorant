@@ -3,6 +3,7 @@ import { useApi } from '../../api'
 import { contagem, formatar } from '../../formatos'
 import Estado from '../../components/Estado'
 import IconeArma from '../../components/IconeArma'
+import Alvos from './Alvos'
 import './Armas.css'
 
 // Aba Armas do jogador (spec 7.5): barras horizontais de `pct`, agrupadas por categoria_meio. Barras em HTML:
@@ -25,22 +26,25 @@ function Armas() {
 				grupos.sort((x, y) => y.kills - x.kills)
 				return (
 					<div className="armas">
-						{grupos.map(g => (
-							<section key={g.categoria} className="card armas__grupo">
-								<h2>{formatar('categoria_meio', g.categoria)} <span className="muted">· {contagem(g.kills, 'kill')}</span></h2>
-								<ul>
-									{g.armas.map(a => (
-										<li key={a.meio}>
-											<span className="armas__nome"><IconeArma meio={a.meio} categoria={a.categoria_meio} comNome /></span>
-											<span className="armas__trilho" aria-hidden="true">
-												<span className="armas__barra" style={{ width: `${(100 * a.pct) / maior}%` }} />
-											</span>
-											<span className="armas__valor numero">{formatar('pct', a.pct)} <span className="muted">({a.kills})</span></span>
-										</li>
-									))}
-								</ul>
-							</section>
-						))}
+						<div className="armas__uso">
+							{grupos.map(g => (
+								<section key={g.categoria} className="card armas__grupo">
+									<h2>{formatar('categoria_meio', g.categoria)} <span className="muted">· {contagem(g.kills, 'kill')}</span></h2>
+									<ul>
+										{g.armas.map(a => (
+											<li key={a.meio}>
+												<span className="armas__nome"><IconeArma meio={a.meio} categoria={a.categoria_meio} comNome /></span>
+												<span className="armas__trilho" aria-hidden="true">
+													<span className="armas__barra" style={{ width: `${(100 * a.pct) / maior}%` }} />
+												</span>
+												<span className="armas__valor numero">{formatar('pct', a.pct)} <span className="muted">({a.kills})</span></span>
+											</li>
+										))}
+									</ul>
+								</section>
+							))}
+						</div>
+						<Alvos />
 					</div>
 				)
 			}}
