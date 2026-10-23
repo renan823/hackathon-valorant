@@ -23,7 +23,7 @@ const DESCRICOES = {
 }
 
 // Explorador de heatmap (spec 7.5, 7.6 e 7.8) em volta do /api/heatmap:
-// - `mapas`: os mapas que dá para escolher (padrão: o primeiro). Com um só, os chips somem;
+// - `mapas`: os mapas que dá para escolher (padrão: o primeiro). Com um só, o select de mapa não é exibido;
 // - `filtro`: parâmetros fixos, de quem são as ações ({ jogador: puuid }, { time: id } ou nada);
 // - `jogadores`: lista opcional de { puuid, nick } para habilitar filtro por jogador;
 // - `tipos`: subconjunto de kills, mortes, plants, abates por habilidade e abates pós-plant;
@@ -52,19 +52,33 @@ function PainelHeatmap({
 	return (
 		<div className="painel-heatmap">
 			<div className="painel-heatmap__controles">
-				{mapas.length > 1 && (
-					<div className="painel-heatmap__chips rolagem-x" role="group" aria-label="Mapa">
-						{mapas.map(m => (
-							<button key={m} className={`chip ${m === mapa ? 'chip--ativo' : ''}`} aria-pressed={m === mapa} onClick={() => setF({ mapa: m })}>{m}</button>
-						))}
-					</div>
-				)}
-				<div className="painel-heatmap__chips" role="group" aria-label="Tipo">
-					{tipos.map(t => (
-						<button key={t} className={`chip ${tipo === t ? 'chip--ativo' : ''}`} aria-pressed={tipo === t} onClick={() => setF({ tipo: t })}>{TIPOS[t]}</button>
-					))}
-				</div>
 				<BarraFiltros campos={campos}>
+					{mapas.length > 1 && (
+						<label className="barra-filtros__campo">
+							<span className="barra-filtros__rotulo">Mapa</span>
+							<select
+								className="barra-filtros__select"
+								value={mapa}
+								onChange={e => setF({ mapa: e.target.value })}
+							>
+								{mapas.map(m => (
+									<option key={m} value={m}>{m}</option>
+								))}
+							</select>
+						</label>
+					)}
+					<label className="barra-filtros__campo">
+						<span className="barra-filtros__rotulo">Tipo</span>
+						<select
+							className="barra-filtros__select"
+							value={tipo}
+							onChange={e => setF({ tipo: e.target.value })}
+						>
+							{tipos.map(t => (
+								<option key={t} value={t}>{TIPOS[t]}</option>
+							))}
+						</select>
+					</label>
 					<label className="barra-filtros__campo" title={semLado ? 'Todo plant é do ataque' : undefined}>
 						<span className="barra-filtros__rotulo">Lado</span>
 						<select className="barra-filtros__select" value={semLado ? 'Attacker' : f.lado} disabled={semLado} onChange={e => setF({ lado: e.target.value })}>
