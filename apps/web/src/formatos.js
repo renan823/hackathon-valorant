@@ -22,6 +22,8 @@ export const ROTULOS = {
   houve_plant: "Plant", plant_site: "Site", houve_defuse: "Defuse", compra_atk: "Compra ATK", compra_def: "Compra DEF",
   loadout_atk: "Loadout ATK", loadout_def: "Loadout DEF", tempo_s: "Tempo", meio: "Arma", categoria_meio: "Categoria",
   assistencias: "Assist.", pct: "%",
+  rounds_utilizados: "Rounds", eficiencia_economia: "K/1k cr.",
+  rounds_com_kill: "Rounds c/ kill", partidas_com_kill: "Partidas", kills_por_cast: "K/cast", casts: "Casts",
   // análises e distribuição
   escolhas: "Escolhas", pick_rate: "Pick rate", partidas_mapa: "Partidas no mapa", pct_do_mapa: "% do mapa",
   plants: "Plants", faixa: "Faixa", vantagem_media: "Vantagem média", conversao_pct: "Conversão",
@@ -63,7 +65,7 @@ const comMenos = texto => texto.replace('-', '−')
 const numero = (fmt, v) => comMenos(NF[fmt].format(v))
 
 const INTEIRO = new Set(['acs', 'adr', 'inicio', 'fim', 'loadout_atk', 'loadout_def', 'vantagem_media'])
-const DUAS_CASAS = new Set(['kd', 'kpr', 'dpr', 'apr', 'fk_round', 'fd_round', 'r'])
+const DUAS_CASAS = new Set(['kd', 'kpr', 'dpr', 'apr', 'fk_round', 'fd_round', 'r', 'eficiencia_economia', 'kills_por_cast'])
 const UMA_CASA = new Set(['media_vitoria', 'media_derrota'])
 const COM_SINAL = new Set(['mais_menos', 'saldo_rounds'])
 

@@ -1,25 +1,95 @@
-.armas {
+.arsenal {
   display: flex;
   flex-direction: column;
-  gap: var(--espaco);
+  gap: 24px;
 }
-.armas__uso {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
-  gap: var(--espaco);
-  align-items: start;
-}
-.armas__grupo h2 { font-size: 0.9375rem; margin-bottom: 10px; }
-.armas__grupo ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
 
-.armas__grupo li {
-  display: grid;
-  grid-template-columns: minmax(120px, 190px) minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.875rem;
+.arsenal__titulo {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
 }
-.armas__nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.armas__trilho { height: 10px; border-radius: 4px; background: var(--surface2); overflow: hidden; }
-.armas__barra { display: block; height: 100%; border-radius: 0 4px 4px 0; background: var(--serie-1); }
-.armas__valor { white-space: nowrap; font-weight: 600; }
+
+.arsenal__lista {
+  padding: 0;
+  overflow: hidden;
+}
+
+.arsenal__arma {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.arsenal__arma:last-child { border-bottom: 0; }
+
+.arsenal__arma-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.arsenal__arma-nome {
+  min-width: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+/* Ícone maior que o padrão de tabela */
+.arsenal__arma-nome .icone-arma__com-nome .icone-arma {
+  width: 80px;
+  height: 20px;
+}
+
+.arsenal__kills {
+  font-size: 1rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.arsenal__pct { font-size: 0.8125rem; font-weight: 400; }
+
+.arsenal__barra-faixa {
+  height: 3px;
+  background: var(--surface2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.arsenal__barra-fill {
+  display: block;
+  height: 100%;
+  background: var(--serie-1);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.arsenal__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+}
+
+.arsenal__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.arsenal__stat-rot {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.arsenal__stat-val {
+  font-size: 0.875rem;
+  font-weight: 600;
+}

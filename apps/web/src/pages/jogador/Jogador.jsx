@@ -28,7 +28,7 @@ function Jogador() {
 						{ rotulo: 'Partidas', para: `${linkJogador(puuid)}/partidas` },
 						{ rotulo: 'Agentes', para: `${linkJogador(puuid)}/agentes` },
 						{ rotulo: 'Mapas', para: `${linkJogador(puuid)}/mapas` },
-						{ rotulo: 'Armas', para: `${linkJogador(puuid)}/armas` },
+						{ rotulo: 'Arsenal', para: `${linkJogador(puuid)}/armas` },
 						{ rotulo: 'Heatmap', para: `${linkJogador(puuid)}/heatmap` },
 					]} />
 					<Outlet />
