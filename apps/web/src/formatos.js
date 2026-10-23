@@ -50,6 +50,30 @@ export function rotulo(coluna) {
   return texto.charAt(0).toUpperCase() + texto.slice(1)
 }
 
+const DESCRICOES = {
+  acs:        'Average Combat Score — pontuação média de combate por round. Métrica principal de impacto individual do Valorant.',
+  kd:         'Kill/Death — kills divididas por mortes. Acima de 1,0 significa mais kills do que mortes.',
+  adr:        'Average Damage per Round — dano médio causado por round, incluindo dano a aliados.',
+  kast_pct:   'KAST — % de rounds em que o jogador teve Kill, Assist (>50 de dano), Sobreviveu ou foi Traded (killer morre em ≤3s).',
+  hs_pct:     'Headshot % — parcela dos kills finalizada com tiro na cabeça.',
+  win_pct:    'Win % — % de partidas vencidas.',
+  fk_round:   'First Kill / Round — média de primeiros abates por round. Mede quem abre duelos e ganha a vantagem numérica.',
+  mais_menos: '+/− — diferença entre kills e mortes totais no período.',
+  kpr:        'Kills per Round — média de kills por round.',
+  dpr:        'Deaths per Round — média de mortes por round.',
+  apr:        'Assists per Round — média de assistências por round.',
+  fd_round:   'First Death / Round — média de primeiras mortes por round. Indica quem abre o round morrendo.',
+  atk_win_pct:    'Win % no Ataque — % de rounds vencidos no lado atacante.',
+  def_win_pct:    'Win % na Defesa — % de rounds vencidos no lado defensor.',
+  pistol_win_pct: 'Win % nas Pistols — % de rounds de pistol (rounds 1 e 13) vencidos.',
+  conversao_pct:  'Conversão — % dos rounds com essa arma em que o jogador conseguiu ao menos 1 kill.',
+  eficiencia_economia: 'Kills por 1.000 créditos de loadout — rendimento da arma em relação ao investimento.',
+}
+
+export function descricao(coluna) {
+  return DESCRICOES[coluna] ?? null
+}
+
 // --- Números ---------------------------------------------------------------------------------
 
 // Uma instância por formato (plano, seção 2).
