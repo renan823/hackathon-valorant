@@ -31,35 +31,50 @@ hackathon-valorant/
 
 ## Subir o dashboard (VAVA Stats)
 
-Precisa de Python 3.12 e Node 22.12 ou mais (ou 20.19+), que o Vite 8 exige. Dois terminais, ambos a partir da
-**raiz do repositório**:
+### Com Docker (recomendado)
+
+Requer Docker Engine com o plugin Docker Compose. Rode na raiz do repositório:
 
 ```sh
-# terminal 1: backend (API em http://localhost:8000/api; lê data/ ao subir)
+make build   # sobe os containers em background, rebuilding as imagens
+make logs    # acompanha os logs em tempo real
+```
+
+Ou sem o Makefile:
+
+```sh
+docker compose up --build -d
+docker compose logs -f
+```
+
+| Atalho Makefile | Equivalente | Descrição |
+|-----------------|-------------|-----------|
+| `make build`    | `docker compose up --build -d` | Sobe em background, rebuilding as imagens |
+| `make up`       | `docker compose up -d` | Sobe sem rebuildar (imagens já existem) |
+| `make down`     | `docker compose down` | Para e remove os containers |
+| `make restart`  | `down` + `build` | Para e sobe novamente com rebuild |
+| `make logs`     | `docker compose logs -f` | Acompanha os logs em tempo real |
+| `make ps`       | `docker compose ps` | Lista o estado dos containers |
+| `make clean`    | `docker compose down --volumes --rmi local` | Remove containers, volumes e imagens locais |
+
+Após subir, o dashboard fica disponível em **<http://localhost:8080>**. A API é acessada via proxy do frontend e pode ser verificada em <http://localhost:8080/api/saude>.
+
+> A primeira build inclui os JSONs de `data/` na imagem da API (~194 MB) e pode demorar alguns minutos. A porta pode ser alterada com `WEB_PORT=8081 make build`.
+
+### Sem Docker (desenvolvimento local)
+
+Requer Python 3.12 e Node 22.12+ (ou 20.19+). Dois terminais a partir da **raiz do repositório**:
+
+```sh
+# terminal 1: API (http://localhost:8000/api)
 python3 -m venv .venv && .venv/bin/pip install -r apps/api/requirements.txt   # só na primeira vez
 .venv/bin/uvicorn app.main:app --reload --app-dir apps/api --port 8000
 
-# terminal 2: front (abre em http://localhost:5173)
+# terminal 2: front (http://localhost:5173)
 cd apps/web && npm install && npm run dev
 ```
 
-O Vite repassa `/api` para a porta 8000. Com o backend desligado, o app mostra um aviso com o comando acima e
-volta sozinho quando ele sobe. Detalhes do front em [`apps/web/README.md`](apps/web/README.md); spec, plano e tarefas
-em [`docs/frontend/`](docs/frontend/) e [`docs/backend/`](docs/backend/).
-
-### Executar com Docker
-
-Com Docker Engine e o plugin Docker Compose instalados, rode na raiz do repositório:
-
-```sh
-docker compose up --build
-```
-
-O dashboard ficará disponível em <http://localhost:8080>; a API é acessada pelo proxy do frontend e também
-pode ser conferida em <http://localhost:8080/api/saude>. A primeira compilação inclui os JSONs de `data/`
-na imagem da API (cerca de 194 MB no conjunto atual) e pode demorar mais; os dados são carregados em memória
-quando a API inicia. Para parar os containers, use `Ctrl+C` e `docker compose down`. A porta do frontend pode
-ser alterada, por exemplo, com `WEB_PORT=8081 docker compose up --build`.
+O Vite repassa `/api` para a porta 8000. Com o backend desligado, o app exibe um aviso e reconecta automaticamente quando ele sobe.
 
 ## Como executar
 
