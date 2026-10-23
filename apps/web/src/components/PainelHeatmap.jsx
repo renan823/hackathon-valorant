@@ -23,12 +23,11 @@ const DESCRICOES = {
 }
 
 // Explorador de heatmap (spec 7.5, 7.6 e 7.8) em volta do /api/heatmap:
-// - `mapas`: os mapas que dá para escolher (padrão: o primeiro). Com um só, o select de mapa não é exibido;
+// - `mapas`: os mapas que dá para escolher;
 // - `filtro`: parâmetros fixos, de quem são as ações ({ jogador: puuid }, { time: id } ou nada);
 // - `jogadores`: lista opcional de { puuid, nick } para habilitar filtro por jogador;
 // - `tipos`: subconjunto de kills, mortes, plants, abates por habilidade e abates pós-plant;
 //   `campos`: os filtros comuns da BarraFiltros.
-// Tudo fica na URL. Os filtros valem para quem age: onde matou (Kills), onde morreu (Mortes) ou onde plantou.
 function PainelHeatmap({
 	mapas,
 	filtro = {},
@@ -41,8 +40,27 @@ function PainelHeatmap({
 }) {
 	const { filtros } = useFiltros()
 	const [f, setF] = useParametros({ mapa: mapas[0], tipo: tipos[0], lado: '', jogador: '' })
-	const mapa = mapas.includes(f.mapa) ? f.mapa : mapas[0]
+
+	// Jogador ativo (definido via prop `filtro` ou selecionado no dropdown `f.jogador`)
+	const jogadorAtivo = filtro.jogador || f.jogador
+
+	// Busca as opções de filtros válidas considerando o jogador atual
+	const { dados: opcoesValidas } = useApi('opcoes-filtros', {
+		...filtro,
+		jogador: jogadorAtivo || undefined,
+	})
+
+	// Filtra a lista de mapas para incluir apenas onde o jogador jogou
+	const mapasDisponiveis = opcoesValidas?.mapas
+		? mapas.filter(m => opcoesValidas.mapas.includes(m))
+		: (jogadores?.find(j => j.puuid === jogadorAtivo)?.mapas
+			? mapas.filter(m => jogadores.find(j => j.puuid === jogadorAtivo).mapas.includes(m))
+			: mapas)
+
+	// Garante um fallback válido para o mapa e tipo selecionados
+	const mapa = mapasDisponiveis.includes(f.mapa) ? f.mapa : (mapasDisponiveis[0] || mapas[0])
 	const tipo = tipos.includes(f.tipo) ? f.tipo : tipos[0]
+
 	// Plant é sempre do ataque: o lado não se aplica.
 	const semLado = tipo === 'plants'
 	const comuns = Object.fromEntries(campos.map(c => [c, filtros[c]]))
@@ -52,8 +70,8 @@ function PainelHeatmap({
 	return (
 		<div className="painel-heatmap">
 			<div className="painel-heatmap__controles">
-				<BarraFiltros campos={campos}>
-					{mapas.length > 1 && (
+				<BarraFiltros campos={campos} filtro={{ ...filtro, jogador: jogadorAtivo }}>
+					{mapasDisponiveis.length > 0 && (
 						<label className="barra-filtros__campo">
 							<span className="barra-filtros__rotulo">Mapa</span>
 							<select
@@ -61,7 +79,7 @@ function PainelHeatmap({
 								value={mapa}
 								onChange={e => setF({ mapa: e.target.value })}
 							>
-								{mapas.map(m => (
+								{mapasDisponiveis.map(m => (
 									<option key={m} value={m}>{m}</option>
 								))}
 							</select>
