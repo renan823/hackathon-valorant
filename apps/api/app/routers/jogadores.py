@@ -18,6 +18,7 @@ COLUNAS_RANKING = ["posicao", "puuid", "nick", "time_id", "time", "partidas", "v
 # Decisão D4 (plano do backend, §7): com 50 rounds o 1º lugar tinha só 3 partidas; com 100 o topo estabiliza.
 MIN_ROUNDS_PADRAO = 100
 CATEGORIAS_ARMAS = {"Rifle", "Sidearm", "Sniper", "SMG", "Heavy", "Shotgun", "Melee"}
+CASTS_HABILIDADES = ["grenade_casts", "ability1_casts", "ability2_casts", "ultimate_casts"]
 
 
 def mais_frequente(df, chave, coluna):
@@ -35,6 +36,44 @@ def linhas_ranking(j, ordenar="acs", ordem="desc", min_rounds=0, limite=None):
     m["agente_principal"] = mais_frequente(j, "puuid", "agente")
     m["funcao_principal"] = m["agente_principal"].map(j.drop_duplicates("agente").set_index("agente")["funcao"])
     return ranking(m.reset_index(), ordenar, ordem, min_rounds, limite)[COLUNAS_RANKING]
+
+
+def _taxas_habilidades(j, grupos):
+    j = j[j["rounds_jogados"].gt(0)].copy()
+    if j.empty:
+        return pd.DataFrame(columns=["puuid", *grupos, "casts_por_round"])
+    j[CASTS_HABILIDADES] = j[CASTS_HABILIDADES].fillna(0)
+    j["casts_total"] = j[CASTS_HABILIDADES].sum(axis=1)
+    taxas = j.groupby(["puuid", *grupos], dropna=False, sort=False).agg(
+        casts_total=("casts_total", "sum"),
+        rounds=("rounds_jogados", "sum"),
+    ).reset_index()
+    taxas["casts_por_round"] = taxas["casts_total"] / taxas["rounds"]
+    return taxas
+
+
+def _uso_habilidades_perfil(j, todos):
+    jogador = _taxas_habilidades(j, ["agente", "funcao"])
+
+    por_funcao = _taxas_habilidades(todos, ["funcao"]).groupby("funcao")["casts_por_round"].agg(
+        media_funcao="mean", jogadores_funcao="size"
+    )
+    por_agente = _taxas_habilidades(todos, ["agente", "funcao"]).groupby(
+        ["agente", "funcao"]
+    )["casts_por_round"].agg(media_agente="mean", jogadores_agente="size")
+
+    return (
+        jogador.join(por_funcao, on="funcao")
+        .join(por_agente, on=["agente", "funcao"])
+        .assign(
+            diferenca_funcao=lambda df: df["casts_por_round"] - df["media_funcao"],
+            diferenca_agente=lambda df: df["casts_por_round"] - df["media_agente"],
+        )
+        .assign(
+            abaixo_funcao=lambda df: df["diferenca_funcao"] < 0,
+            abaixo_agente=lambda df: df["diferenca_agente"] < 0,
+        )
+    )
 
 
 def _validar_metrica(metrica):
@@ -109,10 +148,20 @@ def perfil(puuid: str):
     evolucao = agregar(j, ["match_id"]).merge(j[["match_id", "data", "inicio", "mapa", "venceu"]], on="match_id")
     evolucao = evolucao.sort_values("inicio")[["match_id", "data", "mapa", "venceu", "acs", "adr", "kd", "kast_pct"]]
 
+    por_agente = por(["agente", "funcao"]).merge(
+        _uso_habilidades_perfil(j, b.jogadores)[[
+            "agente", "funcao", "casts_por_round", "media_funcao", "media_agente",
+            "jogadores_funcao", "jogadores_agente", "diferenca_funcao", "diferenca_agente",
+            "abaixo_funcao", "abaixo_agente",
+        ]],
+        on=["agente", "funcao"],
+        how="left",
+    )
+
     return dados.para_json({
         "puuid": puuid, "nick": resumo["nick"], "nicks_anteriores": nicks,
         "times": times, "resumo": resumo,
-        "por_agente": por(["agente", "funcao"]), "por_mapa": por(["mapa"]),
+        "por_agente": por_agente, "por_mapa": por(["mapa"]),
         "armas": armas.sort_values("kills", ascending=False), "evolucao": evolucao,
     })
 

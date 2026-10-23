@@ -243,7 +243,9 @@ csstats. Formato: `[{inicio, fim, jogadores, pct, pct_acumulado}]`.
 ```json
 { "puuid": "…", "nick": "…", "nicks_anteriores": ["…"], "times": [{"id": "…", "nome": "…", "partidas": 10}],
   "resumo": { /* mesmas métricas da linha do ranking */ "posicao_ranking": 14 },
-  "por_agente": [{ "agente": "Jett", "funcao": "Duelista", "partidas": 6, "win_pct": 50.0, "acs": 240.1, "kd": 1.2 }],
+  "por_agente": [{ "agente": "Jett", "funcao": "Duelista", "partidas": 6, "win_pct": 50.0, "acs": 240.1, "kd": 1.2,
+                   "casts_por_round": 2.4, "media_funcao": 2.8, "media_agente": 2.6,
+                   "jogadores_funcao": 80, "jogadores_agente": 15, "abaixo_funcao": true, "abaixo_agente": true }],
   "por_mapa":   [{ "mapa": "Ascent", "partidas": 4, "win_pct": 75.0, "acs": 228.0, "kd": 1.4 }],
   "armas":      [{ "meio": "Vandal", "categoria_meio": "Rifle", "kills": 81, "pct": 41.3 }],
   "evolucao":   [{ "match_id": "…", "data": "2026-06-27", "mapa": "Haven", "venceu": true, "acs": 182.9, "adr": 128.5, "kd": 0.81, "kast_pct": 73.9 }] }
@@ -383,7 +385,7 @@ Análises portadas da seção 10 da EDA e análises incrementais:
 #### Decisões de escopo: análises de habilidades
 
 As análises `impacto-habilidades` (win rate por fase do abate por habilidade),
-`atividade-economia-habilidades` (distribuição de casts por round) e
+`atividade-economia-habilidades` (distribuição de casts por loadout) e
 `equipe-partida-habilidades` (atividade de habilidade e vitória da equipe) foram removidas do produto:
 foram consideradas irrelevantes e sem informação adicional útil para a leitura das partidas. Elas não
 devem aparecer no registro da API nem no dashboard. A decisão não remove os dados subjacentes nem a tabela
@@ -400,6 +402,12 @@ O primeiro abate é comparado com todos os abates válidos do round, mesmo quand
 abates por habilidade entram na categoria. `jogador-partida-habilidades` agrega taxas por mapa/agente/função,
 ponderadas pelos rounds jogados; os slots de habilidade 1 e 2 não são equivalentes entre agentes. A relação
 de conversão com vitória é descritiva e não demonstra causalidade.
+
+O perfil do jogador inclui em `por_agente` o uso total de casts de granada, habilidades 1/2 e ultimate por
+round, além das médias da função e do agente, contagem de jogadores nas referências, diferenças e flags para
+cada valor abaixo da média. Cada jogador tem o mesmo peso nas referências, independente do número de rounds.
+A fonte fornece casts agregados por partida, sem round ou horário; portanto essa comparação contextualiza
+volume de uso observado, não o momento, oportunidade ou qualidade tática do uso.
 
 ### 8.6 Heatmap
 

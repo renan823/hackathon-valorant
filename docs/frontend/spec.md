@@ -540,7 +540,8 @@ O layout busca `GET /api/jogadores/{puuid}`; as abas Agentes, Mapas e Armas reap
   cada bloco com "ver tudo" levando à aba.
 - **Partidas** (`/partidas`): `GET /jogadores/{puuid}/partidas`. Tabela: data, mapa, time, adversário,
   placar, V/D, agente, K, D, A, +/−, ACS, ADR, KAST, HS%, FK, MK. A linha abre a partida.
-- **Agentes**: `por_agente` (partidas, win%, ACS, K/D, ADR, KAST).
+- **Agentes**: `por_agente` (partidas, win%, ACS, K/D, ADR, KAST) e uso de habilidades por round comparado
+  com as médias de todos os jogadores da mesma função e do mesmo agente, com amostras e indicação abaixo/acima.
 - **Mapas**: `por_mapa` como cards com a imagem do mapa ao fundo (partidas, win%, ACS, K/D).
 - **Armas**: `armas` como barras horizontais (`pct`), agrupadas por `categoria_meio`, seguidas pela seção
   **Abates por alvo** (`GET /api/jogadores/{puuid}/alvos?por=funcao|agente`). O seletor alterna o agrupamento;
@@ -591,9 +592,10 @@ O layout busca `GET /api/times/{id}`.
 - *Aceite:* as 11 análises atuais aparecem nas 5 abas; `?mapa=Ascent` muda os números; um arquivo novo em
   `apps/api/app/analises/` aparece na página sem mudança no front.
 
-As análises de win rate por fase do abate por habilidade, distribuição de casts por round e atividade de
-habilidade versus vitória da equipe foram removidas por não adicionarem informação útil. Elas não devem
-aparecer na lista nem nas abas; a análise de conversão pelo primeiro abate permanece.
+As análises antigas de win rate por fase do abate por habilidade, casts segmentados por loadout e atividade
+de habilidade versus vitória da equipe foram removidas por não adicionarem informação útil. O uso de
+habilidades comparado às médias de agente e função é mostrado no perfil do jogador, na aba Agentes. A análise
+de conversão pelo primeiro abate permanece.
 
 ### 7.8 Mapas · `/mapas` e `/mapas/:mapa` · P1
 

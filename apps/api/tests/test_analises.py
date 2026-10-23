@@ -50,6 +50,7 @@ def test_analise_desconhecida_404(cliente):
     "impacto-habilidades",
     "atividade-economia-habilidades",
     "equipe-partida-habilidades",
+    "uso-habilidades-jogadores",
 ])
 def test_analises_removidas_nao_aparecem_nem_respondem(cliente, analise_id):
     ids = {analise["id"] for analise in cliente.get("/api/analises").json()}
@@ -152,6 +153,80 @@ def test_jogador_partida_agrega_taxas_por_agente_funcao_e_mapa(cliente):
     assert sum(d["rounds"] for d in r["dados"]) == jogadores["rounds_jogados"].sum()
     jett = executar(cliente, "jogador-partida-habilidades", agente="Jett")
     assert {d["agente"] for d in jett["dados"]} == {"Jett"}
+
+
+def test_perfil_compara_uso_habilidades_com_medias_por_funcao_e_agente(cliente):
+    base = dados.base()
+    jogador_ref = base.jogadores.loc[base.jogadores["agente"].eq("Jett"), "puuid"].iloc[0]
+    perfil = cliente.get(f"/api/jogadores/{jogador_ref}").json()
+    linha_jogador = linha(perfil["por_agente"], agente="Jett", funcao="Duelista")
+    assert {
+        "casts_por_round", "media_funcao", "media_agente", "diferenca_funcao", "diferenca_agente",
+        "jogadores_funcao", "jogadores_agente", "abaixo_funcao", "abaixo_agente",
+    } <= set(linha_jogador)
+
+    jogador = base.jogadores[
+        (base.jogadores["puuid"] == jogador_ref)
+        & (base.jogadores["agente"] == "Jett")
+        & (base.jogadores["funcao"] == "Duelista")
+        & (base.jogadores["rounds_jogados"] > 0)
+    ]
+    casts = jogador[["grenade_casts", "ability1_casts", "ability2_casts", "ultimate_casts"]].fillna(0).sum().sum()
+    assert linha_jogador["casts_por_round"] == pytest.approx(
+        casts / jogador["rounds_jogados"].sum(), abs=0.005
+    )
+
+    funcao = base.jogadores[base.jogadores["rounds_jogados"] > 0]
+    taxas_funcao = (
+        funcao.assign(
+            casts=funcao[["grenade_casts", "ability1_casts", "ability2_casts", "ultimate_casts"]]
+            .fillna(0).sum(axis=1)
+        )
+        .groupby(["puuid", "funcao"], as_index=False)
+        .agg(casts=("casts", "sum"), rounds=("rounds_jogados", "sum"))
+    )
+    taxas_funcao["casts_por_round"] = taxas_funcao["casts"] / taxas_funcao["rounds"]
+    assert linha_jogador["media_funcao"] == pytest.approx(
+        taxas_funcao[taxas_funcao["funcao"] == "Duelista"]["casts_por_round"].mean(), abs=0.005
+    )
+    taxas_agente = (
+        funcao.assign(
+            casts=funcao[["grenade_casts", "ability1_casts", "ability2_casts", "ultimate_casts"]]
+            .fillna(0).sum(axis=1)
+        )
+        .groupby(["puuid", "agente", "funcao"], as_index=False)
+        .agg(casts=("casts", "sum"), rounds=("rounds_jogados", "sum"))
+    )
+    taxas_agente["casts_por_round"] = taxas_agente["casts"] / taxas_agente["rounds"]
+    assert linha_jogador["media_agente"] == pytest.approx(
+        taxas_agente[taxas_agente["agente"] == "Jett"]["casts_por_round"].mean(), abs=0.005
+    )
+
+    duelistas = base.jogadores[base.jogadores["rounds_jogados"] > 0]
+    taxas_funcao = (
+        duelistas.assign(
+            casts=duelistas[["grenade_casts", "ability1_casts", "ability2_casts", "ultimate_casts"]]
+            .fillna(0).sum(axis=1)
+        )
+        .groupby(["puuid", "funcao"], as_index=False)
+        .agg(casts=("casts", "sum"), rounds=("rounds_jogados", "sum"))
+    )
+    taxas_funcao["casts_por_round"] = taxas_funcao["casts"] / taxas_funcao["rounds"]
+    assert linha_jogador["media_funcao"] == pytest.approx(
+        taxas_funcao[taxas_funcao["funcao"] == "Duelista"]["casts_por_round"].mean(), abs=0.005
+    )
+    assert linha_jogador["jogadores_funcao"] == len(
+        taxas_funcao[taxas_funcao["funcao"] == "Duelista"]
+    )
+
+    abaixo = (
+        linha_jogador["casts_por_round"] < linha_jogador["media_funcao"],
+        linha_jogador["casts_por_round"] < linha_jogador["media_agente"],
+    )
+    assert linha_jogador["abaixo_funcao"] is abaixo[0]
+    assert linha_jogador["abaixo_agente"] is abaixo[1]
+    assert linha_jogador["abaixo_funcao"] is abaixo[0]
+    assert linha_jogador["abaixo_agente"] is abaixo[1]
 
 
 # --- KPIs da Home (T2.15) --------------------------------------------------------------
