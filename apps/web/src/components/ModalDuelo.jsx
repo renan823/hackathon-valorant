@@ -117,7 +117,7 @@ function ModalDuelo({ aresta, todosAbates, mapa, partida, nos, onFechar }) {
 								{embates.map((a, i) => {
 									if (!a.vitima_pos) return null
 									const dim = hovered !== null && hovered !== i
-									const cor = cores[a.killer.time_id]
+									const corKiller = cores[a.killer.time_id]
 									const vx = a.vitima_pos.x * VB, vy = a.vitima_pos.y * VB
 									return (
 										<g key={i} opacity={dim ? 0.15 : 1}>
@@ -131,12 +131,12 @@ function ModalDuelo({ aresta, todosAbates, mapa, partida, nos, onFechar }) {
 													<line
 														x1={a.killer_pos.x * VB} y1={a.killer_pos.y * VB}
 														x2={vx} y2={vy}
-														stroke={cor} strokeWidth="4" strokeLinecap="round"
+														stroke={corKiller} strokeWidth="4" strokeLinecap="round"
 														markerEnd={`url(#modal-seta-${a.killer.time_id})`}
 													/>
 													<circle
 														cx={a.killer_pos.x * VB} cy={a.killer_pos.y * VB}
-														r="8" fill={cor} stroke="#000" strokeWidth="2"
+														r="8" fill={corKiller} stroke="#000" strokeWidth="2"
 													/>
 												</>
 											)}

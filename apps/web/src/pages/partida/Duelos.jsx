@@ -11,7 +11,6 @@ const GrafoDuelos = lazy(() => import('../../components/GrafoDuelos'))
 
 const VISOES = [['matriz', 'Matriz'], ['grafo', 'Grafo']]
 
-// Aba Duelos (spec 7.4): matriz (padrão, a visão acessível) ou grafo de força. A visão fica na URL.
 // Ao clicar numa aresta do grafo, abre o ModalDuelo com o heatmap dos embates entre os dois jogadores.
 function Duelos() {
 	const { id } = useParams()

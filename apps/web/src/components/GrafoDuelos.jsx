@@ -130,9 +130,14 @@ function GrafoDuelos({ duelos, partida, onArestaClick }) {
 					nodeCanvasObject={desenharNo}
 					linkCanvasObjectMode={() => 'replace'}
 					linkCanvasObject={desenharAresta}
+					linkHoverPrecision={6}
 					cooldownTicks={120}
 					onEngineStop={enquadrar}
 					onLinkClick={onArestaClick}
+					onLinkHover={aresta => {
+						const canvas = caixaRef.current?.querySelector('canvas')
+						if (canvas) canvas.style.cursor = aresta ? 'pointer' : 'default'
+					}}
 				/>
 			)}
 		</div>
