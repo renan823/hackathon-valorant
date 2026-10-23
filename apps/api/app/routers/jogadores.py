@@ -84,6 +84,133 @@ def distribuicao(
     ])
 
 
+# (col_casts, agente) — None = todos os agentes
+_SLOT_CAST = {
+    "Ultimate":                ("ultimate_casts",  None),
+    "Habilidade Q":            ("ability1_casts",  None),
+    "Habilidade E":            ("ability2_casts",  None),
+    "Habilidade C":            ("grenade_casts",   None),
+    "Headhunter (Chamber)":    ("ability1_casts",  "Chamber"),
+    "Tour de Force (Chamber)": ("ultimate_casts",  "Chamber"),
+    "Overdrive (Neon)":        ("ultimate_casts",  "Neon"),
+    "Chamber (habilidade)":    ("ability1_casts",  "Chamber"),
+}
+
+
+def calcular_arsenal(puuid: str, b) -> pd.DataFrame:
+    a = b.abates
+    e = b.economia
+    dr = b.dano_round
+
+    kills = a[a["valido"] & (a["killer"] == puuid)]
+    armas = kills.groupby(["meio", "categoria_meio"]).size().rename("kills").reset_index()
+    if armas.empty:
+        return armas
+    armas["pct"] = 100 * armas["kills"] / armas["kills"].sum()
+
+    # --- Métricas de arma ---
+    weapon_kills = kills[kills["categoria_meio"] != "Ability"]
+    eco_df = (e[e["puuid"] == puuid][["match_id", "round", "arma"]]
+              .rename(columns={"arma": "meio"}).drop_duplicates())
+    kill_df = weapon_kills[["match_id", "round", "meio"]].drop_duplicates()
+    union_df = pd.concat([eco_df, kill_df]).drop_duplicates()
+    rounds_util = union_df.groupby("meio").size().rename("rounds_utilizados").reset_index()
+
+    kill_tag = (weapon_kills.groupby(["match_id", "round", "meio"]).size()
+                .reset_index(name="_n").assign(teve_kill=True)
+                [["match_id", "round", "meio", "teve_kill"]])
+    rounds_com_kill_wep = kill_tag.groupby("meio").size().rename("rounds_com_kill").reset_index()
+
+    # KAST por arma — K/A/S/T nos rounds em que a arma foi usada
+    kast_base = union_df.copy()
+    rounds_com_qualquer_kill = kills[["match_id", "round"]].drop_duplicates().assign(teve_k=True)
+    kast_base = kast_base.merge(rounds_com_qualquer_kill, on=["match_id", "round"], how="left")
+    kast_base["teve_k"] = kast_base["teve_k"].fillna(False).astype(bool)
+
+    dano_p = dr[dr["puuid"] == puuid][["match_id", "round", "dano"]]
+    sem_kill = kills[["match_id", "round"]].drop_duplicates().assign(_teve_kill=True)
+    a_rounds = (dano_p.merge(sem_kill, on=["match_id", "round"], how="left")
+                .query("_teve_kill != True and dano > 50")
+                [["match_id", "round"]].assign(teve_a=True))
+    kast_base = kast_base.merge(a_rounds, on=["match_id", "round"], how="left")
+    kast_base["teve_a"] = kast_base["teve_a"].fillna(False).astype(bool)
+
+    deaths = (a[a["vitima"] == puuid][["match_id", "round"]]
+              .drop_duplicates().assign(morreu=True))
+    kast_base = kast_base.merge(deaths, on=["match_id", "round"], how="left")
+    kast_base["morreu"] = kast_base["morreu"].fillna(False).astype(bool)
+    kast_base["teve_s"] = ~kast_base["morreu"]
+
+    p_deaths = (a[a["vitima"] == puuid]
+                [["match_id", "round", "killer", "tempo_round_s", "vitima_time_id"]]
+                .rename(columns={"killer": "meu_killer", "tempo_round_s": "t_minha_morte",
+                                 "vitima_time_id": "meu_time"}))
+    k_deaths = (a[["match_id", "round", "vitima", "tempo_round_s", "killer_time_id"]]
+                .rename(columns={"vitima": "meu_killer", "tempo_round_s": "t_morte_killer",
+                                 "killer_time_id": "time_matou_killer"}))
+    trades = (p_deaths.merge(k_deaths, on=["match_id", "round", "meu_killer"])
+              .query("0 <= t_morte_killer - t_minha_morte <= 3")
+              .query("time_matou_killer == meu_time")
+              [["match_id", "round"]].assign(teve_t=True))
+    kast_base = kast_base.merge(trades, on=["match_id", "round"], how="left")
+    kast_base["teve_t"] = kast_base["teve_t"].fillna(False).astype(bool)
+    kast_base["kast_round"] = (kast_base["teve_k"] | kast_base["teve_a"]
+                               | kast_base["teve_s"] | kast_base["teve_t"])
+    kast_agg = (kast_base.groupby("meio")["kast_round"]
+                .sum().rename("rounds_kast").reset_index())
+
+    eco_load = (e[e["puuid"] == puuid][["match_id", "round", "arma", "loadout"]]
+                .rename(columns={"arma": "meio"}))
+    eco_eff = eco_load.groupby("meio").agg(total_loadout=("loadout", "sum")).reset_index()
+    total_kills_wep = weapon_kills.groupby("meio").size().rename("total_kills").reset_index()
+    eco_eff = eco_eff.merge(total_kills_wep, on="meio", how="left")
+    eco_eff["total_kills"] = eco_eff["total_kills"].fillna(0)
+    eco_eff["eficiencia_economia"] = 1000 * eco_eff["total_kills"] / eco_eff["total_loadout"]
+
+    result = (armas
+              .merge(rounds_util, on="meio", how="left")
+              .merge(rounds_com_kill_wep, on="meio", how="left")
+              .merge(kast_agg, on="meio", how="left")
+              .merge(eco_eff[["meio", "eficiencia_economia"]], on="meio", how="left"))
+    result["conversao_pct"] = 100 * result["rounds_com_kill"] / result["rounds_utilizados"]
+    result["kast_pct"] = 100 * result["rounds_kast"] / result["rounds_utilizados"]
+    result = result.drop(columns=["rounds_kast"])
+
+    # --- Métricas de habilidade ---
+    ability_kills = kills[kills["categoria_meio"] == "Ability"]
+    partidas_kill = kills.groupby("meio")["match_id"].nunique().rename("partidas_com_kill").reset_index()
+    result = result.merge(partidas_kill, on="meio", how="left")
+
+    if not ability_kills.empty:
+        rounds_ab = (ability_kills.drop_duplicates(["match_id", "round", "meio"])
+                     .groupby("meio").size().rename("_rck_ab").reset_index())
+        result = result.merge(rounds_ab, on="meio", how="left")
+        ab_mask = result["categoria_meio"] == "Ability"
+        result.loc[ab_mask, "rounds_com_kill"] = result.loc[ab_mask, "_rck_ab"]
+        result = result.drop(columns=["_rck_ab"])
+
+        j_puuid = b.jogadores[b.jogadores["puuid"] == puuid]
+        cast_data = {}
+        for meio_h, (col, agente_f) in _SLOT_CAST.items():
+            df = j_puuid[j_puuid["agente"] == agente_f] if agente_f else j_puuid
+            total = int(df[col].sum()) if col in df.columns else 0
+            if total > 0:
+                cast_data[meio_h] = total
+        result["casts_totais"] = result["meio"].map(cast_data)
+        ab_mask = result["categoria_meio"] == "Ability"
+        result["kills_por_cast"] = np.where(
+            ab_mask & result["casts_totais"].notna() & (result["casts_totais"] > 0),
+            result["kills"] / result["casts_totais"],
+            np.nan,
+        )
+        result = result.rename(columns={"casts_totais": "casts"})
+    else:
+        result["kills_por_cast"] = np.nan
+        result["casts"] = np.nan
+
+    return result.sort_values("kills", ascending=False)
+
+
 @router.get("/{puuid}")
 def perfil(puuid: str):
     b = dados.base()
@@ -101,10 +228,7 @@ def perfil(puuid: str):
         cols = chaves + ["partidas", "vitorias", "win_pct", "rounds", "acs", "adr", "kd", "kast_pct"]
         return agregar(j, chaves).sort_values(["partidas", "acs"], ascending=False)[cols]
 
-    a = b.abates
-    kills = a[a["valido"] & (a["killer"] == puuid)]
-    armas = kills.groupby(["meio", "categoria_meio"]).size().rename("kills").reset_index()
-    armas["pct"] = 100 * armas["kills"] / armas["kills"].sum()
+    armas = calcular_arsenal(puuid, b)
 
     evolucao = agregar(j, ["match_id"]).merge(j[["match_id", "data", "inicio", "mapa", "venceu"]], on="match_id")
     evolucao = evolucao.sort_values("inicio")[["match_id", "data", "mapa", "venceu", "acs", "adr", "kd", "kast_pct"]]
