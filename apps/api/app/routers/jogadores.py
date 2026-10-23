@@ -176,37 +176,59 @@ def calcular_arsenal(puuid: str, b) -> pd.DataFrame:
     result["kast_pct"] = 100 * result["rounds_kast"] / result["rounds_utilizados"]
     result = result.drop(columns=["rounds_kast"])
 
-    # --- Métricas de habilidade ---
-    ability_kills = kills[kills["categoria_meio"] == "Ability"]
-    partidas_kill = kills.groupby("meio")["match_id"].nunique().rename("partidas_com_kill").reset_index()
-    result = result.merge(partidas_kill, on="meio", how="left")
+    # Armas: partidas com kill
+    partidas_wep = (weapon_kills.groupby("meio")["match_id"]
+                    .nunique().rename("partidas_com_kill").reset_index())
+    weapon_result = (result[result["categoria_meio"] != "Ability"].copy()
+                     .merge(partidas_wep, on="meio", how="left"))
 
-    if not ability_kills.empty:
-        rounds_ab = (ability_kills.drop_duplicates(["match_id", "round", "meio"])
-                     .groupby("meio").size().rename("_rck_ab").reset_index())
-        result = result.merge(rounds_ab, on="meio", how="left")
-        ab_mask = result["categoria_meio"] == "Ability"
-        result.loc[ab_mask, "rounds_com_kill"] = result.loc[ab_mask, "_rck_ab"]
-        result = result.drop(columns=["_rck_ab"])
+    # --- Métricas de habilidade (todas as usadas, mesmo sem kill) ---
+    # Parte dos casts totais por slot, não apenas das habilidades que mataram.
+    j_puuid = b.jogadores[b.jogadores["puuid"] == puuid]
+    _SLOTS_TODOS = [
+        ("Habilidade C", "grenade_casts",  None),
+        ("Habilidade Q", "ability1_casts", None),
+        ("Habilidade E", "ability2_casts", None),
+        ("Ultimate",     "ultimate_casts", None),
+    ] + [(m, col, ag) for m, (col, ag) in _SLOT_CAST.items() if ag]
 
-        j_puuid = b.jogadores[b.jogadores["puuid"] == puuid]
-        cast_data = {}
-        for meio_h, (col, agente_f) in _SLOT_CAST.items():
-            df = j_puuid[j_puuid["agente"] == agente_f] if agente_f else j_puuid
-            total = int(df[col].sum()) if col in df.columns else 0
-            if total > 0:
-                cast_data[meio_h] = total
-        result["casts_totais"] = result["meio"].map(cast_data)
-        ab_mask = result["categoria_meio"] == "Ability"
-        result["kills_por_cast"] = np.where(
-            ab_mask & result["casts_totais"].notna() & (result["casts_totais"] > 0),
-            result["kills"] / result["casts_totais"],
+    cast_rows = []
+    for nome, col, agente_f in _SLOTS_TODOS:
+        df = j_puuid[j_puuid["agente"] == agente_f] if agente_f else j_puuid
+        total = int(df[col].sum()) if col in df.columns else 0
+        if total > 0:
+            cast_rows.append({"meio": nome, "categoria_meio": "Ability", "casts": total})
+
+    if cast_rows:
+        ability_result = pd.DataFrame(cast_rows)
+        ability_kills = kills[kills["categoria_meio"] == "Ability"]
+        total_kills_geral = armas["kills"].sum()
+
+        if not ability_kills.empty:
+            kills_ab = ability_kills.groupby("meio").size().rename("kills").reset_index()
+            kills_ab["pct"] = 100 * kills_ab["kills"] / total_kills_geral
+            rounds_ab = (ability_kills.drop_duplicates(["match_id", "round", "meio"])
+                         .groupby("meio").size().rename("rounds_com_kill").reset_index())
+            partidas_ab = (ability_kills.groupby("meio")["match_id"]
+                           .nunique().rename("partidas_com_kill").reset_index())
+            ability_result = (ability_result
+                .merge(kills_ab[["meio", "kills", "pct"]], on="meio", how="left")
+                .merge(rounds_ab, on="meio", how="left")
+                .merge(partidas_ab, on="meio", how="left"))
+
+        for col_name in ["kills", "pct", "rounds_com_kill", "partidas_com_kill"]:
+            if col_name not in ability_result.columns:
+                ability_result[col_name] = np.nan
+        ability_result["kills"] = ability_result["kills"].fillna(0).astype(int)
+        ability_result["pct"] = ability_result["pct"].fillna(0.0)
+        ability_result["kills_por_cast"] = np.where(
+            ability_result["casts"] > 0,
+            ability_result["kills"] / ability_result["casts"],
             np.nan,
         )
-        result = result.rename(columns={"casts_totais": "casts"})
+        result = pd.concat([weapon_result, ability_result], ignore_index=True)
     else:
-        result["kills_por_cast"] = np.nan
-        result["casts"] = np.nan
+        result = weapon_result
 
     return result.sort_values("kills", ascending=False)
 

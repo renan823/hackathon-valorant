@@ -44,8 +44,9 @@ function ArmaLinha({ arma, maxKills }) {
 					<IconeArma meio={arma.meio} categoria={arma.categoria_meio} comNome />
 				</span>
 				<span className="arsenal__kills numero">
-					{arma.kills} <span className="muted">kills</span>
-					{' '}<span className="muted arsenal__pct">({formatar('pct', arma.pct)})</span>
+					{arma.kills > 0
+						? <>{arma.kills} <span className="muted">kills</span>{' '}<span className="muted arsenal__pct">({formatar('pct', arma.pct)})</span></>
+						: <span className="muted">0 kills</span>}
 				</span>
 			</div>
 			<div className="arsenal__barra-faixa" aria-hidden="true">
