@@ -9,7 +9,13 @@ MIN_ROUNDS = 30
     id="compras",
     titulo="Vitória do ataque por tipo de compra",
     descricao=("Taxa de vitória do ataque para cada combinação de compra (ataque × defesa), pelo valor total do "
-               f"time (critério do vlr.gg). Combinações com menos de {MIN_ROUNDS} rounds são pouco confiáveis."),
+               "equipamento do time no round (loadout: soma de armas + armadura + habilidades compradas de todos os jogadores.). "
+               "Pistol = rounds pistol (1º e 13º); "
+               "Eco = loadout < 5 000 créditos; "
+               "Semi-eco = 5 000 a 9 999; "
+               "Semi-buy = 10 000 a 19 999; "
+               "Full buy = 20 000 ou mais. "
+               f"Combinações com menos de {MIN_ROUNDS} rounds são pouco confiáveis."),
     categoria="economia",
     grafico={"tipo": "matriz", "x": "compra_def", "y": "compra_atk", "valor": "atk_win_pct", "n": "rounds",
              "ordem": ORDEM_COMPRA, "min_n": MIN_ROUNDS, "rotulo_x": "Compra da defesa",
