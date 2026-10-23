@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 12px;
   /* Cabeçalho do jogador ou do time + tiles + abas + controles ficam acima do mapa. */
-  --mapa-desconto: 300px;
+  --mapa-desconto: 160px;
 }
 
 .painel-heatmap__controles { display: flex; flex-direction: column; gap: 10px; }

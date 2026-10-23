@@ -25,11 +25,13 @@ const DESCRICOES = {
 // Explorador de heatmap (spec 7.5, 7.6 e 7.8) em volta do /api/heatmap:
 // - `mapas`: os mapas que dá para escolher (padrão: o primeiro). Com um só, os chips somem;
 // - `filtro`: parâmetros fixos, de quem são as ações ({ jogador: puuid }, { time: id } ou nada);
-// - `tipos`: subconjunto de kills, mortes, plants e abates por habilidade; `campos`: filtros comuns.
+// - `jogadores`: lista opcional de { puuid, nick } para habilitar filtro por jogador;
+// - `tipos`: subconjunto de kills, mortes, plants e abates por habilidade; `campos`: os filtros comuns da BarraFiltros.
 // Tudo fica na URL. Os filtros valem para quem age: onde matou (Kills), onde morreu (Mortes) ou onde plantou.
 function PainelHeatmap({
 	mapas,
 	filtro = {},
+	jogadores,
 	tipos = [
 		'kills', 'mortes', 'ability_kills', 'ability_deaths',
 		'postplant_ability_kills', 'postplant_ability_deaths',
@@ -37,13 +39,14 @@ function PainelHeatmap({
 	campos = ['torneio', 'fase'],
 }) {
 	const { filtros } = useFiltros()
-	const [f, setF] = useParametros({ mapa: mapas[0], tipo: tipos[0], lado: '' })
+	const [f, setF] = useParametros({ mapa: mapas[0], tipo: tipos[0], lado: '', jogador: '' })
 	const mapa = mapas.includes(f.mapa) ? f.mapa : mapas[0]
 	const tipo = tipos.includes(f.tipo) ? f.tipo : tipos[0]
 	// Plant é sempre do ataque: o lado não se aplica.
 	const semLado = tipo === 'plants'
 	const comuns = Object.fromEntries(campos.map(c => [c, filtros[c]]))
-	const resposta = useApi('heatmap', { ...comuns, ...filtro, mapa, tipo, lado: semLado ? '' : f.lado })
+	const jogadorParam = jogadores ? f.jogador : undefined
+	const resposta = useApi('heatmap', { ...comuns, ...filtro, mapa, tipo, lado: semLado ? '' : f.lado, jogador: jogadorParam })
 
 	return (
 		<div className="painel-heatmap">
@@ -68,6 +71,15 @@ function PainelHeatmap({
 							{Object.entries(LADOS).map(([v, l]) => <option key={v} value={v}>{l.rotulo}</option>)}
 						</select>
 					</label>
+					{jogadores && (
+						<label className="barra-filtros__campo">
+							<span className="barra-filtros__rotulo">Jogador</span>
+							<select className="barra-filtros__select" value={f.jogador} onChange={e => setF({ jogador: e.target.value })}>
+								<option value="">Todos</option>
+								{jogadores.map(j => <option key={j.puuid} value={j.puuid}>{j.nick}</option>)}
+							</select>
+						</label>
+					)}
 				</BarraFiltros>
 			</div>
 			<Estado resposta={resposta} vazio={() => false} esqueleto="grafico">
