@@ -13,21 +13,11 @@ hackathon-valorant/
 │   └── web/                # dashboard VAVA Stats (React/Vite), consome a API; scripts/baixar_icones.py gera os ícones
 ├── packages/
 │   └── valorant-data/      # valorant_data.py: lê os JSONs e gera as tabelas jogadores, rounds, economia e abates
-├── analysis/
-│   ├── notebooks/          # preparação (gera outputs/processed/), EDA e aula/ (notebooks de aula originais)
-│   ├── scripts/            # visualizações sobre o mapa (teste_mapa*.py)
-│   ├── brainstorming/      # ETL para SQLite + notebook marimo (projeto uv próprio)
-│   └── requirements.txt    # dependências de notebooks/ e scripts/
 ├── data/                   # JSONs brutos das partidas (não editar) — ver "Estrutura de data/"
-├── reference/              # tabelas de referência (UUID -> nome de agentes, armas, armaduras e mapas) e calibração dos mapas
-├── outputs/
-│   ├── figures/            # figuras geradas pelos scripts
-│   └── processed/          # bases tratadas em CSV (geradas, não versionadas)
-└── docs/                   # spec, plano e tarefas do backend (docs/backend/) e do front (docs/frontend/)
+└── reference/              # tabelas de referência (UUID -> nome de agentes, armas, armaduras e mapas) e calibração dos mapas
 ```
 
-`apps/` são as aplicações que rodam (API e front), `packages/` o código compartilhado entre elas e a análise,
-`analysis/` o trabalho exploratório. `data/`, `reference/` e `outputs/` ficam na raiz porque todos usam.
+`apps/` são as aplicações que rodam (API e front) e `packages/` o código compartilhado entre elas. `data/` e `reference/` ficam na raiz porque todos usam.
 
 ## Subir o dashboard (VAVA Stats)
 
@@ -79,27 +69,6 @@ O Vite repassa `/api` para a porta 8000. Com o backend desligado, o app exibe um
 ## Como executar
 
 Todos os comandos abaixo partem da **raiz do repositório**.
-
-**Notebooks e scripts (pandas)**
-
-```sh
-uv venv .venv && uv pip install --python .venv/bin/python -r analysis/requirements.txt
-# ou: python3 -m venv .venv && .venv/bin/pip install -r analysis/requirements.txt
-
-# a preparação roda primeiro: grava outputs/processed/, lido pela análise exploratória
-.venv/bin/jupyter nbconvert --to notebook --execute --inplace analysis/notebooks/valorant-data-preparation.ipynb
-.venv/bin/jupyter nbconvert --to notebook --execute --inplace analysis/notebooks/valorant-exploratory-data-analysis.ipynb
-
-.venv/bin/python analysis/scripts/teste_mapa_calor.py
-```
-
-**ETL em SQLite + marimo (`analysis/brainstorming/`)** — o loader lê `./data` e grava `./valorant.db` na pasta atual, por isso deve ser executado da raiz:
-
-```sh
-uv sync --project analysis/brainstorming
-uv run --project analysis/brainstorming analysis/brainstorming/loader.py
-uv run --project analysis/brainstorming marimo edit analysis/brainstorming/notebook.py
-```
 
 **Backend (`apps/api/`)**: API do dashboard. Lê `data/` na inicialização e serve tudo em `/api`.
 
@@ -544,43 +513,3 @@ Objeto com efeitos especiais registrados pelas habilidades do jogador neste roun
 | `ability1Effects` | `null` | Efeitos da habilidade Q |
 | `ability2Effects` | `null` | Efeitos da habilidade E |
 | `ultimateEffects` | `null` | Efeitos da ultimate X |
-
----
-
-## Consistência dos Dados
-
-Verificado em todos os **336 arquivos**:
-
-| Verificação | Resultado |
-|-------------|-----------|
-| Todas as 5 chaves de topo presentes | ✅ 336/336 arquivos |
-| `roundResults` sempre populado | ✅ Nenhum arquivo com 0 rounds |
-| `isCompleted` sempre `true` | ✅ Todas as partidas concluídas |
-| `gameMode` sempre Spike (Bomb) | ✅ Modo padrão competitivo |
-| `region` sempre `"br"` | ✅ Servidor brasileiro |
-| Jogadores com `stats = null` | ⚠️ 22 casos — todos são observadores (`isObserver = true`) |
-| `coaches` presente | ℹ️ 180/336 arquivos (ausente em alguns torneios) |
-| Partidas com overtime | ℹ️ Placar > 13 rounds indica overtime |
-| `matchId` único | ✅ 336/336 |
-| Placar do nome do arquivo = `teams[].roundsWon` | ✅ 336/336 |
-| 5 × 5 jogadores ativos por partida | ✅ 336/336 |
-| `roundNum` sequencial, lados trocam no round 13, `stats.roundsPlayed` = nº de rounds | ✅ 336/336 |
-| `characterId` e UUIDs de arma/armadura mapeados no reference | ✅ todos |
-| Time da esquerda do arquivo = `Red` | ⚠️ só em 160/336: associe pelo placar |
-| Itens de `kills` que não são abates (killer = vítima, teamkill) | ⚠️ 382: excluir para bater com `stats.kills` |
-| Kills de habilidade como `damageType = "Weapon"` | ⚠️ 899 de Chamber e Neon (730 com UUID de habilidade + 169 sem UUID); ver a nota acima |
-| Posição do killer ausente em `playerLocations` | ℹ️ 444 (373 de killer = vítima + 71 sem snapshot do killer) |
-| `gameStartMillis` × data do nome do arquivo | ℹ️ 3 partidas diferem em 1 dia (fuso UTC) |
-| Mapas jogados | ℹ️ 10. Bind e Icebox não aparecem; Pearl, Breeze e Fracture têm de 2 a 5 partidas |
-
----
-
-## Dicas para Análise
-
-- **Identificar jogadores**: use `puuid` como chave primária. `gameName + tagLine` podem mudar entre partidas.
-- **Calcular ACS**: `stats.score / stats.roundsPlayed` por partida, ou some os `score` de cada round em `roundResults[].playerStats[].score`.
-- **KAST**: percorra `roundResults` para identificar rounds onde o jogador fez kill, assist, sobreviveu ou foi tradado.
-- **Dano por round (ADR)**: some `damage[].damage` de cada round em `playerStats` e divida por `roundsPlayed`.
-- **Headshot %**: some `headshots` e divida por `(headshots + bodyshots + legshots)` em `playerStats[].damage`.
-- **Economia**: some `economy.loadoutValue` dos 5 jogadores e classifique a compra do time (critério do vlr.gg, usado em `packages/valorant-data/valorant_data.py`): eco (< 5 mil cr), semi-eco (< 10 mil), semi-buy (< 20 mil) e full buy (≥ 20 mil). Os rounds 1 e 13 são pistol.
-- **Posicionamento**: as coordenadas `{x, y}` em `playerLocations`, `victimLocation`, `plantLocation` e `defuseLocation` são comparáveis dentro do mesmo mapa. Para desenhar sobre o minimapa, use a calibração oficial em `reference/map_calibration.json` (valorant-api), que **troca os eixos**: `u = y · xMultiplier + xScalarToAdd` (horizontal) e `v = x · yMultiplier + yScalarToAdd` (vertical), ambos em [0, 1].
