@@ -131,7 +131,8 @@ function GrafoDuelos({ duelos, partida, onArestaClick }) {
 					linkCanvasObjectMode={() => 'replace'}
 					linkCanvasObject={desenharAresta}
 					linkHoverPrecision={6}
-					cooldownTicks={120}
+					warmupTicks={120}
+					cooldownTicks={0}
 					onEngineStop={enquadrar}
 					onLinkClick={onArestaClick}
 					onLinkHover={aresta => {

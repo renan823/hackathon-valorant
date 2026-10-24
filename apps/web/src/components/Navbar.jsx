@@ -26,7 +26,7 @@ function Navbar() {
 	return (
 		<header className="navbar">
 			<div className="navbar__barra">
-				<Link to="/" className="navbar__logo" onClick={fechar}>VAVA <span>Stats</span></Link>
+				<Link to="/" className="navbar__logo" onClick={fechar}>VAVÁ<span>lise</span></Link>
 
 				<button
 					className="navbar__menu-botao"

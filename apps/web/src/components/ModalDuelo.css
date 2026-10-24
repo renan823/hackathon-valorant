@@ -8,11 +8,9 @@ dialog.modal-duelo {
   width: 100%;
   max-height: 90vh;
   overflow: auto;
-  margin: auto;
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  margin: auto;
 }
 
 dialog.modal-duelo::backdrop {
