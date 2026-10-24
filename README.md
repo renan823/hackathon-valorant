@@ -1,4 +1,4 @@
-# Hackathon Valorant — Documentação dos Dados
+# Hackathon Valorant
 
 Este repositório contém dados de partidas do torneio universitário de Valorant disponibilizados para o hackathon. Os dados estão no formato JSON, com **336 arquivos** distribuídos em 4 torneios.
 
@@ -19,7 +19,7 @@ hackathon-valorant/
 
 `apps/` são as aplicações que rodam (API e front) e `packages/` o código compartilhado entre elas. `data/` e `reference/` ficam na raiz porque todos usam.
 
-## Subir o dashboard (VAVA Stats)
+## Subir o dashboard (VAVAnálise)
 
 ### Com Docker (recomendado)
 
